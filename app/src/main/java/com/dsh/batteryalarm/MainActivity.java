@@ -1,29 +1,40 @@
 package com.dsh.batteryalarm;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+
 public class MainActivity extends Activity {
 
+    private static final String TAG = "MainActivity";
     private WebView webView;
+    private static final int REQ_NOTIF = 1001;
+    private boolean heartbeatStarted = false;
 
     private static class AppWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             String url = request.getUrl().toString();
             if (url.startsWith("http")) {
-                view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                try {
+                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                } catch (Exception ignored) {}
                 return true;
             }
             return false;
@@ -50,22 +61,30 @@ public class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.setKeepScreenOn(true);
+        webView.addJavascriptInterface(new WebBridge(this), "Android");
 
         webView.setWebViewClient(new AppWebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("file:///android_asset/index.html");
 
-        startService();
-        requestIgnoreBatteryOptimizations();
+        requestPermissions();
+        startWatchService();
     }
 
-    private void startService() {
-        try {
-            Intent svc = new Intent(this, BatteryWatchService.class);
-            startForegroundService(svc);
-        } catch (Exception e) {
-            android.util.Log.w("MainActivity", "cannot start service", e);
+    private void requestPermissions() {
+        // مجوز اعلان (اندروید ۱۳+) با API مستقیم، بدون نیاز به کتابخانهٔ androidx
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            try {
+                int check = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS);
+                if (check != PackageManager.PERMISSION_GRANTED) {
+                    String[] perms = {Manifest.permission.POST_NOTIFICATIONS};
+                    requestPermissions(perms, REQ_NOTIF);
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "notification permission request failed", e);
+            }
         }
+        requestIgnoreBatteryOptimizations();
     }
 
     private void requestIgnoreBatteryOptimizations() {
@@ -79,7 +98,29 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         } catch (Exception e) {
-            android.util.Log.w("MainActivity", "cannot request battery opt-out", e);
+            Log.w(TAG, "battery opt-out request failed", e);
+        }
+    }
+
+    private void startWatchService() {
+        try {
+            Intent svc = new Intent(this, BatteryWatchService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(svc);
+            } else {
+                startService(svc);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "cannot start service", e);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_NOTIF) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            Log.i(TAG, "notification permission: " + (granted ? "granted" : "denied"));
         }
     }
 
@@ -90,5 +131,11 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // سرویس پس‌زمینه باقی می‌ماند
+        super.onDestroy();
     }
 }

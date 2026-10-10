@@ -489,6 +489,8 @@ function checkAlarm(pct, charging){
 function triggerAlarm(kind, value){
   alarmActive = true;
   ensureAudio();
+  // به سرویس اندروید اطلاع بده تا سرویس نیتیو ساکت بماند و heartbeat بگیرد
+  if (window.Android && window.Android.alarmHeartbeat) window.Android.alarmHeartbeat();
   var isHigh = kind === 'high';
   ovIcon.textContent = isHigh ? '🔋' : '🪫';
   ovTitle.textContent = 'باتری به ' + fa(value) + '٪ رسید!';
@@ -508,6 +510,7 @@ function triggerAlarm(kind, value){
 
 function stopAlarm(snooze){
   alarmActive = false;
+  if (window.Android && window.Android.alarmStopped) window.Android.alarmStopped();
   if (alarmTimer){ clearTimeout(alarmTimer); alarmTimer = null; }
   stopCustomSounds();
   if (vibTimer){ clearInterval(vibTimer); vibTimer = null; }
@@ -622,6 +625,7 @@ function schedulePattern(){
 
 function loopAlarm(){
   schedulePattern();
+  if (window.Android && window.Android.alarmHeartbeat) window.Android.alarmHeartbeat();
   alarmTimer = setTimeout(loopAlarm, SOUND_LEN[settings.sound] || (CUSTOM_SOUND_LEN[settings.sound] || 1500));
 }
 
