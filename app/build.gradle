@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.dsh.batteryalarm'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.dsh.batteryalarm"
+        minSdk 26
+        targetSdk 35
+        versionCode 3
+        versionName "1.2"
+    }
+
+    // فایل HTML رابط کاربری در پوشهٔ assets پروژه است (خارج از app/src)
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets', '../assets']
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../../keystore/release.keystore')
+            storePassword 'dsh123456'
+            keyAlias 'dsh-battery'
+            keyPassword 'dsh123456'
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}

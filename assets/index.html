@@ -193,6 +193,26 @@
   .overlay .btn.primary:hover{filter:brightness(1.06);}
   .overlay .btn.ghost{color:#fecaca; border:1px solid rgba(254,202,202,.45); background:rgba(0,0,0,.28);}
   .overlay .btn.ghost:hover{background:rgba(0,0,0,.42);}
+  /* ---------- hardware info ---------- */
+  .sys-grid{display:grid; gap:10px;}
+  .sys-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06);}
+  .sys-row .k{color:var(--muted); font-size:.82rem; white-space:nowrap;}
+  .sys-row .v{font-size:.84rem; font-variant-numeric:tabular-nums; text-align:left; direction:ltr; word-break:break-word;}
+  .sys-block{display:flex; flex-direction:column; gap:6px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06);}
+  .sys-block .top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .sys-bar{height:7px; border-radius:99px; background:rgba(255,255,255,.09); overflow:hidden;}
+  .sys-bar i{display:block; height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,var(--em),var(--em2)); transition:width .7s cubic-bezier(.22,1,.36,1);}
+  .sys-bar.warn i{background:linear-gradient(90deg,#fbbf24,#f97316);}
+  .sys-bar.danger i{background:linear-gradient(90deg,#f87171,#ef4444);}
+  .sys-sub{font-size:.75rem; color:var(--muted); line-height:1.75; word-break:break-word;}
+  .sys-head{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .sys-head h3{margin-bottom:0;}
+  .sys-head .btn{padding:7px 13px; font-size:.78rem;}
+  .sys-chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+  .chip{font-size:.72rem; padding:4px 10px; border-radius:99px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); color:var(--muted); white-space:nowrap;}
+  .chip.hot{color:#fca5a5; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.10);}
+  .sys-warn{display:none; padding:10px 12px; border-radius:14px; font-size:.8rem; line-height:1.7; color:#fde68a; background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.35);}
+  .sys-warn.show{display:block;}
 </style>
 </head>
 <body>
@@ -305,6 +325,35 @@
   <section class="card">
     <h3><span class="ic">📜</span> رویدادها</h3>
     <ul id="log"></ul>
+  </section>
+
+  <section class="card">
+    <div class="sys-head">
+      <h3><span class="ic">🧠</span> وضعیت سخت‌افزار</h3>
+      <button class="btn ghost" id="sysRefresh">↻ به‌روزرسانی</button>
+    </div>
+    <div class="sys-grid" style="margin-top:12px;">
+      <div class="sys-row"><span class="k">پردازنده (CPU)</span><span class="v" id="cpuModel">—</span></div>
+      <div class="sys-block">
+        <div class="top"><span class="k">بار پردازنده</span><span class="v" id="cpuUsage">—</span></div>
+        <div class="sys-bar" id="cpuBar"><i></i></div>
+        <div class="sys-sub" id="cpuCores">—</div>
+      </div>
+      <div class="sys-row"><span class="k">گرافیک (GPU)</span><span class="v" id="gpuModel">—</span></div>
+      <div class="sys-block"><div class="sys-sub" id="gpuDetail">—</div></div>
+      <div class="sys-block">
+        <div class="top"><span class="k">حافظهٔ رم (RAM)</span><span class="v" id="ramUsage">—</span></div>
+        <div class="sys-bar" id="ramBar"><i></i></div>
+        <div class="sys-sub" id="ramDetail">—</div>
+      </div>
+      <div class="sys-block">
+        <div class="top"><span class="k">فضای ذخیره‌سازی</span><span class="v" id="stUsage">—</span></div>
+        <div class="sys-bar" id="stBar"><i></i></div>
+        <div class="sys-sub" id="stDetail">—</div>
+      </div>
+      <div class="sys-block"><div class="sys-sub" id="devDetail">—</div></div>
+      <div class="sys-warn" id="sysWarn">⚠️</div>
+    </div>
   </section>
 
   <div class="note">
@@ -833,6 +882,151 @@ $('#lowToggle').checked = settings.lowEnabled;
 lowRow.classList.toggle('hidden', !settings.lowEnabled);
 
 render();
+/* ---------- hardware info (native bridge) ---------- */
+var sysTimer = null;
+function fmtBytes(n){
+  if (n == null || isNaN(n)) return '—';
+  var u = ['B','KB','MB','GB','TB'];
+  var i = 0; var d = n;
+  while (d >= 1024 && i < u.length - 1){ d /= 1024; i++; }
+  return (d >= 100 ? Math.round(d) : (Math.round(d * 10) / 10)) + ' ' + u[i];
+}
+function barSet(id, pct, dangerAt, warnAt){
+  var bar = $(id); if (!bar) return;
+  var p = Math.max(0, Math.min(100, pct));
+  var fill = bar.querySelector('i'); if (fill) fill.style.width = p + '%';
+  bar.classList.toggle('danger', p >= dangerAt);
+  bar.classList.toggle('warn', p >= warnAt && p < dangerAt);
+}
+function sysUnavailable(){
+  var ids = ['cpuModel','cpuUsage','cpuCores','gpuModel','gpuDetail','ramUsage','ramDetail','stUsage','stDetail','devDetail'];
+  ids.forEach(function(id){ var el = $(id); if (el) el.textContent = 'در دسترس نیست (فقط درون برنامه)'; });
+}
+function sysLoad(){
+  if (!window.SysInfo || !window.SysInfo.getCpuInfo){ sysUnavailable(); return false; }
+  try {
+    var cpu = JSON.parse(window.SysInfo.getCpuInfo());
+    $('#cpuModel').textContent = cpu.model || 'نامشخص';
+    var avg = cpu.avgUsage || 0;
+    $('#cpuUsage').textContent = fa(avg) + '٪';
+    barSet('#cpuBar', avg, 95, 80);
+    var cores = cpu.cores || 0;
+    var per = cpu.perCore || [];
+    var coreTxt = fa(cores) + ' هسته';
+    if (per.length){
+      var maxF = 0;
+      per.forEach(function(c){ var f = c.maxFreq || 0; if (f > maxF) maxF = f; });
+      if (maxF > 0) coreTxt += ' · نهایت ' + fa(Math.round(maxF / 1000)) + ' مگاهرتز';
+      var on = 0; per.forEach(function(c){ if ((c.usage != null ? c.usage : 0) > 2) on++; });
+      coreTxt += ' · ' + fa(on) + ' فعال';
+    }
+    var top = cpu.topProcs || [];
+    if (top.length){
+      coreTxt += '\nپر مصرف‌ترین‌ها: ';
+      top.slice(0, 3).forEach(function(p, i){
+        coreTxt += (i ? '، ' : '') + (p.name || 'نامشخص') + ' (' + fa(p.usage != null ? p.usage : 0) + '٪)';
+      });
+    }
+    $('#cpuCores').textContent = coreTxt;
+  } catch(e){}
+  try {
+    var gpu = JSON.parse(window.SysInfo.getGpuInfo());
+    $('#gpuModel').textContent = gpu.renderer || 'نامشخص';
+    var g = [];
+    if (gpu.vendor) g.push('سازنده: ' + gpu.vendor);
+    if (gpu.gles) g.push(gpu.gles);
+    if (gpu.clock) g.push('کلاک: ' + gpu.clock);
+    if (gpu.maxTexture) g.push('بافت حداکثر: ' + fa(gpu.maxTexture) + 'px');
+    $('#gpuDetail').textContent = g.join(' · ') || '—';
+  } catch(e){}
+  try {
+    var mem = JSON.parse(window.SysInfo.getMemoryInfo());
+    var mp = mem.usedPct || 0;
+    $('#ramUsage').textContent = fa(mp) + '٪';
+    barSet('#ramBar', mp, 90, 75);
+    var d = mem.detail || {};
+    var info = fmtBytes(mem.total) + ' کل · ' + fmtBytes(mem.used) + ' استفاده · ' + fmtBytes(mem.avail) + ' آزاد';
+    if (d['Cached']) info += '\nکش: ' + fmtBytes(d['Cached']);
+    if (d['Buffers']) info += ' · بافر: ' + fmtBytes(d['Buffers']);
+    if (d['SwapTotal']) info += '\nSwap: ' + fmtBytes(d['SwapTotal'] - (d['SwapFree'] || 0)) + ' از ' + fmtBytes(d['SwapTotal']);
+    var top = mem.topProcs || [];
+    if (top.length){
+      info += '\nپر مصرف‌ترین رم: ';
+      top.slice(0, 3).forEach(function(p, i){
+        info += (i ? '، ' : '') + (p.name || 'نامشخص') + ' (' + fmtBytes(p.mem != null ? p.mem : 0) + ')';
+      });
+    }
+    $('#ramDetail').textContent = info;
+  } catch(e){}
+  try {
+    var st = JSON.parse(window.SysInfo.getStorageInfo());
+    var sp = st.usedPct || 0;
+    $('#stUsage').textContent = fa(sp) + '٪';
+    barSet('#stBar', sp, 95, 85);
+    var info = fmtBytes(st.total) + ' کل · ' + fmtBytes(st.used) + ' پر · ' + fmtBytes(st.avail) + ' آزاد';
+    var cats = st.categories || [];
+    if (cats.length){
+      info += '\n';
+      cats.slice(0, 6).forEach(function(c, i){
+        info += (i ? ' · ' : '') + c.name + ': ' + fmtBytes(c.size);
+      });
+    }
+    var ext = st.external;
+    if (ext){
+      info += '\nکارت حافظه: ' + fmtBytes(ext.used) + ' از ' + fmtBytes(ext.total);
+    }
+    if (st.appCache != null && st.appCache > 0) info += '\nکش این برنامه: ' + fmtBytes(st.appCache);
+    $('#stDetail').textContent = info;
+  } catch(e){}
+  try {
+    var dev = JSON.parse(window.SysInfo.getDeviceInfo());
+    var info = (dev.manufacturer || '') + ' ' + (dev.model || '');
+    if (dev.android) info += ' · اندروید ' + dev.android;
+    if (dev.kernel) info += '\nهسته: ' + dev.kernel;
+    if (dev.uptime){
+      var up = dev.uptime;
+      var d2 = Math.floor(up / 86400), h = Math.floor((up % 86400) / 3600), m = Math.floor((up % 3600) / 60);
+      info += '\nآپ‌تایم: ';
+      if (d2) info += fa(d2) + ' روز ';
+      info += fa(h) + ' ساعت ' + fa(m) + ' دقیقه';
+    }
+    $('#devDetail').textContent = info;
+  } catch(e){}
+  sysAlarmCheck();
+  return true;
+}
+function sysAlarmCheck(){
+  var warn = $('#sysWarn'); if (!warn) return;
+  if (!window.SysInfo || !window.SysInfo.getCpuInfo){ warn.classList.remove('show'); return; }
+  var msgs = [];
+  try {
+    var cpu = JSON.parse(window.SysInfo.getCpuInfo());
+    if ((cpu.avgUsage || 0) >= 95) msgs.push('بار پردازنده ' + fa(cpu.avgUsage) + '٪ است');
+    var bat = JSON.parse(window.SysInfo.getBatteryInfo());
+    if ((bat.temperature || 0) >= 45) msgs.push('دمای دستگاه بالا (' + fa(bat.temperature) + '°C)');
+    var mem = JSON.parse(window.SysInfo.getMemoryInfo());
+    if ((mem.usedPct || 0) >= 90) msgs.push('رم تقریباً پر است (' + fa(mem.usedPct) + '٪)');
+    var st = JSON.parse(window.SysInfo.getStorageInfo());
+    if ((st.usedPct || 0) >= 95) msgs.push('فضای ذخیره‌سازی تقریباً پر است (' + fa(st.usedPct) + '٪)');
+  } catch(e){}
+  if (msgs.length){
+    warn.textContent = '⚠️ هشدار: ' + msgs.join(' · ');
+    warn.classList.add('show');
+    if (window.Android && window.Android.resourceAlarm && !window.SysAlarmFired){
+      window.SysAlarmFired = true;
+      window.Android.resourceAlarm('⚠️ هشدار وضعیت سخت‌افزار', msgs.join(' · ') + ' — برای توقف زنگ بزنید');
+    }
+  } else {
+    warn.textContent = '⚠️';
+    warn.classList.remove('show');
+    window.SysAlarmFired = false;
+  }
+}
+var sysAvailable = false;
+if (window.SysInfo && window.SysInfo.getCpuInfo){ sysAvailable = true; sysLoad(); }
+$('#sysRefresh').addEventListener('click', function(){ sysLoad(); });
+sysTimer = setInterval(function(){ if (sysAvailable) sysLoad(); }, 15000);
+
 initBattery();
 
 setInterval(function(){ if (monitoring) render(); }, 5000);

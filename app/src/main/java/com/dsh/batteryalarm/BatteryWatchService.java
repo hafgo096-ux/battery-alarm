@@ -78,7 +78,18 @@ public class BatteryWatchService extends Service {
         Log.i(TAG, "ALARM at " + percent + "%");
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null) {
-            nm.notify(NOTIF_ALARM, buildAlarmNotification(percent));
+            nm.notify(NOTIF_ALARM, buildAlarmNotification(percent, null, null));
+        }
+        startVibration();
+        playSystemAlarm();
+    }
+
+    /** زنگ سفارشی برای رویدادهای غیر باتری (مثلاً مصرف بحرانی منابع) */
+    void triggerAlarmCustom(String title, String sub) {
+        Log.i(TAG, "ALARM custom: " + title);
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (nm != null) {
+            nm.notify(NOTIF_ALARM, buildAlarmNotification(0, title, sub));
         }
         startVibration();
         playSystemAlarm();
@@ -176,6 +187,12 @@ public class BatteryWatchService extends Service {
     }
 
     private Notification buildAlarmNotification(int percent) {
+        return buildAlarmNotification(percent, null, null);
+    }
+
+    private Notification buildAlarmNotification(int percent, String title, String sub) {
+        String t = (title != null && !title.isEmpty()) ? title : "⚡ شارژ به " + percent + "٪ رسید!";
+        String s = (sub != null && !sub.isEmpty()) ? sub : "گوشی را از شارژ بکشید — برای توقف زنگ بزنید";
         Intent stopIntent = new Intent(this, BatteryWatchService.class);
         stopIntent.putExtra("stop_alarm", true);
         PendingIntent stopPending = PendingIntent.getService(this, 1, stopIntent,
@@ -190,8 +207,8 @@ public class BatteryWatchService extends Service {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new Notification.Builder(this, CH_ALARM)
-                .setContentTitle("⚡ شارژ به " + percent + "٪ رسید!")
-                .setContentText("گوشی را از شارژ بکشید — برای توقف زنگ بزنید")
+                .setContentTitle(t)
+                .setContentText(s)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
                 .setOngoing(true)
                 .setCategory(Notification.CATEGORY_ALARM)
@@ -217,6 +234,19 @@ public class BatteryWatchService extends Service {
             } else if (intent.getBooleanExtra("html_stopped", false)) {
                 // کاربر در برنامه دکمهٔ توقف را زد
                 stopAlarm();
+            } else if (intent.getBooleanExtra("native_alarm", false)) {
+                // درخواست زنگ از طرف WebView (HTML تشخیص داد به آستانه رسیده‌ایم)
+                int percent = intent.getIntExtra("percent", TARGET_PERCENT);
+                String title = intent.getStringExtra("alarm_title");
+                String sub = intent.getStringExtra("alarm_sub");
+                if (!alarmFired && !stopRequested) {
+                    alarmFired = true;
+                    if (title != null) {
+                        triggerAlarmCustom(title, sub);
+                    } else {
+                        triggerAlarm(percent);
+                    }
+                }
             }
         }
         return START_STICKY;

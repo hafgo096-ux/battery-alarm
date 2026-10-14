@@ -42,4 +42,17 @@ public class WebBridge {
             Log.w(TAG, "native trigger failed", e);
         }
     }
+
+    /** زنگ هشدار سفارشی برای رویدادهای غیر باتری (مثل مصرف بالای منابع) */
+    public void resourceAlarm(String title, String sub) {
+        try {
+            Intent i = new Intent(ctx, BatteryWatchService.class);
+            i.putExtra("native_alarm", true);
+            i.putExtra("alarm_title", title);
+            i.putExtra("alarm_sub", sub == null ? "" : sub);
+            ctx.startService(i);
+        } catch (Exception e) {
+            Log.w(TAG, "resource alarm failed", e);
+        }
+    }
 }
