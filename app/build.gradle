@@ -41,4 +41,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    // نام ثابت فایل خروجی برای لینک دانلود پایدار در release
+    applicationVariants.all { variant ->
+        if (variant.name == 'release') {
+            variant.outputs.each { output ->
+                output.outputFileName = "battery-alarm.apk"
+            }
+        }
+    }
 }
