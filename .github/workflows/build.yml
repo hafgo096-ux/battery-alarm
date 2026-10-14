@@ -5,6 +5,9 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,7 +43,7 @@ jobs:
           body: |
             ✅ بخش نمایش وضعیت سخت‌افزار (CPU/GPU/RAM/دیسک)
             ✅ هشدار زنگ هشدار هنگام مصرف بحرانی منابع
-            ✅ bیلد خودکار از طریق GitHub Actions
+            ✅ بیلد خودکار از طریق GitHub Actions
           files: app/build/outputs/apk/release/app-release.apk
           draft: false
           prerelease: false
