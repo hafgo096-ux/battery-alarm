@@ -23,7 +23,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('../../keystore/release.keystore')
+            storeFile file('../keystore/release.keystore')
             storePassword 'dsh123456'
             keyAlias 'dsh-battery'
             keyPassword 'dsh123456'
