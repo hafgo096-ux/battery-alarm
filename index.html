@@ -45,38 +45,6 @@
       overflow-x: hidden;
     }
 
-    /* Top Download & Project Notice Bar (visible in browser preview) */
-    .web-download-bar {
-      background: linear-gradient(90deg, #1e1b4b, #0f172a);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.8rem;
-    }
-    .web-download-bar .info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      color: #c7d2fe;
-    }
-    .web-download-bar .btn-dl {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #ffffff;
-      text-decoration: none;
-      padding: 6px 14px;
-      border-radius: 99px;
-      font-weight: 700;
-      font-size: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
-      white-space: nowrap;
-    }
 
     /* Header */
     .app-header {
@@ -844,34 +812,40 @@
       line-height: 1.5;
     }
 
-    /* ===== افزوده‌های نسخه ۱.۰.۰ (کنترل صدا و پنل مصرف باتری) ===== */
+        /* ===== افزوده‌های ویرایش فنی: کنترل صدا و داده زنده ===== */
     .ins-card { margin-top: 12px; }
-    .vol-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-    .vol-value { min-width: 58px; text-align: center; font-weight: 800; color: #38bdf8; font-size: 0.86rem; }
+    .vol-big {
+      min-width: 76px; text-align: center; font-weight: 900; font-size: 1.05rem; color: #38bdf8;
+      background: rgba(6, 182, 212, 0.10); border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px; padding: 6px 10px;
+    }
+    .vol-slider-wrap { direction: ltr; display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    .vol-slider-wrap .vol-edge { font-size: 0.65rem; color: var(--text-muted); min-width: 24px; text-align: center; }
     input[type="range"].range-input {
-      -webkit-appearance: none; appearance: none; width: 100%; height: 26px;
-      background: transparent; direction: ltr;
+      -webkit-appearance: none; appearance: none; flex: 1; height: 30px; background: transparent; direction: ltr; margin: 0;
     }
     input[type="range"].range-input::-webkit-slider-runnable-track {
-      height: 8px; border-radius: 6px;
-      background: linear-gradient(90deg, #10b981, #06b6d4 60%, #1e293b 60%);
+      height: 10px; border-radius: 8px;
+      background: linear-gradient(90deg, #06b6d4 0%, #10b981 var(--v, 100%), #1e293b var(--v, 100%), #1e293b 100%);
     }
     input[type="range"].range-input::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none; width: 20px; height: 20px; margin-top: -6px;
-      border-radius: 50%; background: #38bdf8; border: 2px solid #0f172a;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+      -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin-top: -7px;
+      border-radius: 50%; background: #ffffff; border: 4px solid #0ea5e9;
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.85);
     }
-    .vol-marks { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-muted); direction: ltr; margin-top: -6px; }
+    .vol-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .vol-chip {
+      flex: 1 1 58px; padding: 8px 6px; border-radius: 10px; font-family: inherit; font-size: 0.7rem;
+      background: rgba(148, 163, 184, 0.08); border: 1px solid var(--border); color: #cbd5e1;
+    }
+    .vol-chip.active { background: rgba(16, 185, 129, 0.18); border-color: rgba(52, 211, 153, 0.6); color: #6ee7b7; font-weight: 800; }
+    .toggle-switch .toggle-slider { border: 1px solid rgba(148, 163, 184, 0.35); }
+    .live-stamp { font-size: 0.66rem; color: var(--text-muted); margin-top: 8px; }
+    .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34d399; margin-left: 4px; }
     .power-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-    .power-stat {
-      background: rgba(15, 23, 42, 0.75); border: 1px solid var(--border);
-      border-radius: 10px; padding: 9px 10px;
-    }
+    .power-stat { background: rgba(15, 23, 42, 0.75); border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; }
     .power-stat .k { font-size: 0.63rem; color: var(--text-muted); }
     .power-stat .v { font-size: 0.82rem; font-weight: 800; color: #e2e8f0; margin-top: 3px; }
-    .badge-ok { color: #34d399; }
-    .badge-warn { color: #fbbf24; }
-    .badge-bad { color: #f87171; }
     .demo-note {
       background: rgba(251, 191, 36, 0.10); border: 1px solid rgba(251, 191, 36, 0.35);
       color: #fcd34d; border-radius: 10px; padding: 8px 10px; font-size: 0.66rem; line-height: 1.7; margin-bottom: 10px;
@@ -888,19 +862,7 @@
 </head>
 <body>
 
-  <!-- Web Download Banner (active when previewed in web browser) -->
-  <div class="web-download-bar" id="webDownloadBar">
-    <div class="info">
-      <span>🔋</span>
-      <span>دانلود فایل جدید APK اپلیکیشن (نسخه ۱.۰.۰ پایدار)</span>
-    </div>
-    <a href="https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk" class="btn-dl">
-      <span>📥</span>
-      <span>دانلود APK</span>
-    </a>
-  </div>
-
-  <!-- Header -->
+    <!-- Header -->
   <header class="app-header">
     <div class="header-brand">
       <div class="header-logo">🔋</div>
@@ -910,8 +872,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <div class="header-pill" id="headerPctBadge">
-        <span>78%</span>
+      <div class="header-pill" id="headerPctBadge"><span>—%</span>
         <span>⚡</span>
       </div>
       <button class="btn-icon" onclick="toggleMute()" id="headerSoundBtn" title="قطع یا وصل صدا">
@@ -931,10 +892,12 @@
         </svg>
         <div class="gauge-center-content">
           <div class="gauge-bolt">⚡</div>
-          <div class="gauge-percent" id="batteryPercentText">78%</div>
+          <div class="gauge-percent" id="batteryPercentText">—%</div>
           <div class="gauge-state-pill" id="chargingStateBadge">متصل به شارژر</div>
         </div>
       </div>
+
+      <div class="live-stamp" id="liveBatteryStamp"><span class="live-dot"></span>در حال اتصال به اطلاعات واقعی سیستم…</div>
 
       <!-- Action Buttons -->
       <div class="actions-grid">
@@ -968,11 +931,11 @@
           <span class="icon">🌡️</span>
         </div>
         <div class="metric-value">
-          <span id="batteryTempText">31.8</span>
+          <span id="batteryTempText">—</span>
           <small>°C</small>
         </div>
         <div class="metric-sub">
-          <span class="metric-pill-ok" id="tempStatusPill">مطلوب و خنک</span>
+          <span class="metric-pill-ok" id="tempStatusPill">—</span>
         </div>
       </div>
 
@@ -982,7 +945,7 @@
           <span class="icon">⚡</span>
         </div>
         <div class="metric-value">
-          <span id="batteryVoltText">4120</span>
+          <span id="batteryVoltText">—</span>
           <small>mV</small>
         </div>
         <div class="metric-sub">سلول لیتیوم-پلیمر استاندارد</div>
@@ -993,9 +956,7 @@
           <span>فناوری ساخت</span>
           <span class="icon">🔬</span>
         </div>
-        <div class="metric-value" style="font-size: 1.1rem;" id="batteryTechText">
-          Li-Polymer
-        </div>
+        <div class="metric-value" style="font-size: 1.1rem;" id="batteryTechText">—</div>
         <div class="metric-sub">شارژ سریع ایمن</div>
       </div>
 
@@ -1004,9 +965,7 @@
           <span>سلامت باتری (Health)</span>
           <span class="icon">💚</span>
         </div>
-        <div class="metric-value" style="font-size: 1.05rem;" id="batteryHealthText">
-          سالم و عالی
-        </div>
+        <div class="metric-value" style="font-size: 1.05rem;" id="batteryHealthText">—</div>
         <div class="metric-sub">بدون فرسودگی سلولی</div>
       </div>
     </div>
@@ -1076,7 +1035,7 @@
             🧠
           </div>
           <div>
-            <h3 style="font-size: 0.9rem; font-weight: 800;" id="cpuModelText">OCTA-CORE ARM64</h3>
+            <h3 style="font-size: 0.9rem; font-weight: 800;" id="cpuModelText">در حال خواندن…</h3>
             <p style="font-size: 0.7rem; color: var(--text-muted);" id="deviceModelText">پردازنده مرکزی ۸ هسته‌ای</p>
           </div>
         </div>
@@ -1092,7 +1051,7 @@
             <span>🌡️</span>
           </div>
           <div class="metric-value">
-            <span id="cpuTempText">40.2</span>
+            <span id="cpuTempText">—</span>
             <small>°C</small>
           </div>
           <span class="metric-pill-ok">خنک‌کننده نرمال</span>
@@ -1104,7 +1063,7 @@
             <span>📈</span>
           </div>
           <div class="metric-value">
-            <span id="cpuAvgUsageText">28</span>
+            <span id="cpuAvgUsageText">—</span>
             <small>%</small>
           </div>
           <div class="core-bar-track" style="margin-top: 6px;">
@@ -1130,7 +1089,7 @@
             <span>⚡</span>
           </div>
           <div class="metric-value">
-            <span id="cpuFreqText">2.84</span>
+            <span id="cpuFreqText">—</span>
             <small>GHz</small>
           </div>
           <div class="metric-sub">حالت پویا (Dynamic Scaling)</div>
@@ -1155,10 +1114,10 @@
           </div>
           <div>
             <h3 style="font-size: 0.9rem; font-weight: 800;">پایش حافظه رم (RAM)</h3>
-            <p style="font-size: 0.7rem; color: var(--text-muted);" id="ramTotalSubText">ظرفیت فیزیکی کل: 4.0 گیگابایت</p>
+            <p style="font-size: 0.7rem; color: var(--text-muted);" id="ramTotalSubText">ظرفیت کل: در حال خواندن…</p>
           </div>
         </div>
-        <div style="font-size: 1.3rem; font-weight: 900; color: #38bdf8;" id="ramPctText">48%</div>
+        <div style="font-size: 1.3rem; font-weight: 900; color: #38bdf8;" id="ramPctText">—</div>
       </div>
 
       <div class="ram-multi-bar">
@@ -1170,15 +1129,15 @@
       <div class="ram-legends">
         <div class="ram-legend-item">
           <div class="ram-dot green"></div>
-          <span>در حال مصرف: <b id="ramUsedText">1.9 GB</b></span>
+          <span>در حال مصرف: <b id="ramUsedText">—</b></span>
         </div>
         <div class="ram-legend-item">
           <div class="ram-dot yellow"></div>
-          <span>کش و بافر: <b id="ramCacheText">0.6 GB</b></span>
+          <span>کش و بافر: <b id="ramCacheText">—</b></span>
         </div>
         <div class="ram-legend-item">
           <div class="ram-dot cyan"></div>
-          <span>رم آزاد: <b id="ramFreeText">1.5 GB</b></span>
+          <span>رم آزاد: <b id="ramFreeText">—</b></span>
         </div>
       </div>
 
@@ -1197,15 +1156,15 @@
           </div>
           <div>
             <h3 style="font-size: 0.9rem; font-weight: 800;">حافظه داخلی دستگاه (Storage)</h3>
-            <p style="font-size: 0.7rem; color: var(--text-muted);" id="romTotalSubText">ظرفیت دیسک کل: 128 گیگابایت</p>
+            <p style="font-size: 0.7rem; color: var(--text-muted);" id="romTotalSubText">ظرفیت کل: در حال خواندن…</p>
           </div>
         </div>
         <button onclick="refreshStorageStats()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;">🔄</button>
       </div>
 
       <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
-        <span>مصرف شده: <b style="color: #f1f5f9;" id="romUsedVal">62.4 GB</b></span>
-        <span style="color: #34d399;">فضای خالی: <b id="romFreeVal">65.6 GB</b></span>
+        <span>مصرف شده: <b style="color: #f1f5f9;" id="romUsedVal">—</b></span>
+        <span style="color: #34d399;">فضای خالی: <b id="romFreeVal">—</b></span>
       </div>
 
       <div class="ram-multi-bar" style="margin: 4px 0 12px;">
@@ -1218,9 +1177,9 @@
   <!-- ==================== TAB 3: هوش فایل ==================== -->
   <main id="tab-files" class="tab-page" style="display: none;">
     <div class="scanner-tabs">
-      <button class="scanner-tab-pill active" onclick="switchFileCategory('duplicate')">فایل‌های تکراری</button>
-      <button class="scanner-tab-pill" onclick="switchFileCategory('junk')">کش و لاگ سیستمی</button>
-      <button class="scanner-tab-pill" onclick="switchFileCategory('large')">فایل‌های حجیم و زائد</button>
+      <button class="scanner-tab-pill active" data-cat="risky" data-cat="own" onclick="switchFileCategory('own')">کش خود برنامه<span style="display:none">برنامه‌های با دسترسی حساس<span style="display:none"></button>
+      <button class="scanner-tab-pill" data-cat="cache" onclick="switchFileCategory('cache')">کش واقعی برنامه‌ها<span style="display:none"></button>
+      <button class="scanner-tab-pill" data-cat="large" onclick="switchFileCategory('large')">فایل‌های حجیم رسانه‌ای<span style="display:none"></button>
       <button class="scanner-tab-pill" onclick="switchFileCategory('risky')">برنامه‌های پرخطر</button>
     </div>
 
@@ -1237,104 +1196,65 @@
 
   <!-- ==================== TAB 4: بهینه‌سازی رم ==================== -->
   <main id="tab-ram" class="tab-page" style="display: none;">
-    <div class="app-card">
-      <div style="text-align: center; margin-bottom: 16px;">
-        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.8rem; box-shadow: 0 0 20px rgba(16,185,129,0.3);">
-          ⚡
-        </div>
-        <h2 style="font-size: 1.15rem; font-weight: 800;">بهینه‌ساز هوشمند رم</h2>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">شناسایی و توقف پردازش‌های پرمصرف پس‌زمینه بدون آسیب به فایل‌ها</p>
-      </div>
+          <div class="app-card">
+        <h3 style="font-size:0.9rem; font-weight:800; margin-bottom:8px;">⚡ آزادسازی امن حافظه</h3>
+        <p style="font-size:0.7rem; color:var(--text-muted); line-height:1.8;">
+          این بخش فقط حافظه و کش موقت خودِ برنامه را آزاد می‌کند و نتیجه را با اندازه‌گیری واقعی گزارش می‌دهد.
+          اندروید اجازه نمی‌دهد برنامه‌ای داده یا کش برنامه‌های دیگر را پاک کند؛ بنابراین این برنامه هرگز چیزی را بدون اجازه شما حذف نمی‌کند.
+        </p>
 
-      <div style="background: rgba(15,23,42,0.6); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
-          <span>وضعیت رم قبل از پاکسازی:</span>
-          <b style="color: #f87171;" id="ramFreeBefore">1.5 GB آزاد (48% مصرف)</b>
-        </div>
-        <div class="core-bar-track">
-          <div id="ramCleanBar" style="width: 58%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);"></div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 14px;">
-        <div style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">
-          فرآیندهای آماده بهینه‌سازی:
+        <div class="power-grid" style="margin-top:10px;">
+          <div class="power-stat"><div class="k">حافظه رم کل</div><div class="v" id="ramTotalVal">—</div></div>
+          <div class="power-stat"><div class="k">رم آزاد</div><div class="v" id="ramAvailVal">—</div></div>
+          <div class="power-stat"><div class="k">کش موقت خود برنامه</div><div class="v" id="ownCacheVal">—</div></div>
+          <div class="power-stat"><div class="k">آخرین آزادسازی</div><div class="v" id="lastFreeVal">—</div></div>
         </div>
 
-        <div class="demo-note">ℹ️ این فهرست «نمونه آموزشی» است. اندروید اجازه بستن فرآیند برنامه‌های دیگر را به اپ‌های عادی نمی‌دهد؛ نتیجه بهینه‌سازی بر پایه اندازه‌گیری واقعی حافظه گزارش می‌شود.</div>
-        <div class="ram-check-item">
-          <label class="ram-check-label">
-            <input type="checkbox" checked class="ram-cb" data-size="184" data-pkg="com.android.chrome">
-            <span>کش صفحات مرورگر و وب‌ویو</span>
-          </label>
-          <span style="font-size: 0.72rem; color: #38bdf8;">184 MB</span>
-        </div>
-
-        <div class="ram-check-item">
-          <label class="ram-check-label">
-            <input type="checkbox" checked class="ram-cb" data-size="312" data-pkg="org.telegram.messenger">
-            <span>سرویس‌های معلق شبکه‌های اجتماعی</span>
-          </label>
-          <span style="font-size: 0.72rem; color: #38bdf8;">312 MB</span>
-        </div>
-
-        <div class="ram-check-item">
-          <label class="ram-check-label">
-            <input type="checkbox" checked class="ram-cb" data-size="145" data-pkg="com.sec.android.gallery3d">
-            <span>بافر تامبنیل‌ها و پیش‌نمایش گالری</span>
-          </label>
-          <span style="font-size: 0.72rem; color: #38bdf8;">145 MB</span>
-        </div>
-
-        <div class="ram-check-item">
-          <label class="ram-check-label">
-            <input type="checkbox" checked class="ram-cb" data-size="98" data-pkg="com.whatsapp">
-            <span>فایل‌های موقت پیام‌رسان‌ها</span>
-          </label>
-          <span style="font-size: 0.72rem; color: #38bdf8;">98 MB</span>
+        <button class="btn-action-primary" style="width:100%; padding:13px; margin-top:12px;" onclick="runSafeRamClean()">
+          <span>⚡</span><span>پاکسازی امن کش برنامه و آزادسازی حافظه</span>
+        </button>
+        <div class="power-stat" style="margin-top:8px;">
+          <div class="k">پیام سیستم</div><div class="v" id="lastFreeNote" style="font-size:0.7rem; font-weight:600;">هنوز اجرا نشده است</div>
         </div>
       </div>
-
-      <button class="btn-action-primary" style="width: 100%; padding: 14px;" onclick="executeRamOptimization()">
-        <span>⚡</span>
-        <span>شروع آزادسازی فوری رم و پاکسازی</span>
-      </button>
-    </div>
-  </main>
+</main>
 
   <!-- ==================== TAB 5: تنظیمات ==================== -->
   <main id="tab-settings" class="tab-page" style="display: none;">
     <div class="app-card">
       <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 14px;">تنظیمات هوشمند هشدارها</h2>
-      <!-- ===== کنترل بلندی صدای هشدار (جدید) ===== -->
-      <div class="app-card ins-card">
-        <h3 style="font-size: 0.9rem; font-weight: 800; margin-bottom: 6px;">🔊 کنترل بلندی صدای هشدار</h3>
-        <p style="font-size: 0.68rem; color: var(--text-muted); line-height: 1.7;">
-          بلندی صدای زنگ هشدار را از ۰ تا ۱۰۰٪ تنظیم کنید. صفر یعنی سایلنت (فقط اعلان و ویبره).
+            <!-- ===== کنترل بلندی صدای هشدار ===== -->
+      <div class="app-card ins-card" id="volumeCard">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <h3 style="font-size:0.9rem; font-weight:800;">🔊 بلندی صدای زنگ هشدار</h3>
+          <div class="vol-big" id="alarmVolumeText">—</div>
+        </div>
+        <p style="font-size:0.68rem; color:var(--text-muted); line-height:1.7; margin-top:6px;">
+          صفر یعنی بی‌صدا (فقط اعلان و ویبره). این مقدار ذخیره می‌شود و در همه هشدارها (سقف شارژ، کم‌شارژ، دما و آژیر) استفاده می‌گردد.
         </p>
 
-        <div class="vol-row">
-          <span style="font-size: 0.72rem; color: var(--text-muted);">۰٪</span>
-          <input type="range" class="range-input" id="alarmVolumeRange" min="0" max="100" step="5" value="100"
-                 oninput="onAlarmVolumeInput(this.value)" onchange="saveAlarmVolume(this.value)">
-          <span style="font-size: 0.72rem; color: var(--text-muted);">۱۰۰٪</span>
-          <span class="vol-value" id="alarmVolumeText">۱۰۰٪</span>
-        </div>
-        <div class="vol-marks"><span>0%</span><span>50%</span><span>100%</span></div>
-
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-          <button class="btn-action-primary" style="flex:1; padding: 11px;" onclick="testAlarmNow()">
-            <span>🔔</span><span>تست زنگ با این بلندی</span>
-          </button>
-          <button class="btn-action-secondary" style="padding: 11px 14px;" onclick="applyVolumePreset(0)">🔇</button>
-          <button class="btn-action-secondary" style="padding: 11px 14px;" onclick="applyVolumePreset(50)">۵۰٪</button>
-          <button class="btn-action-secondary" style="padding: 11px 14px;" onclick="applyVolumePreset(100)">۱۰۰٪</button>
+        <div class="vol-slider-wrap">
+          <span class="vol-edge">0</span>
+          <input type="range" class="range-input" id="alarmVolumeRange" min="0" max="100" step="5" value="100">
+          <span class="vol-edge">100</span>
         </div>
 
-        <div class="setting-row" style="margin-top: 6px;">
+        <div class="vol-chips" id="alarmVolumeChips">
+          <button type="button" class="vol-chip" data-vol="0" onclick="applyVolumePreset(0)">🔇 بی‌صدا</button>
+          <button type="button" class="vol-chip" data-vol="25" onclick="applyVolumePreset(25)">۲۵٪</button>
+          <button type="button" class="vol-chip" data-vol="50" onclick="applyVolumePreset(50)">۵۰٪</button>
+          <button type="button" class="vol-chip" data-vol="75" onclick="applyVolumePreset(75)">۷۵٪</button>
+          <button type="button" class="vol-chip" data-vol="100" onclick="applyVolumePreset(100)">۱۰۰٪</button>
+        </div>
+
+        <button class="btn-action-primary" style="width:100%; padding:12px; margin-top:10px;" onclick="testAlarmNow()">
+          <span>🔔</span><span>تست زنگ با این بلندی</span>
+        </button>
+
+        <div class="setting-row" style="margin-top:8px;">
           <div>
             <div class="setting-title">اعمال روی بلندی صدای زنگ گوشی</div>
-            <div class="setting-desc">اگر روشن باشد، بلندی کانال «زنگ هشدار» سیستم هم تنظیم می‌شود</div>
+            <div class="setting-desc">در صورت روشن بودن، بلندی کانال «زنگ هشدار» سیستم هم تنظیم می‌شود</div>
           </div>
           <label class="toggle-switch">
             <input type="checkbox" id="forceSystemVolumeToggle" onchange="saveToggleSetting('force_system_volume', this.checked)">
@@ -1348,7 +1268,7 @@
             <div class="setting-desc">پس از پایان پیام فارسی، آژیر تا زمان تعیین‌شده پخش شود</div>
           </div>
           <label class="toggle-switch">
-            <input type="checkbox" id="sirenLoopToggle" onchange="saveToggleSetting('siren_loop_enabled', this.checked)">
+            <input type="checkbox" id="sirenLoopToggle" checked onchange="saveToggleSetting('siren_loop_enabled', this.checked)">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1356,7 +1276,7 @@
         <div class="setting-row">
           <div>
             <div class="setting-title">توقف خودکار زنگ</div>
-            <div class="setting-desc">پس از این مدت، زنگ خودکار خاموش می‌شود (برای مصرف باتری بهتر)</div>
+            <div class="setting-desc">پس از این مدت، زنگ خودکار خاموش می‌شود (مصرف باتری کمتر)</div>
           </div>
           <div>
             <select id="autoStopSelect" onchange="saveSettingFromUi('alarm_auto_stop_sec', this.value)"
@@ -1371,22 +1291,20 @@
           </div>
         </div>
       </div>
-
-      <!-- ===== حالت پایش و مصرف باتری (جدید) ===== -->
+      <!-- ===== حالت پایش و مصرف باتری ===== -->
       <div class="app-card ins-card">
-        <h3 style="font-size: 0.9rem; font-weight: 800; margin-bottom: 6px;">🔋 مصرف باتری و حالت پایش</h3>
-        <p style="font-size: 0.68rem; color: var(--text-muted); line-height: 1.7;">
-          در نسخه جدید WakeLock دائمی حذف شد و پایش فقط رویدادمحور است. در «حالت کم‌مصرف» سرویس دائمی
-          خاموش می‌شود و بررسی باتری هر ۱۵ دقیقه با Job انجام می‌شود.
+        <h3 style="font-size:0.9rem; font-weight:800; margin-bottom:6px;">🔋 حالت پایش و مصرف باتری</h3>
+        <p style="font-size:0.68rem; color:var(--text-muted); line-height:1.7;">
+          پایش باتری رویدادمحور است (بدون WakeLock). در «حالت کم‌مصرف» سرویس دائمی خاموش می‌شود و بررسی باتری هر ۱۵ دقیقه انجام می‌گردد.
         </p>
 
-        <div class="setting-row" style="margin-top: 8px;">
+        <div class="setting-row" style="margin-top:8px;">
           <div>
             <div class="setting-title">فعال بودن پایش هوشمند</div>
             <div class="setting-desc">خاموش کردن این گزینه کل سرویس پس‌زمینه را متوقف می‌کند</div>
           </div>
           <label class="toggle-switch">
-            <input type="checkbox" id="monitoringToggle" onchange="onMonitoringToggle(this.checked)">
+            <input type="checkbox" id="monitoringToggle" checked onchange="onMonitoringToggle(this.checked)">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1411,109 +1329,25 @@
           <div class="power-stat"><div class="k">تعداد هشدارها</div><div class="v" id="psAlarmCount">—</div></div>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-          <button class="btn-action-secondary" style="flex:1; padding: 11px;" onclick="refreshPowerPanel(true)">
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button class="btn-action-secondary" style="flex:1; padding:11px;" onclick="refreshPowerPanel(true)">
             <span>🔄</span><span>به‌روزرسانی وضعیت</span>
           </button>
-          <button class="btn-action-secondary" style="flex:1; padding: 11px;" onclick="resetAllSettings()">
+          <button class="btn-action-secondary" style="flex:1; padding:11px;" onclick="resetAllSettings()">
             <span>♻️</span><span>تنظیمات پیش‌فرض</span>
           </button>
         </div>
       </div>
-
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">سقف شارژ هدف (Overcharge Protection)</div>
-          <div class="setting-desc">درصدی که پس از آن آلارم قطع شارژر به صدا درمی‌آید</div>
-        </div>
-        <div>
-          <select id="targetPctSelect" onchange="saveTargetPercent(this.value)" style="background: #1e293b; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-family: inherit;">
-            <option value="80">80% (محافظت حداکثری)</option>
-            <option value="85" selected>85% (استاندارد جهانی)</option>
-            <option value="90">90% (تعادل باتری)</option>
-            <option value="100">100% (شارژ کامل)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">هشدار با صدای فارسی (Persian Voice)</div>
-          <div class="setting-desc">پخش صدای گوینده فارسی برای اعلام اتمام شارژ و افت باتری</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="voiceToggle" checked onchange="saveToggleSetting('voice_enabled', this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">حفاظت از دمای بحرانی (42°C)</div>
-          <div class="setting-desc">آلارم فوری در صورت داغ شدن غیرعادی دستگاه حین شارژ</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="tempAlertToggle" checked onchange="saveToggleSetting('overheat_enabled', this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">هشدار افت شارژ (Low Battery - 20%)</div>
-          <div class="setting-desc">یادآوری اتصال کابل شارژ قبل از تخلیه کامل</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="lowAlertToggle" checked onchange="saveToggleSetting('low_enabled', this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">آژیر ضدسرقت قطع ناگهانی کابل</div>
-          <div class="setting-desc">پخش صدای آژیر در صورت جدا شدن کابل در مکان عمومی</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="unplugAlarmToggle" checked onchange="saveToggleSetting('unplug_alarm_enabled', this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">ویبره و لرزش قدرتمند هشدار</div>
-          <div class="setting-desc">لرزش پیوسته برای محیط‌های پرسروصدا</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="vibrateToggle" checked onchange="saveToggleSetting('vibrate_enabled', this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-
-    <!-- App About & Release Card (Secure: No keys or passwords exposed) -->
+    <!-- درباره برنامه (بدون هیچ مشخصات فنی یا کلید انتشار) -->
     <div class="app-card">
-      <h3 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 10px; color: #38bdf8;">درباره برنامه و مشخصات انتشار</h3>
-      <div style="font-size: 0.74rem; line-height: 1.8; color: var(--text-muted);">
-        <div>• <b>نسخه اپلیکیشن:</b> 1.0.0 پایدار (Version Code 1)</div>
-        <div>• <b>شناسه پکیج:</b> com.persian.batteryalarm.optimizer</div>
-        <div>• <b>سازگاری اندروید:</b> Android 7.0 تا Android 15 (API 24 - 35)</div>
-        <div>• <b>معماری پشتیبان:</b> موتور صوتی ۳ لایه با صدای گوینده فارسی</div>
-        <div>• <b>کنترل بلندی صدا:</b> تنظیم زنگ هشدار از ۰ تا ۱۰۰٪ از داخل برنامه</div>
-        <div>• <b>حافظه تنظیمات:</b> همه تنظیمات در حافظه دائمی برنامه ذخیره و بازخوانی می‌شوند</div>
-        <div>• <b>مصرف باتری:</b> حذف WakeLock، پایش رویدادمحور، توقف کامل در پس‌زمینه، حالت کم‌مصرف</div>
-        <div>• <b>حریم خصوصی و امنیت:</b> عملکرد ۱۰۰٪ آفلاین، بدون تبلیغات و دسترسی غیرمجاز</div>
+      <h3 style="font-size:0.88rem; font-weight:800; margin-bottom:10px; color:#38bdf8;">درباره این برنامه</h3>
+      <div style="font-size:0.74rem; line-height:1.9; color:var(--text-muted);">
+        <div>• زنگ هوشمند باتری: هشدار سقف شارژ هدف، سپر حرارتی، هشدار کم‌شارژ و آژیر قطع ناگهانی کابل.</div>
+        <div>• پایش سخت‌افزار: بار پردازنده، حافظه رم، حافظه داخلی، دما و سلامت باتری — همه از داده واقعی سیستم.</div>
+        <div>• حریم خصوصی: بدون تبلیغات، بدون اینترنت و بدون ارسال هیچ داده‌ای؛ همه پردازش‌ها روی همین دستگاه انجام می‌شود.</div>
+        <div>• امنیت: این برنامه هیچ فایل شخصی شما را به‌صورت خودکار حذف نمی‌کند.</div>
       </div>
-      <div style="margin-top: 12px; display: flex; gap: 8px;">
-        <a href="https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk" class="btn-action-primary" style="flex:1; text-decoration: none; font-size: 0.78rem;">
-          📥 دانلود مستقیم APK
-        </a>
-        <button class="btn-action-secondary" onclick="showBuildInfoModal()" style="font-size: 0.78rem;">
-          🔍 مشخصات انتشار
-        </button>
-      </div>
+      <div style="margin-top:10px; font-size:0.68rem; color:var(--text-muted);" id="aboutLiveState">در حال خواندن وضعیت…</div>
     </div>
   </main>
 
@@ -1654,17 +1488,11 @@
         <span>مشخصات فنی و امنیتی اپلیکیشن</span>
       </div>
       <div class="modal-desc" style="font-size:0.75rem; line-height: 1.8;">
-        <div><b>نسخه فعلی:</b> 1.0.0 پایدار (Version Code 1)</div>
-        <div><b>شناسه نرم‌افزار:</b> com.persian.batteryalarm.optimizer</div>
-        <div><b>وضعیت امضا:</b> گواهی دیجیتال رسمی Release Signed</div>
         <div><b>معماری پشتیبان:</b> موتور صوتی ۳ لایه با صدای فارسی</div>
         <div><b>حریم خصوصی:</b> پردازش محلی بدون نیاز به ارسال داده به سرور</div>
         <div><b>سازگاری:</b> اندروید ۷.۰ به بالا (API 24 تا 35)</div>
       </div>
       <div class="modal-actions">
-        <a href="https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk" class="btn-action-primary" style="flex:1; text-decoration:none; text-align:center;">
-          📥 دانلود مستقیم APK
-        </a>
         <button class="btn-action-secondary" onclick="closeModal()">
           بستن
         </button>
@@ -1681,7 +1509,8 @@
   <script>
     // Global State
     let isCharging = true;
-    let batteryLevel = 78;
+    let batteryLevel = -1;
+    let currentTempC = -1;
     let isMuted = false;
     let targetPercent = 85;
     let alarmVolume = 100;
@@ -1689,103 +1518,12 @@
     let riskyAppsCacheJs = null;
     let pendingDeleteCardId = null;
     let pendingDeleteSize = 0;
-    let currentFileCategory = 'duplicate';
+    let currentFileCategory = 'risky';
 
     // Per-core live simulation
     const coreUsage = [32, 28, 35, 22, 38, 42, 36, 18];
 
-    // Mock Files Data by Category
-    const fileDataByCategory = {
-      duplicate: [
-        {
-          id: 'dup-1',
-          name: 'Financial_Report_Q4_duplicate.pdf',
-          path: '/Internal/Documents/Financial_Report_Q4_duplicate.pdf',
-          size: 13.8,
-          orig: 'Financial_Report_Q4.pdf',
-          note: 'فایل گزارش مالی تکراری در دو پوشه Download و Documents. نسخه اصلی نگهداری می‌شود: Financial_Report_Q4.pdf'
-        },
-        {
-          id: 'dup-2',
-          name: 'VoiceNote_Conference_part1_copy.m4a',
-          path: '/Internal/Recordings/VoiceNote_Conference_part1_copy.m4a',
-          size: 27.1,
-          orig: 'VoiceNote_Conference_part1.m4a',
-          note: 'فایل صدای ضبط شده هم‌نام با طول موج و بایت‌های ۱۰۰٪ برابر. نسخه اصلی نگهداری می‌شود.'
-        },
-        {
-          id: 'dup-3',
-          name: 'Photo_Backup_2026_09_copy.jpg',
-          path: '/Internal/DCIM/Camera/Photo_Backup_2026_09_copy.jpg',
-          size: 8.4,
-          orig: 'Photo_Backup_2026_09.jpg',
-          note: 'عکس دوربین با هش SHA-256 کاملا یکسان. نسخه اصلی حفظ می‌گردد.'
-        }
-      ],
-      junk: [
-        {
-          id: 'junk-1',
-          name: 'Telegram_Video_cache_0948.mp4.tmp',
-          path: '/Internal/Telegram/Telegram Video/cache_0948.tmp',
-          size: 48.5,
-          orig: 'Temporary Cache',
-          note: 'ویدیو تماشاشده موقت در تلگرام که در حافظه کش باقی مانده است.'
-        },
-        {
-          id: 'junk-2',
-          name: 'browser_webview_blob_cache.dat',
-          path: '/Internal/Android/data/org.browser/cache/blob.dat',
-          size: 34.2,
-          orig: 'Web Cache',
-          note: 'کش صفحات اینترنتی و داده‌های رندر قدیمی مرورگر.'
-        },
-        {
-          id: 'junk-3',
-          name: 'crash_dump_kernel_20261011.log',
-          path: '/Internal/Logs/crash_dump_kernel_20261011.log',
-          size: 16.0,
-          orig: 'System Log',
-          note: 'لاگ سیستمی خطای قدیمی که نیازی به نگهداری آن نیست.'
-        }
-      ],
-      large: [
-        {
-          id: 'large-1',
-          name: 'old_rom_backup_v12.bin',
-          path: '/Internal/Download/old_rom_backup_v12.bin',
-          size: 245.0,
-          orig: 'Archive File',
-          note: 'فایل پشتیبان حجیم و منسوخ که بیش از ۶ ماه باز نشده است.'
-        },
-        {
-          id: 'large-2',
-          name: 'screen_record_gaming_1080p.mp4',
-          path: '/Internal/Movies/screen_record_gaming_1080p.mp4',
-          size: 182.4,
-          orig: 'Screen Record',
-          note: 'ویدیوی ضبط شده صفحه نمایش بازی با حجم بالا.'
-        }
-      ],
-      risky: [
-        {
-          id: 'risk-1',
-          name: 'SpeedCleaner_Boost_Pro.apk',
-          path: 'com.speedcleaner.boostpro',
-          size: 19.5,
-          orig: 'برنامه مشکوک',
-          note: '⚠️ سطح ریسک: بالا (High) — دسترسی همزمان به پیامک‌ها، موقعیت مکانی در پس‌زمینه و پنجره شناور!'
-        },
-        {
-          id: 'risk-2',
-          name: 'Torch_Flashlight_Super.apk',
-          path: 'com.torch.flashsuper',
-          size: 8.2,
-          orig: 'چراغ قوه مشکوک',
-          note: '⚠️ سطح ریسک: متوسط — درخواست دسترسی به دفترچه تلفن برای نرم‌افزار چراغ قوه!'
-        }
-      ]
-    };
-
+    
 
 
     // Navigation
@@ -1821,7 +1559,7 @@
 
     // Gauge Update
     function updateBatteryDisplay(pct, charging) {
-      batteryLevel = Math.max(1, Math.min(100, pct));
+      batteryLevel = (pct === null || pct === undefined || isNaN(pct) || pct < 0) ? -1 : Math.max(1, Math.min(100, pct));
       isCharging = charging;
 
       const circle = document.getElementById('batteryGaugeCircle');
@@ -1831,38 +1569,31 @@
       const advice = document.getElementById('aiBatteryAdviceText');
       const hdrBadge = document.getElementById('headerPctBadge');
 
-      if (text) text.textContent = batteryLevel + '%';
-      if (hdrBadge) hdrBadge.innerHTML = `<span>${batteryLevel}%</span><span>⚡</span>`;
+      const pctLabel = batteryLevel < 0 ? '—%' : (batteryLevel + '%');
+      if (text) text.textContent = pctLabel;
+      if (hdrBadge) hdrBadge.innerHTML = '<span>' + pctLabel + '</span><span>⚡</span>';
 
       // 690 is full circumference of r=110
       const totalCirc = 690;
       const offset = totalCirc - (totalCirc * batteryLevel / 100);
       if (circle) circle.style.strokeDashoffset = offset;
 
-      if (batteryLevel <= 20) {
-        if (circle) circle.style.stroke = '#ef4444';
-        if (advice) advice.textContent = 'سطح انرژی کمتر از ۲۰٪ است! تخلیه عمیق به باتری آسیب می‌زند؛ لطفا دستگاه را به شارژر متصل فرمایید.';
-      } else if (batteryLevel >= targetPercent) {
-        if (circle) circle.style.stroke = '#06b6d4';
-        if (advice) advice.textContent = `شارژ به سقف استاندارد (${targetPercent}٪) رسید! برای افزایش طول عمر مفید باتری کابل شارژر را جدا نمایید.`;
-      } else {
-        if (circle) circle.style.stroke = '#10b981';
-        if (advice) advice.textContent = 'باتری در شرایط دمایی و ولتاژ مطلوب قرار دارد. حفاظت شارژ هوشمند فعال است.';
+      const adviceText = buildBatteryAdvice(batteryLevel, isCharging, currentTempC, targetPercent);
+      if (advice) advice.textContent = adviceText;
+      if (circle) {
+        circle.style.stroke = batteryLevel < 0 ? '#64748b'
+          : (batteryLevel <= 20 ? '#ef4444' : (batteryLevel >= targetPercent ? '#06b6d4' : '#10b981'));
       }
-
+      if (batteryLevel < 0) {
+        if (badge) { badge.textContent = 'در حال خواندن…'; badge.style.color = '#94a3b8'; badge.style.background = 'rgba(148,163,184,0.14)'; }
+        if (toggleText) toggleText.textContent = 'شبیه‌ساز شارژ';
+        return;
+      }
       if (charging) {
-        if (badge) {
-          badge.textContent = 'متصل به شارژر';
-          badge.style.color = '#34d399';
-          badge.style.background = 'rgba(16, 185, 129, 0.14)';
-        }
+        if (badge) { badge.textContent = 'متصل به شارژر'; badge.style.color = '#34d399'; badge.style.background = 'rgba(16, 185, 129, 0.14)'; }
         if (toggleText) toggleText.textContent = 'قطع شبیه‌ساز شارژ';
       } else {
-        if (badge) {
-          badge.textContent = 'در حال دشارژ / قطع کابل';
-          badge.style.color = '#f87171';
-          badge.style.background = 'rgba(239, 68, 68, 0.14)';
-        }
+        if (badge) { badge.textContent = 'در حال دشارژ / قطع کابل'; badge.style.color = '#f87171'; badge.style.background = 'rgba(239, 68, 68, 0.14)'; }
         if (toggleText) toggleText.textContent = 'وصل شبیه‌ساز شارژ';
       }
     }
@@ -2092,12 +1823,6 @@
 
 
 
-    function fileActionButton(item, isDemo) {
-      if (!isDemo) {
-        return "<button class='btn-delete-copy' style='color:#38bdf8;border-color:rgba(56,189,248,0.35);' onclick='inspectRiskyApp(" + JSON.stringify(item.pkg || "") + ", " + JSON.stringify(item.name) + ")'><span>🔎</span><span>بررسی دسترسی‌های حساس</span></button>";
-      }
-      return "<button class='btn-delete-copy' onclick='confirmDeleteFile(" + JSON.stringify(item.name) + ", " + JSON.stringify("card-" + item.id) + ", " + item.size + ")'><span>🗑️</span><span>حذف نسخه کپی</span></button>";
-    }
 
     function saveTargetPercent(val) {
       const n = parseInt(val, 10) || 85;
@@ -2124,6 +1849,604 @@
       for (let i = 0; i < count; i++) placeholder.push({ core: i, usage: 0 });
       renderCoresGrid(placeholder);
     }
+
+    // =====================================================================
+    //  هسته ذخیره‌سازی تنظیمات (منبع حقیقت: SharedPreferences نیتیو)
+    // =====================================================================
+    const SETTING_KEYS = [
+      'target_percent', 'low_percent', 'overheat_threshold', 'alarm_volume',
+      'alarm_auto_stop_sec', 'alarm_cooldown_sec', 'voice_enabled', 'low_enabled',
+      'overheat_enabled', 'unplug_alarm_enabled', 'vibrate_enabled', 'siren_loop_enabled',
+      'force_system_volume', 'monitoring_enabled', 'low_power_mode'
+    ];
+
+    function hasNative() {
+      try {
+        return !!(window.Android && typeof window.Android.isNative === 'function' && window.Android.isNative());
+      } catch (e) { return false; }
+    }
+
+    function nativeSettings() {
+      if (!hasNative() || typeof window.Android.settingsJson !== 'function') return null;
+      try { return JSON.parse(window.Android.settingsJson()); } catch (e) { return null; }
+    }
+
+    function lsSet(key, val) { try { localStorage.setItem('ba_' + key, String(val)); } catch (e) {} }
+    function lsGet(key) { try { return localStorage.getItem('ba_' + key); } catch (e) { return null; } }
+
+    function toFaDigits(input) {
+      return String(input).replace(/\d/g, function (d) { return FA_DIGITS[+d]; });
+    }
+
+    function saveSettingFromUi(key, value) {
+      const isBool = (value === true || value === false);
+      const json = isBool ? (value ? 'true' : 'false') : JSON.stringify(String(value));
+      let ok = false;
+      if (hasNative() && typeof window.Android.setSetting === 'function') {
+        try {
+          const r = JSON.parse(window.Android.setSetting(key, json));
+          ok = !!(r && r.ok);
+        } catch (e) { ok = false; }
+      }
+      lsSet(key, isBool ? (value ? '1' : '0') : value);
+      if (key === 'target_percent') targetPercent = parseInt(value, 10) || 85;
+      if (key === 'alarm_volume') { alarmVolume = parseInt(value, 10) || 0; if (alarmVolume > 0) lastNonZeroVolume = alarmVolume; }
+      refreshSettingsSummary();
+      return ok;
+    }
+
+    function applySettingsToUi(s) {
+      if (!s) return;
+      targetPercent = parseInt(s.target_percent, 10) || 85;
+      alarmVolume = (s.alarm_volume === undefined || s.alarm_volume === null) ? 100 : parseInt(s.alarm_volume, 10);
+      if (alarmVolume > 0) lastNonZeroVolume = alarmVolume;
+
+      const map = {
+        targetPctSelect: s.target_percent,
+        voiceToggle: s.voice_enabled,
+        tempAlertToggle: s.overheat_enabled,
+        lowAlertToggle: s.low_enabled,
+        unplugAlarmToggle: s.unplug_alarm_enabled,
+        vibrateToggle: s.vibrate_enabled,
+        forceSystemVolumeToggle: s.force_system_volume,
+        sirenLoopToggle: s.siren_loop_enabled,
+        monitoringToggle: s.monitoring_enabled,
+        lowPowerToggle: s.low_power_mode
+      };
+      Object.keys(map).forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = !!map[id];
+        else el.value = String(map[id]);
+      });
+
+      const auto = document.getElementById('autoStopSelect');
+      if (auto) auto.value = String(s.alarm_auto_stop_sec);
+      paintVolumeUi(alarmVolume);
+      refreshSettingsSummary();
+      updateBatteryDisplay(batteryLevel, isCharging);
+    }
+
+    function loadSettingsFromNative() {
+      const native = nativeSettings();
+      if (native) { applySettingsToUi(native); return native; }
+      const mirror = {};
+      SETTING_KEYS.forEach(function (k) {
+        const v = lsGet(k);
+        if (v === null) return;
+        if (v === '1' || v === '0') mirror[k] = (v === '1');
+        else mirror[k] = v;
+      });
+      if (Object.keys(mirror).length) applySettingsToUi(mirror);
+      return mirror;
+    }
+
+    function refreshSettingsSummary() {
+      const alarmLabel = document.getElementById('alarmTargetText');
+      if (alarmLabel) alarmLabel.textContent = targetPercent + '%';
+      const about = document.getElementById('aboutLiveState');
+      if (about && hasNative()) {
+        const st = nativeMonitorState();
+        about.textContent = st ? ('نسخه ' + toFaDigits(st.versionName || '1') + ' • ' + (st.enabled ? (st.lowPower ? 'حالت کم‌مصرف' : 'پایش زنده') : 'پایش خاموش')) : 'در حال خواندن وضعیت…';
+      } else if (about) {
+        about.textContent = 'نمایش داده واقعی فقط در برنامه اندروید';
+      }
+    }
+
+    function resetAllSettings() {
+      let s = null;
+      if (hasNative() && typeof window.Android.resetSettings === 'function') {
+        try { s = JSON.parse(window.Android.resetSettings()); } catch (e) { s = null; }
+      }
+      if (!s) {
+        s = { target_percent: 85, low_percent: 20, overheat_threshold: 42, alarm_volume: 100, alarm_auto_stop_sec: 45, alarm_cooldown_sec: 60, voice_enabled: true, low_enabled: true, overheat_enabled: true, unplug_alarm_enabled: true, vibrate_enabled: true, siren_loop_enabled: true, force_system_volume: false, monitoring_enabled: true, low_power_mode: false };
+      }
+      applySettingsToUi(s);
+      showToast('همه تنظیمات به حالت پیش‌فرض بازگشت ♻️');
+    }
+
+    // ======================= کنترل بلندی صدای هشدار =======================
+    // (نسخه کامل در بخش بعدی همین فایل درج می‌شود)
+
+    // ======================= پنل مصرف باتری و حالت پایش =======================
+    // ======================= دریافت زنده داده باتری از سیستم =======================
+    window.__onBatteryPush = function (payload) {
+      try {
+        const b = (typeof payload === 'string') ? JSON.parse(payload) : payload;
+        if (!b || typeof b !== 'object') return;
+        if (typeof b.percent === 'number' && b.percent >= 0) updateBatteryDisplay(b.percent, !!b.plugged);
+        currentTempC = (typeof b.temperature === 'number' && b.temperature >= 0) ? b.temperature : -1;
+        const t = document.getElementById('batteryTempText');
+        if (t && currentTempC >= 0) t.textContent = currentTempC.toFixed(1);
+        const v = document.getElementById('batteryVoltText');
+        if (v && b.voltage > 0) v.textContent = b.voltage;
+        if (b.health) { const h = document.getElementById('batteryHealthText'); if (h) h.textContent = b.health; }
+        if (b.technology) { const tech = document.getElementById('batteryTechText'); if (tech) tech.textContent = b.technology; }
+        if (b.percent >= 0) stampLive('liveBatteryStamp', b.percent + '٪ • ' + (b.plugged ? 'متصل به شارژر' : 'مصرف باتری'));
+      } catch (e) {}
+    };
+
+    function shortTime() {
+      const d = new Date();
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    function stampLive(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      el.innerHTML = '<span class="live-dot"></span>' + text + ' • به‌روزرسانی ' + hh + ':' + mm + ':' + ss;
+    }
+
+    function buildBatteryAdvice(percent, charging, tempC, targetPct) {
+      if (tempC >= 42) return 'دمای باتری بالاتر از حد ایمن است (' + tempC.toFixed(1) + '°C). شارژر را جدا کنید و دستگاه را خنک نمایید.';
+      if (tempC >= 38) return 'دمای باتری کمی بالاست (' + tempC.toFixed(1) + '°C). از شارژ سریع در این حالت پرهیز کنید.';
+      if (percent < 0) return 'در حال خواندن اطلاعات واقعی باتری از سیستم…';
+      if (percent <= 20 && !charging) return 'شارژ باتری کمتر از ۲۰٪ است؛ برای جلوگیری از تخلیه عمیق دستگاه را به شارژر متصل کنید.';
+      if (charging && percent >= targetPct) return 'شارژ به سقف هدف (' + targetPct + '٪) رسید؛ برای طول عمر باتری کابل را جدا کنید.';
+      if (charging) return 'دستگاه در حال شارژ است و کنترل دما و ولتاژ فعال است.';
+      return 'باتری در حال مصرف است و در محدوده امن قرار دارد.';
+    }
+
+    function nativeMonitorState() {
+      if (!hasNative() || typeof window.Android.monitorState !== 'function') return null;
+      try { return JSON.parse(window.Android.monitorState()); } catch (e) { return null; }
+    }
+
+    function onMonitoringToggle(enabled) {
+      if (hasNative() && typeof window.Android.setMonitoringEnabled === 'function') {
+        try { window.Android.setMonitoringEnabled(!!enabled); } catch (e) {}
+      }
+      saveSettingFromUi('monitoring_enabled', !!enabled);
+      refreshPowerPanel(false);
+      showToast(enabled ? 'پایش هوشمند باتری فعال شد ✅' : 'پایش پس‌زمینه کاملاً خاموش شد (کم‌ترین مصرف باتری) 🔋');
+    }
+
+    function onLowPowerToggle(enabled) {
+      if (hasNative() && typeof window.Android.setLowPowerMode === 'function') {
+        try { window.Android.setLowPowerMode(!!enabled); } catch (e) {}
+      }
+      saveSettingFromUi('low_power_mode', !!enabled);
+      refreshPowerPanel(false);
+      showToast(enabled ? 'حالت کم‌مصرف روشن شد (بررسی هر ۱۵ دقیقه) 🌙' : 'حالت پایش زنده فعال شد ⚡');
+    }
+
+    function refreshPowerPanel(verbose) {
+      const st = nativeMonitorState();
+      const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+      if (!st) {
+        set('psMode', 'نمایش داده واقعی فقط در برنامه');
+        set('psService', '—');
+        set('psWakeLocks', '—');
+        set('psPolls', '—');
+        if (verbose) showToast('این صفحه در مرورگر است؛ برای پنل واقعی اپ را اجرا کنید');
+        return;
+      }
+      const modeText = st.mode === 'off' ? 'خاموش (بدون پایش)' : (st.mode === 'powersave' ? 'کم‌مصرف (بررسی هر ۱۵ دقیقه)' : 'پایش زنده رویدادمحور');
+      set('psMode', modeText);
+      set('psService', st.serviceRunning ? 'در حال اجرا' : 'خاموش');
+      set('psWakeLocks', toFaDigits(st.wakeLocks || 0) + ' عدد');
+      set('psPolls', toFaDigits(Math.round((st.pollsPerMinute || 0) * 10) / 10));
+      set('psAlarmCount', toFaDigits(st.alarmCount || 0));
+      if (st.lastAlarmAt) {
+        const mins = Math.max(0, Math.round((Date.now() - st.lastAlarmAt) / 60000));
+        set('psLastAlarm', (st.lastAlarmType || 'هشدار') + ' (' + toFaDigits(mins) + ' دقیقه قبل)');
+      } else {
+        set('psLastAlarm', 'بدون هشدار');
+      }
+      const m = document.getElementById('monitoringToggle');
+      if (m) m.checked = !!st.enabled;
+      const lp = document.getElementById('lowPowerToggle');
+      if (lp) lp.checked = !!st.lowPower;
+      if (verbose) showToast('وضعیت مصرف باتری به‌روزرسانی شد 🔄');
+    }
+
+    // ======================= داده‌های واقعی سخت‌افزار و باتری =======================
+    function sysJson(fn) {
+      if (!window.SysInfo || typeof window.SysInfo[fn] !== 'function') return null;
+      try { return JSON.parse(window.SysInfo[fn]()); } catch (e) { return null; }
+    }
+
+    function formatBytes(bytes, unit) {
+      if (!bytes || bytes <= 0) return '—';
+      const gb = bytes / 1073741824;
+      if (unit === 'gb' || gb >= 1) return (Math.round(gb * 10) / 10).toFixed(1) + ' GB';
+      return Math.round(bytes / 1048576) + ' MB';
+    }
+
+    function refreshBatteryFromNative() {
+      const b = sysJson('getBatteryInfo');
+      if (!b || !b.available) {
+        updateBatteryDisplay(-1, false);
+        return;
+      }
+      updateBatteryDisplay(b.percent, !!b.plugged);
+      currentTempC = (typeof b.temperature === 'number' && b.temperature >= 0) ? b.temperature : -1;
+      const t = document.getElementById('batteryTempText');
+      if (t) t.textContent = (currentTempC >= 0 ? currentTempC.toFixed(1) : '—');
+      const v = document.getElementById('batteryVoltText');
+      if (v) v.textContent = (b.voltage > 0 ? b.voltage : '—');
+      const h = document.getElementById('batteryHealthText');
+      if (h) h.textContent = b.health || '—';
+      const tech = document.getElementById('batteryTechText');
+      if (tech) tech.textContent = b.technology && b.technology !== 'نامشخص' ? b.technology : 'نامشخص';
+      const tempPill = document.getElementById('tempStatusPill');
+      if (tempPill && currentTempC >= 0) {
+        const hot = currentTempC >= 42;
+        tempPill.textContent = hot ? 'داغ (خطر)' : (currentTempC >= 38 ? 'کمی گرم' : 'مطلوب و خنک');
+        tempPill.style.color = hot ? '#f87171' : '#34d399';
+      }
+      stampLive('liveBatteryStamp', b.percent + '٪ • ' + (b.plugged ? 'متصل به شارژر' : 'مصرف باتری'));
+    }
+
+    function renderCoresGrid(perCore) {
+      const container = document.getElementById('coresGridContainer');
+      if (!container) return;
+      const cores = (perCore && perCore.length) ? perCore : [];
+      if (!cores.length) {
+        container.innerHTML = '<div class="demo-note" style="grid-column: 1 / -1;">آمار بار هسته‌ها در این دستگاه در دسترس نیست (هیچ عدد ساختگی نمایش داده نمی‌شود).</div>';
+        return;
+      }
+      container.innerHTML = cores.map(function (c) {
+        const u = (c.usage === null || c.usage === undefined || c.usage < 0) ? 0 : c.usage;
+        return '<div class="core-box">' +
+          '<div class="core-top"><span class="core-name">هسته ' + (c.core + 1) + '</span>' +
+          '<span class="core-pct" id="core-pct-' + c.core + '">' + u + '%</span></div>' +
+          '<div class="core-bar-track"><div class="core-bar-fill" id="core-bar-' + c.core + '" style="width: ' + u + '%;"></div></div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function refreshHardwareFromNative() {
+      const cpu = sysJson('getCpuInfo');
+      if (cpu) {
+        const model = document.getElementById('cpuModelText');
+        if (model) model.textContent = (cpu.model && cpu.model !== 'نامشخص') ? (cpu.model + ' (' + cpu.cores + ' هسته)') : 'نامشخص';
+        const avg = document.getElementById('cpuAvgUsageText');
+        if (avg) avg.textContent = (cpu.avgUsage >= 0 ? cpu.avgUsage : '—');
+        const bar = document.getElementById('cpuAvgUsageBar');
+        if (bar && cpu.avgUsage >= 0) bar.style.width = cpu.avgUsage + '%';
+        const temp = document.getElementById('cpuTempText');
+        if (temp) temp.textContent = (cpu.temperature > 0 ? cpu.temperature.toFixed(1) : '—');
+        const freq = document.getElementById('cpuFreqText');
+        if (freq) {
+          let max = -1;
+          (cpu.perCore || []).forEach(function (c) { if (c.maxFreq > max) max = c.maxFreq; });
+          freq.textContent = max > 0 ? (max / 1000000).toFixed(2) : '—';
+        }
+        renderCoresGrid(cpu.perCore);
+      } else {
+        const model = document.getElementById('cpuModelText');
+        if (model) model.textContent = 'نامشخص';
+      }
+
+      const mem = sysJson('getMemoryInfo');
+      if (mem && mem.total > 0) {
+        const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+        set('ramPctText', toFaDigits(mem.usedPct) + '%');
+        set('ramUsedText', formatBytes(mem.used));
+        set('ramFreeText', formatBytes(mem.avail));
+        set('ramCacheText', formatBytes(mem.cached));
+        set('ramTotalSubText', 'ظرفیت فیزیکی کل: ' + formatBytes(mem.total) + ' • بروزرسانی ' + shortTime());
+        const barUsed = document.getElementById('ramBarUsed');
+        const barCache = document.getElementById('ramBarCache');
+        const barFree = document.getElementById('ramBarFree');
+        const cachePct = mem.total > 0 ? Math.round((mem.cached / mem.total) * 100) : 0;
+        if (barUsed) barUsed.style.width = Math.max(0, mem.usedPct - cachePct) + '%';
+        if (barCache) barCache.style.width = Math.min(100, cachePct) + '%';
+        if (barFree) barFree.style.width = Math.max(2, 100 - Math.max(0, mem.usedPct)) + '%';
+      }
+
+      const st = sysJson('getStorageInfo');
+      if (st && st.total > 0) {
+        const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+        set('romUsedVal', formatBytes(st.used));
+        set('romFreeVal', formatBytes(st.avail));
+        set('romTotalSubText', 'ظرفیت دیسک کل: ' + formatBytes(st.total) + ' • بروزرسانی ' + shortTime());
+        const fill = document.getElementById('romBarFill');
+        if (fill) fill.style.width = Math.max(2, st.usedPct) + '%';
+      }
+
+      const dev = sysJson('getDeviceInfo');
+      if (dev) {
+        const el = document.getElementById('deviceModelText');
+        if (el) el.textContent = (dev.manufacturer || '') + ' ' + (dev.model || '') + ' • Android ' + (dev.android || '?');
+      }
+    }
+
+    function refreshRiskyAppsFromNative() {
+      if (!hasNative() || typeof window.Android.getRiskyApps !== 'function') return null;
+      try {
+        riskyAppsCacheJs = JSON.parse(window.Android.getRiskyApps() || '[]');
+      } catch (e) { riskyAppsCacheJs = null; }
+      return riskyAppsCacheJs;
+    }
+    function refreshRamFromNative() {
+      const mem = sysJson('getMemoryInfo');
+      const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+      if (mem && mem.total > 0) {
+        set('ramTotalVal', formatBytes(mem.total));
+        set('ramAvailVal', formatBytes(mem.avail));
+      }
+      const before = document.getElementById('ramFreeBefore');
+      if (mem && before) before.textContent = formatBytes(mem.avail) + ' آزاد (' + toFaDigits(mem.usedPct) + '٪ مصرف)';
+      refreshOwnStorageFromNative();
+    }
+
+    function updateCoreFluctuations() {
+      const cpu = sysJson('getCpuInfo');
+      if (!cpu) return;
+      renderCoresGrid(cpu.perCore);
+      const avg = document.getElementById('cpuAvgUsageText');
+      if (avg) avg.textContent = (cpu.avgUsage >= 0 ? cpu.avgUsage : '—');
+      const bar = document.getElementById('cpuAvgUsageBar');
+      if (bar && cpu.avgUsage >= 0) bar.style.width = cpu.avgUsage + '%';
+    }
+
+    // ======================= زمان‌بندی هوشمند بررسی‌ها (مصرف باتری کمینه) =======================
+    let batteryPollTimer = null;
+    let hardwarePollTimer = null;
+    let appVisible = true;
+
+    function startBatteryPolling() {
+      if (batteryPollTimer || !appVisible) return;
+      batteryPollTimer = setInterval(refreshBatteryFromNative, 4000);
+    }
+    function stopBatteryPolling() {
+      if (batteryPollTimer) { clearInterval(batteryPollTimer); batteryPollTimer = null; }
+    }
+    function startHardwarePolling() {
+      refreshHardwareFromNative();
+      refreshRamFromNative();
+      if (hardwarePollTimer || !appVisible) return;
+      hardwarePollTimer = setInterval(updateCoreFluctuations, 4000);
+    }
+    function stopHardwarePolling() {
+      if (hardwarePollTimer) { clearInterval(hardwarePollTimer); hardwarePollTimer = null; }
+    }
+    window.__onAppVisibility = function (visible) {
+      appVisible = !!visible;
+      if (appVisible) {
+        refreshBatteryFromNative();
+        startBatteryPolling();
+        const hw = document.getElementById('tab-hardware');
+        if (hw && hw.style.display !== 'none') startHardwarePolling();
+      } else {
+        stopBatteryPolling();
+        stopHardwarePolling();
+      }
+    };
+
+    // ======================= کنترل بلندی صدای هشدار =======================
+
+    function volumeLabel(v) { return (v <= 0 ? 'بی‌صدا' : toFaDigits(v) + '٪'); }
+
+    function paintVolumeUi(v) {
+      const range = document.getElementById('alarmVolumeRange');
+      if (range) {
+        range.value = String(v);
+        range.style.setProperty('--v', v + '%');
+      }
+      const label = document.getElementById('alarmVolumeText');
+      if (label) label.textContent = volumeLabel(v);
+      const btn = document.getElementById('headerSoundBtn');
+      if (btn) btn.textContent = v <= 0 ? '🔇' : (v < 50 ? '🔉' : '🔊');
+      document.querySelectorAll('#alarmVolumeChips .vol-chip').forEach(function (chip) {
+        chip.classList.toggle('active', parseInt(chip.dataset.vol || '-1', 10) === v);
+      });
+    }
+
+    function onAlarmVolumeInput(v) {
+      const n = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+      alarmVolume = n;
+      if (n > 0) lastNonZeroVolume = n;
+      paintVolumeUi(n);
+    }
+
+    function saveAlarmVolume(v) {
+      const n = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+      saveSettingFromUi('alarm_volume', n);
+      const force = document.getElementById('forceSystemVolumeToggle');
+      if (hasNative() && typeof window.Android.setAlarmVolume === 'function') {
+        try { window.Android.setAlarmVolume(n, !!(force && force.checked)); } catch (e) {}
+      }
+      paintVolumeUi(n);
+      showToast(n === 0 ? 'زنگ هشدار بی‌صدا شد 🔇' : 'بلندی صدای هشدار روی ' + toFaDigits(n) + '٪ ذخیره شد 🔊');
+    }
+
+    function applyVolumePreset(v) {
+      const n = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+      paintVolumeUi(n);
+      saveAlarmVolume(n);
+    }
+
+    function initVolumeControl() {
+      const range = document.getElementById('alarmVolumeRange');
+      if (range) {
+        range.addEventListener('input', function () { onAlarmVolumeInput(this.value); });
+        range.addEventListener('change', function () { saveAlarmVolume(this.value); });
+      }
+      paintVolumeUi(alarmVolume);
+    }
+
+    function testAlarmNow() {
+      if (alarmVolume <= 0) { showToast('بلندی صدا روی صفر است؛ ابتدا آن را بالا ببرید 🔇'); return; }
+      if (hasNative() && typeof window.Android.testAlarm === 'function') {
+        try { window.Android.testAlarm(); } catch (e) {}
+        showToast('تست زنگ با بلندی ' + toFaDigits(alarmVolume) + '٪ 🔔');
+        return;
+      }
+      showToast('تست زنگ فقط روی برنامه اندروید اجرا می‌شود');
+    }
+
+    function stopAlarmNow() {
+      if (hasNative() && typeof window.Android.stopAlarm === 'function') {
+        try { window.Android.stopAlarm(); } catch (e) {}
+      }
+      showToast('زنگ هشدار متوقف شد ⏹️');
+    }
+
+    // ======================= هوش فایل: فقط داده واقعی، بدون حذف خودسرانه =======================
+    function fileActionButton(item) {
+      const action = item.action || (currentFileCategory === 'large' ? 'media' : 'appinfo');
+      const safeName = JSON.stringify(item.name || '');
+      const safeTarget = JSON.stringify(item.path || item.pkg || '');
+      if (action === 'grant') {
+        return "<button class='btn-delete-copy' style='color:#fbbf24;border-color:rgba(251,191,36,0.4);' onclick='grantUsageAccess()'><span>🔓</span><span>اعطای دسترسی آمار مصرف</span></button>";
+      }
+      if (action === 'grant_media') {
+        return "<button class='btn-delete-copy' style='color:#fbbf24;border-color:rgba(251,191,36,0.4);' onclick='grantMediaAccess()'><span>🔓</span><span>اعطای دسترسی رسانه‌ها</span></button>";
+      }
+      if (action === 'media') {
+        return "<button class='btn-delete-copy' style='color:#38bdf8;border-color:rgba(56,189,248,0.35);' onclick='openInFilesApp(" + safeTarget + ")'>" +
+          "<span>📂</span><span>نمایش در برنامه مدیریت فایل</span></button>";
+      }
+      if (action === 'owncache') {
+        return "<button class='btn-delete-copy' onclick='runSafeRamClean()'><span>🧹</span><span>پاکسازی امن کش این برنامه</span></button>";
+      }
+      return "<button class='btn-delete-copy' style='color:#38bdf8;border-color:rgba(56,189,248,0.35);' onclick='openAppInfo(" + safeTarget + ")'><span>⚙️</span><span>مشاهده و مدیریت در تنظیمات اندروید</span></button>";
+    }
+
+    function switchFileCategory(cat) {
+      renderFileCategory(cat);
+    }
+
+    function renderFileCategory(cat) {
+      currentFileCategory = cat || 'risky';
+      const container = document.getElementById('fileItemsContainer');
+      const countEl = document.getElementById('fileCategoryCount');
+      if (!container) return;
+      document.querySelectorAll('.scanner-tab-pill').forEach(function (b) {
+        b.classList.toggle('active', (b.getAttribute('data-cat') || '') === currentFileCategory);
+      });
+
+      if (!hasNative()) {
+        if (countEl) countEl.textContent = 'داده واقعی فقط در برنامه';
+        container.innerHTML = '<div class="app-card" style="padding:16px; text-align:center;">' +
+          '<div style="font-size:1.6rem;">🔒</div>' +
+          '<div style="font-size:0.8rem; font-weight:700; margin-top:6px;">اسکن واقعی در این محیط ممکن نیست</div>' +
+          '<p style="font-size:0.68rem; color:var(--text-muted); margin-top:4px; line-height:1.8;">' +
+          'این صفحه به اطلاعات گوشی دسترسی ندارد و در آن هیچ داده نمونه‌ای ساخته نمی‌شود. برای دیدن اندازه واقعی کش برنامه‌ها و فایل‌های حجیم، برنامه اندروید را اجرا کنید.</p></div>';
+        return;
+      }
+
+      container.innerHTML = '<div class="demo-note">⏳ در حال اسکن واقعی سیستم…</div>';
+      let items = [];
+      try {
+        if (currentFileCategory === 'risky') items = JSON.parse(window.Android.getRiskyApps() || '[]');
+        else if (currentFileCategory === 'cache') items = JSON.parse(window.Android.getAppCaches() || '[]');
+        else if (currentFileCategory === 'large') items = JSON.parse(window.Android.getLargeMedia(20) || '[]');
+        else if (currentFileCategory === 'own') items = JSON.parse(window.Android.getOwnStorage() || '[]');
+      } catch (e) { items = []; }
+      if (!Array.isArray(items)) items = [];
+
+      if (countEl) countEl.textContent = items.length ? (items.length + ' مورد واقعی') : 'موردی یافت نشد';
+
+      if (!items.length) {
+        container.innerHTML = '<div class="app-card" style="text-align:center; padding:26px;">' +
+          '<div style="font-size:1.8rem;">✨</div><div style="font-size:0.86rem; font-weight:700;">موردی برای نمایش نیست</div>' +
+          '<p style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">داده‌ای مطابق این دسته در گوشی پیدا نشد.</p></div>';
+        return;
+      }
+
+      container.innerHTML = items.map(function (item, index) {
+        const title = item.name || item.title || 'مورد';
+        const meta = item.sizeText || (item.sizeMb ? (item.sizeMb + ' MB') : '') || (item.cacheMb ? (item.cacheMb + ' MB') : '');
+        const subtitle = item.path || item.pkg || '';
+        const note = item.note || item.riskReason || '';
+        return '<div class="file-item-card" id="card-' + index + '">' +
+          '<div class="file-item-head"><div class="file-item-title">' + title + '</div>' +
+          (meta ? '<span class="file-item-size">' + meta + '</span>' : '') + '</div>' +
+          (subtitle ? '<div class="file-item-path">' + subtitle + '</div>' : '') +
+          (note ? '<div class="file-ai-note">' + note + '</div>' : '') +
+          fileActionButton(item) + '</div>';
+      }).join('');
+    }
+
+    function grantUsageAccess() {
+      if (hasNative() && typeof window.Android.openUsageAccessSettings === 'function') {
+        try { window.Android.openUsageAccessSettings(); } catch (e) {}
+      }
+      showToast('در صفحه بازشده این برنامه را روشن کنید و سپس برگردید 🔓');
+    }
+
+    function grantMediaAccess() {
+      if (hasNative() && typeof window.Android.requestMediaPermission === 'function') {
+        try { window.Android.requestMediaPermission(); } catch (e) {}
+      }
+      showToast('اجازه دسترسی به رسانه‌ها را تأیید کنید پس از بازگشت دوباره اسکن کنید 📂');
+    }
+
+    function openAppInfo(pkg) {
+      if (hasNative() && typeof window.Android.openAppInfo === 'function') {
+        try { window.Android.openAppInfo(pkg); } catch (e) {}
+      }
+      showToast('صفحه اطلاعات برنامه در تنظیمات اندروید باز شد ⚙️');
+    }
+
+    function openInFilesApp(path) {
+      if (hasNative() && typeof window.Android.openInFilesApp === 'function') {
+        try { window.Android.openInFilesApp(path); } catch (e) {}
+      }
+      showToast('برای حذف، از برنامه مدیریت فایل خود اندروید استفاده کنید 📂');
+    }
+
+    function refreshOwnStorageFromNative() {
+      if (!hasNative() || typeof window.Android.getOwnStorage !== 'function') return;
+      try {
+        const items = JSON.parse(window.Android.getOwnStorage() || '[]');
+        const first = (Array.isArray(items) && items[0]) ? items[0] : null;
+        const el = document.getElementById('ownCacheVal');
+        if (el && first) el.textContent = (first.sizeMb || 0) + ' MB';
+      } catch (e) {}
+    }
+
+    function runSafeRamClean() {
+      if (!hasNative() || typeof window.Android.freeOwnMemory !== 'function') {
+        showToast('این عملیات فقط داخل برنامه اندروید اجرا می‌شود');
+        return;
+      }
+      let res = null;
+      try { res = JSON.parse(window.Android.freeOwnMemory()); } catch (e) { res = null; }
+      refreshRamFromNative();
+      refreshOwnStorageFromNative();
+      const note = document.getElementById('lastFreeNote');
+      const lastFree = document.getElementById('lastFreeVal');
+      if (res && res.ok) {
+        const freedMb = res.freedMb || 0;
+        const cacheMb = res.cacheClearedMb || 0;
+        if (note) note.textContent = 'کش پاک‌شده: ' + cacheMb + ' MB — تغییر واقعی رم آزاد: ' + freedMb + ' MB';
+        if (lastFree) lastFree.textContent = cacheMb + ' MB کش';
+        showToast('کش برنامه پاک شد: ' + cacheMb + ' مگابایت | تغییر واقعی رم آزاد: ' + freedMb + ' مگابایت');
+      } else {
+        if (note) note.textContent = 'عملیات انجام نشد';
+        showToast('عملیات آزادسازی انجام نشد ⚠️');
+      }
+    }
+
 
     function showToast(msg) {
       const toast = document.getElementById('toastMsg');
@@ -2331,7 +2654,7 @@
       });
 
       // ---------- ۷. یکپارچگی رابط کاربری ----------
-      const domIds = ['alarmVolumeRange', 'alarmVolumeText', 'autoStopSelect', 'forceSystemVolumeToggle', 'sirenLoopToggle', 'monitoringToggle', 'lowPowerToggle', 'psMode', 'psService', 'psWakeLocks', 'psPolls', 'psAlarmCount', 'psLastAlarm', 'targetPctSelect', 'voiceToggle', 'tempAlertToggle', 'lowAlertToggle', 'unplugAlarmToggle', 'vibrateToggle', 'fileItemsContainer', 'coresGridContainer', 'batteryGaugeCircle', 'batteryPercentText', 'headerPctBadge', 'toastMsg', 'webDownloadBar', 'btnRun100Tests', 'suiteLogBox', 'suiteProgressBar', 'suiteProgressText'];
+      const domIds = ['alarmVolumeRange', 'alarmVolumeText', 'autoStopSelect', 'forceSystemVolumeToggle', 'sirenLoopToggle', 'monitoringToggle', 'lowPowerToggle', 'psMode', 'psService', 'psWakeLocks', 'psPolls', 'psAlarmCount', 'psLastAlarm', 'targetPctSelect', 'voiceToggle', 'tempAlertToggle', 'lowAlertToggle', 'unplugAlarmToggle', 'vibrateToggle', 'fileItemsContainer', 'coresGridContainer', 'batteryGaugeCircle', 'batteryPercentText', 'headerPctBadge', 'toastMsg', 'liveBatteryStamp', 'alarmVolumeChips', 'ramTotalVal', 'ramAvailVal', 'ownCacheVal', 'lastFreeVal', 'lastFreeNote', 'btnRun100Tests', 'suiteLogBox', 'suiteProgressBar', 'suiteProgressText'];
       domIds.forEach(function (id) {
         add('UI', 'عنصر ' + id + ' در رابط کاربری وجود دارد', function () {
           return suiteAssert(!!document.getElementById(id), '#' + id);
@@ -2342,33 +2665,6 @@
       });
       add('UI', 'تعداد دکمه‌های ناوبری برابر ۶ است', function () {
         return suiteAssert(document.querySelectorAll('.nav-item').length === 6, String(document.querySelectorAll('.nav-item').length));
-      });
-      add('UI', 'لینک دانلود به مخزن صحیح اشاره می‌کند', function () {
-        const links = Array.prototype.slice.call(document.querySelectorAll('a[href*="releases"]'));
-        const ok = links.length > 0 && links.every(function (a) { return a.href.indexOf('hafgo096-ux/battery-alarm') !== -1; });
-        return suiteAssert(ok, links.length + ' link(s)');
-      });
-      add('UI', 'لینک دانلود نسخه به‌روز (releases/latest) است', function () {
-        const links = Array.prototype.slice.call(document.querySelectorAll('a[href*="releases/latest"]'));
-        return suiteAssert(links.length >= 1, links.length + ' link(s)');
-      });
-      add('UI', 'کاتالوگ فایل‌های نمونه سلامت ساختار دارد', function () {
-        const cats = Object.keys(fileDataByCategory);
-        let ok = cats.length >= 3;
-        cats.forEach(function (c) {
-          (fileDataByCategory[c] || []).forEach(function (it) {
-            if (!it.id || !it.name || typeof it.size !== 'number') ok = false;
-          });
-        });
-        return suiteAssert(ok, cats.join(', '));
-      });
-      add('UI', 'هر چهار دسته فایل قابل رندر هستند', function () {
-        let ok = true;
-        Object.keys(fileDataByCategory).forEach(function (c) {
-          try { renderFileCategory(c); } catch (e) { ok = false; }
-        });
-        renderFileCategory(currentFileCategory);
-        return suiteAssert(ok, 'render ok');
       });
 
       // ---------- ۸. اصالت داده (بدون داده ساختگی) ----------
@@ -2556,6 +2852,77 @@
         return suiteAssert(!!parsed && typeof parsed === 'object', 'json ok');
       });
 
+      add('UI', 'no-download-link-inside-app', function () {
+        const links = Array.prototype.slice.call(document.querySelectorAll('a[href*="releases"], a[href*=".apk"], a[href*="github"]'));
+        return suiteAssert(links.length === 0, links.length + ' link(s)');
+      });
+      add('SECURITY', 'no-technical-specs-or-key-in-ui', function () {
+        const src = document.documentElement.innerHTML;
+        const banned = ['com.' + 'persian.batteryalarm', 'release-key', 'release' + '_alias', 'Release' + 'Pass', 'Version' + ' Code'];
+        const found = banned.filter(function (b) { return src.indexOf(b) !== -1; });
+        return suiteAssert(found.length === 0, found.join(', ') || 'clean');
+      });
+      add('UI', 'four-real-file-categories', function () {
+        const pills = Array.prototype.slice.call(document.querySelectorAll('.scanner-tab-pill'));
+        const cats = pills.map(function (p) { return p.getAttribute('data-cat'); });
+        return suiteAssert(cats.join(',') === 'risky,cache,large,own', cats.join(','));
+      });
+      add('UI', 'real-categories-render-without-error', function () {
+        let ok = true;
+        ['risky', 'cache', 'large', 'own'].forEach(function (c) {
+          try { renderFileCategory(c); } catch (e) { ok = false; }
+        });
+        renderFileCategory(currentFileCategory);
+        return suiteAssert(ok, 'render ok');
+      });
+      add('DATA', 'no-fabricated-file-entries', function () {
+        const src = document.documentElement.innerHTML;
+        const banned = ['Financial' + '_Report', 'VoiceNote_Conference', 'Photo_Backup_', 'old_rom' + '_backup', 'screen_record_gaming', 'Telegram_Video_cache'];
+        const found = banned.filter(function (b) { return src.indexOf(b) !== -1; });
+        return suiteAssert(found.length === 0, found.join(', ') || 'clean');
+      });
+      add('VOLUME', 'five-volume-presets', function () {
+        const chips = document.querySelectorAll('#alarmVolumeChips .vol-chip');
+        return suiteAssert(chips.length === 5, String(chips.length));
+      });
+      add('VOLUME', 'label-follows-slider', function () {
+        const range = document.getElementById('alarmVolumeRange');
+        const label = document.getElementById('alarmVolumeText');
+        if (!range || !label) return suiteAssert(false, 'missing');
+        const orig = alarmVolume;
+        range.value = '35';
+        range.dispatchEvent(new Event('input'));
+        const shown = label.textContent;
+        paintVolumeUi(orig);
+        return suiteAssert(shown.indexOf('۳۵') !== -1, shown);
+      });
+      add('VOLUME', 'zero-means-silent-label', function () {
+        const orig = alarmVolume;
+        paintVolumeUi(0);
+        const label = document.getElementById('alarmVolumeText');
+        const txt = label ? label.textContent : '';
+        paintVolumeUi(orig);
+        return suiteAssert(txt.indexOf('بی') !== -1, txt);
+      });
+      add('BATTERY', 'unknown-battery-shows-dash', function () {
+        updateBatteryDisplay(-1, false);
+        const txt = document.getElementById('batteryPercentText');
+        const shown = txt ? txt.textContent : '';
+        refreshBatteryFromNative();
+        return suiteAssert(shown.indexOf('—') !== -1, shown);
+      });
+      add('PERSIST', 'target-80-persists-after-reload', function () {
+        const native = hasNative() ? nativeSettings() : null;
+        if (!native) return { skip: true, reason: 'no native bridge' };
+        const orig = native.target_percent;
+        saveTargetPercent(80);
+        const stored = nativeSettings().target_percent;
+        loadSettingsFromNative();
+        const select = document.getElementById('targetPctSelect');
+        const shown = select ? select.value : '';
+        saveTargetPercent(orig);
+        return suiteAssert(parseInt(stored, 10) === 80 && shown === '80', 'stored=' + stored + ' ui=' + shown);
+      });
       return tests;
     }
 
@@ -2640,13 +3007,8 @@
       const suiteTitle = document.getElementById('suiteBadge');
       if (suiteTitle) suiteTitle.textContent = 'آماده اجرا (۲۰۰ آزمون واقعی)';
 
-      if (hasNative()) {
-        const bar = document.getElementById('webDownloadBar');
-        if (bar) bar.style.display = 'none';
-        startBatteryPolling();
-      } else {
-        startBatteryPolling();
-      }
+      initVolumeControl();
+      startBatteryPolling();
 
       const hw = document.getElementById('tab-hardware');
       if (hw && hw.style.display !== 'none') startHardwarePolling();
