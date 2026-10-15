@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
@@ -97,7 +98,7 @@ public class MainActivity extends Activity {
             PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
             String pkg = getPackageName();
             if (pm != null && !pm.isIgnoringBatteryOptimizations(pkg)) {
-                Intent intent = new Intent("android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATION_SETTINGS");
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + pkg));
                 startActivity(intent);
             }

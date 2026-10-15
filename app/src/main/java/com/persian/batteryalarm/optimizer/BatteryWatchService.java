@@ -27,6 +27,10 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -74,12 +78,16 @@ public class BatteryWatchService extends Service {
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         try {
+            Intent stickyIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
+                stickyIntent = registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
             } else {
-                registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                stickyIntent = registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
             }
             receiverRegistered = true;
+            if (stickyIntent != null) {
+                batteryReceiver.onReceive(this, stickyIntent);
+            }
         } catch (Exception e) {
             Log.w(TAG, "failed to register receiver", e);
         }
@@ -137,15 +145,27 @@ public class BatteryWatchService extends Service {
             Log.w(TAG, "audioManager volume adjust failed", e);
         }
 
-        // لایه ۱: فایل صوتی فارسی نیتیو
+        // لایه ۱: فایل صوتی فارسی نیتیو با پشتیبانی دوگانه openFd و stream
         boolean played = false;
         if (assetName != null && !assetName.isEmpty()) {
             try {
                 String path = "audio/" + assetName;
-                AssetFileDescriptor afd = getAssets().openFd(path);
                 mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                afd.close();
+                try {
+                    AssetFileDescriptor afd = getAssets().openFd(path);
+                    mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                    afd.close();
+                } catch (Exception fdEx) {
+                    // پایداری: اگر استخراج مستقیم دیسکریپتور به دلیل فشرده‌سازی با خطا مواجه شد
+                    File tempSound = new File(getCacheDir(), "cache_" + assetName);
+                    try (InputStream in = getAssets().open(path);
+                         OutputStream out = new FileOutputStream(tempSound)) {
+                        byte[] buf = new byte[8192];
+                        int r;
+                        while ((r = in.read(buf)) > 0) out.write(buf, 0, r);
+                    }
+                    mediaPlayer.setDataSource(tempSound.getAbsolutePath());
+                }
 
                 mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ALARM)
@@ -206,10 +226,22 @@ public class BatteryWatchService extends Service {
         if (!alarmFired || stopRequested) return;
         try {
             stopMediaPlayer();
-            AssetFileDescriptor afd = getAssets().openFd("audio/fa_siren.mp3");
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-            afd.close();
+            try {
+                AssetFileDescriptor afd = getAssets().openFd("audio/fa_siren.mp3");
+                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                afd.close();
+            } catch (Exception fdEx) {
+                File tempSound = new File(getCacheDir(), "cache_fa_siren.mp3");
+                try (InputStream in = getAssets().open("audio/fa_siren.mp3");
+                     OutputStream out = new FileOutputStream(tempSound)) {
+                    byte[] buf = new byte[8192];
+                    int r;
+                    while ((r = in.read(buf)) > 0) out.write(buf, 0, r);
+                }
+                mediaPlayer.setDataSource(tempSound.getAbsolutePath());
+            }
+
             mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -230,6 +262,10 @@ public class BatteryWatchService extends Service {
 
     private void startVibration() {
         try {
+            SharedPreferences sp = getSharedPreferences("persian_battery_prefs", Context.MODE_PRIVATE);
+            boolean vibrateEnabled = sp.getBoolean("vibrate_enabled", true);
+            if (!vibrateEnabled) return;
+
             if (vibrator == null || !vibrator.hasVibrator()) return;
             long[] pattern = {0, 600, 250, 600, 250, 800};
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -293,7 +329,14 @@ public class BatteryWatchService extends Service {
         PendingIntent openPending = PendingIntent.getActivity(this, 0, openIntent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        return new Notification.Builder(this, CH_WATCH)
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CH_WATCH);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+
+        return builder
                 .setContentTitle("زنگ هوشمند باتری و بهینه‌ساز")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
@@ -319,7 +362,14 @@ public class BatteryWatchService extends Service {
         PendingIntent openPending = PendingIntent.getActivity(this, 2, openIntent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        return new Notification.Builder(this, CH_ALARM)
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CH_ALARM);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+
+        return builder
                 .setContentTitle(t)
                 .setContentText(s)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_charging)

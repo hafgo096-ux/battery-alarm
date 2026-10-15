@@ -20,14 +20,16 @@ public class BatteryReceiver extends BroadcastReceiver {
         if (level < 0 || scale <= 0) return;
         int percent = (level * 100) / scale;
         boolean charging = plugged > 0;
-        double tempC = temp / 10.0;
+        double tempC = temp > 0 ? (temp / 10.0) : 31.0;
 
         SharedPreferences sp = context.getSharedPreferences("persian_battery_prefs", Context.MODE_PRIVATE);
         int targetPercent = sp.getInt("target_percent", 85);
+        boolean voiceEnabled = sp.getBoolean("voice_enabled", true);
         boolean lowAlertEnabled = sp.getBoolean("low_enabled", true);
         int lowPercent = sp.getInt("low_percent", 20);
         boolean overheatAlertEnabled = sp.getBoolean("overheat_enabled", true);
-        int overheatThreshold = sp.getInt("overheat_threshold", 38);
+        int overheatThreshold = sp.getInt("overheat_threshold", 42);
+        boolean unplugAlarmEnabled = sp.getBoolean("unplug_alarm_enabled", false);
 
         Log.d(TAG, "Battery level=" + percent + "% charging=" + charging + " temp=" + tempC + "°C");
 
@@ -51,8 +53,16 @@ public class BatteryReceiver extends BroadcastReceiver {
                     "fa_battery_low.mp3");
         }
 
-        // ریست وضعیت هنگامی که شارژ جدا شد یا درصد کاهش یافت
-        if (percent <= targetPercent - 2 || !charging) {
+        // ۴. ریست هوشمند وضعیت هنگام قطع شارژ یا کاهش درصد
+        if (!charging) {
+            if (svc.alarmFired && percent >= targetPercent) {
+                // اگر کاربر شارژر را جدا کرد، زنگ به صورت خودکار پایان یابد
+                svc.stopAlarm();
+            }
+            svc.alarmFired = false;
+            svc.stopRequested = false;
+        } else if (percent <= targetPercent - 2) {
+            svc.alarmFired = false;
             svc.stopRequested = false;
         }
     }

@@ -29,6 +29,18 @@ public class WebBridge {
         this.ctx = ctx;
     }
 
+    private void startServiceSafely(Intent intent) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ctx.startForegroundService(intent);
+            } else {
+                ctx.startService(intent);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "startServiceSafely failed", e);
+        }
+    }
+
     @JavascriptInterface
     public boolean isNative() {
         return true;
@@ -36,7 +48,7 @@ public class WebBridge {
 
     @JavascriptInterface
     public void alarmHeartbeat() {
-        // اطلاع از فعال بودن واسط کاربری
+        // واسط فعال است
     }
 
     @JavascriptInterface
@@ -44,7 +56,7 @@ public class WebBridge {
         try {
             Intent i = new Intent(ctx, BatteryWatchService.class);
             i.putExtra("stop_alarm", true);
-            ctx.startService(i);
+            startServiceSafely(i);
         } catch (Exception e) {
             Log.w(TAG, "stop failed", e);
         }
@@ -53,6 +65,13 @@ public class WebBridge {
     @JavascriptInterface
     public void playPersianVoice(String alertType) {
         try {
+            SharedPreferences sp = ctx.getSharedPreferences("persian_battery_prefs", Context.MODE_PRIVATE);
+            boolean voiceEnabled = sp.getBoolean("voice_enabled", true);
+            if (!voiceEnabled && !"siren".equals(alertType)) {
+                Log.i(TAG, "Voice alert skipped because voice is muted in settings");
+                return;
+            }
+
             String soundAsset = "fa_battery_85.mp3";
             String title = "زنگ هوشمند باتری";
             String sub = "شارژ به میزان تعیین‌شده رسید";
@@ -91,7 +110,7 @@ public class WebBridge {
             i.putExtra("custom_title", title);
             i.putExtra("custom_sub", sub);
             i.putExtra("sound_asset", soundAsset);
-            ctx.startService(i);
+            startServiceSafely(i);
             Log.i(TAG, "Playing Persian Voice via native service: " + soundAsset);
         } catch (Exception e) {
             Log.w(TAG, "playPersianVoice native failed", e);
@@ -119,6 +138,27 @@ public class WebBridge {
         }
     }
 
+    @JavascriptInterface
+    public void setBoolSetting(String key, boolean val) {
+        try {
+            SharedPreferences sp = ctx.getSharedPreferences("persian_battery_prefs", Context.MODE_PRIVATE);
+            sp.edit().putBoolean(key, val).apply();
+            Log.i(TAG, "Bool setting updated: " + key + " = " + val);
+        } catch (Exception e) {
+            Log.w(TAG, "setBoolSetting failed: " + key, e);
+        }
+    }
+
+    @JavascriptInterface
+    public boolean getBoolSetting(String key, boolean defaultVal) {
+        try {
+            SharedPreferences sp = ctx.getSharedPreferences("persian_battery_prefs", Context.MODE_PRIVATE);
+            return sp.getBoolean(key, defaultVal);
+        } catch (Exception e) {
+            return defaultVal;
+        }
+    }
+
     // ================= بهینه‌سازی رم =================
     @JavascriptInterface
     public String optimizeRam(String selectedPackagesJson) {
@@ -130,7 +170,7 @@ public class WebBridge {
                 JSONArray arr = new JSONArray(selectedPackagesJson != null && !selectedPackagesJson.isEmpty() ? selectedPackagesJson : "[]");
                 for (int i = 0; i < arr.length(); i++) {
                     String pkg = arr.getString(i);
-                    if (pkg != null && !pkg.equals(ctx.getPackageName())) {
+                    if (pkg != null && !pkg.isEmpty() && !pkg.equals(ctx.getPackageName())) {
                         try {
                             am.killBackgroundProcesses(pkg);
                             countKilled++;
@@ -138,7 +178,7 @@ public class WebBridge {
                     }
                 }
             }
-            // محاسبه تقریبی رم آزاد شده بر اساس تعداد پروسس‌ها
+            // محاسبه تخمینی یا آزادسازی رم
             freedMb = Math.max(350, countKilled * 180 + (int)(Math.random() * 200));
             playPersianVoice("ram_clean");
         } catch (Exception e) {
@@ -200,7 +240,7 @@ public class WebBridge {
                     JSONObject app = new JSONObject();
                     app.put("name", pi.applicationInfo.loadLabel(pm).toString());
                     app.put("pkg", pi.packageName);
-                    app.put("riskReason", "دسترسی‌های همزمان حساس (پیامک + موقعیت مکانی / پنجره شناور)");
+                    app.put("riskReason", "دسترسی همزمان به پیامک‌ها و موقعیت مکانی / پنجره شناور");
                     app.put("dangerLevel", "بالا (High)");
                     res.put(app);
                 }
