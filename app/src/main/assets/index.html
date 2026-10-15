@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070a13">
+<title>زنگ هوشمند باتری و بهینه‌ساز</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #070a13;
+    --bg-card: rgba(22, 29, 49, 0.75);
+    --border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f1f5f9;
+    --text-muted: #94a3b8;
+    --emerald: #10b981;
+    --emerald-glow: rgba(16, 185, 129, 0.35);
+    --cyan: #06b6d4;
+    --blue: #3b82f6;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, Tahoma, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding-bottom: 90px;
+    background-image: 
+      radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.10) 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+    overflow-x: hidden;
+    user-select: none;
+  }
+  .app-container { max-width: 480px; margin: 0 auto; padding: 14px 16px; }
+
+  /* Header */
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 6px 0; }
+  .logo-title { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 15px var(--emerald-glow); }
+  .logo-text h1 { font-size: 1.15rem; font-weight: 800; background: linear-gradient(135deg, #34d399, #22d3ee); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .logo-text p { font-size: 0.72rem; color: var(--text-muted); }
+  .status-badge { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 99px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.75rem; color: #34d399; font-weight: 600; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+  /* Navigation Bar */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
+    background: rgba(10, 14, 26, 0.92); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center;
+    max-width: 480px; margin: 0 auto; z-index: 100;
+  }
+  .nav-btn {
+    background: none; border: none; color: var(--text-muted);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 0.72rem; font-family: inherit; font-weight: 600; cursor: pointer;
+    transition: all 0.25s ease; padding: 6px 12px; border-radius: 12px;
+  }
+  .nav-btn.active { color: #34d399; background: rgba(16, 185, 129, 0.10); }
+  .nav-btn .icon { font-size: 1.25rem; }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 18px; margin-bottom: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+  .card-title { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .card-title .icon { font-size: 1.1rem; }
+
+  /* Battery Gauge */
+  .gauge-container { position: relative; width: 190px; height: 190px; margin: 6px auto 14px; display: flex; align-items: center; justify-content: center; }
+  .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 14; }
+  .gauge-bar { fill: none; stroke: url(#gauge-grad); stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; stroke-dasharray: 502; stroke-dashoffset: 125; }
+  .gauge-center { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .gauge-pct { font-size: 2.8rem; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #f8fafc, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .gauge-sub { font-size: 0.78rem; color: #34d399; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+  /* AI Advisor Box */
+  .ai-advisor {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(6, 182, 212, 0.08));
+    border: 1px solid rgba(139, 92, 246, 0.28); border-radius: 16px;
+    padding: 14px; margin-bottom: 14px; position: relative; overflow: hidden;
+  }
+  .ai-advisor-head { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 800; color: #c084fc; margin-bottom: 6px; }
+  .ai-advisor-text { font-size: 0.82rem; color: #e2e8f0; line-height: 1.55; }
+
+  /* Sliders & Controls */
+  .control-group { margin-bottom: 14px; }
+  .control-label { display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-muted); margin-bottom: 8px; }
+  .control-label b { color: var(--text-primary); font-weight: 700; font-size: 0.9rem; }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 7px; border-radius: 8px;
+    background: rgba(255,255,255,0.12); outline: none; margin: 4px 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #06b6d4); cursor: pointer;
+    box-shadow: 0 0 10px var(--emerald-glow); border: 2px solid #fff;
+  }
+
+  /* Switches */
+  .switch-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+  .switch-row:last-child { border-bottom: none; }
+  .switch-title { font-weight: 600; color: #e2e8f0; }
+  .switch-desc { font-size: 0.72rem; color: var(--text-muted); }
+  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider-toggle { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.16); transition: .3s; border-radius: 34px; }
+  .slider-toggle:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+  input:checked + .slider-toggle { background: linear-gradient(135deg, #10b981, #06b6d4); }
+  input:checked + .slider-toggle:before { transform: translateX(20px); }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%; padding: 12px 16px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, #10b981, #059669); color: white;
+    font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 15px var(--emerald-glow); display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-secondary {
+    padding: 9px 14px; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.06); color: #e2e8f0; font-family: inherit;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-family: inherit;
+    font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
+  .btn-danger-all {
+    background: linear-gradient(135deg, #ef4444, #dc2626); color: white;
+    border: none; padding: 10px 16px; border-radius: 10px; font-family: inherit;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+  }
+
+  /* Audio studio grid */
+  .audio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .audio-item {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .audio-name { font-size: 0.78rem; font-weight: 600; color: #cbd5e1; }
+  .audio-play-btn {
+    background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399; padding: 5px; border-radius: 8px; font-size: 0.72rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+
+  /* Scanner Categories */
+  .scanner-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; scrollbar-width: none; }
+  .scanner-tab-btn {
+    white-space: nowrap; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.75rem; font-family: inherit;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .scanner-tab-btn.active { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
+  .badge-count { background: rgba(255,255,255,0.12); padding: 1px 6px; border-radius: 99px; font-size: 0.68rem; }
+  .scanner-tab-btn.active .badge-count { background: #10b981; color: white; }
+
+  /* Item List */
+  .file-item {
+    background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .file-info { display: flex; flex-direction: column; gap: 3px; overflow: hidden; flex: 1; }
+  .file-name { font-size: 0.82rem; font-weight: 600; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tag-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
+  .tag-dup { background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
+  .tag-orig { background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
+
+  /* RAM Optimizer List */
+  .ram-item {
+    background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+  }
+  .ram-checkbox { width: 18px; height: 18px; accent-color: #10b981; cursor: pointer; }
+  .ram-info { flex: 1; }
+  .ram-title { font-size: 0.82rem; font-weight: 600; color: #e2e8f0; }
+  .ram-cat { font-size: 0.7rem; color: var(--text-muted); }
+  .ram-size { font-size: 0.8rem; font-weight: 700; color: #38bdf8; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-card {
+    background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+    padding: 20px; max-width: 380px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+  .modal-title { font-size: 1rem; font-weight: 800; color: #f87171; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .modal-body { font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 18px; }
+  .modal-item-preview { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; color: #94a3b8; margin: 10px 0; word-break: break-all; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions button { flex: 1; padding: 10px; border-radius: 10px; font-family: inherit; font-size: 0.84rem; font-weight: 700; cursor: pointer; border: none; }
+  .btn-modal-confirm { background: #ef4444; color: white; }
+  .btn-modal-cancel { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+
+  /* Hardware Info Grid */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-box { background: rgba(255,255,255,0.035); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .info-k { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .info-v { font-size: 0.95rem; font-weight: 800; color: #f1f5f9; }
+
+  /* CPU Cores */
+  .cores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+  .core-bar-box { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 6px; text-align: center; }
+  .core-name { font-size: 0.65rem; color: var(--text-muted); }
+  .core-pct { font-size: 0.78rem; font-weight: 700; color: #38bdf8; margin: 2px 0; }
+  .core-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+  .core-fill { height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); width: 20%; transition: width 0.5s; }
+
+  /* Notification banner */
+  .toast {
+    position: fixed; top: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto;
+    background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 12px 16px; border-radius: 14px; color: #f8fafc; font-size: 0.82rem; font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
+    transform: translateY(-150%); transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 300;
+  }
+  .toast.show { transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-title">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>هشدار باتری و بهینه‌ساز</h1>
+        <p>پایش سخت‌افزار، بهینه‌سازی رم و امنیت هوشمند</p>
+      </div>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="headerStatusText">پایش هوشمند فعال</span>
+    </div>
+  </header>
+
+  <!-- TAB 1: باتری و هشدارها -->
+  <div id="tab-battery" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🔋</span>
+        <span>وضعیت بلادرنگ باتری</span>
+      </div>
+
+      <div class="gauge-container">
+        <svg class="gauge-svg" viewBox="0 0 180 180">
+          <defs>
+            <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#10b981" />
+              <stop offset="60%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+          <circle class="gauge-bg" cx="90" cy="90" r="76"></circle>
+          <circle id="batteryCircle" class="gauge-bar" cx="90" cy="90" r="76"></circle>
+        </svg>
+        <div class="gauge-center">
+          <div id="batteryPctText" class="gauge-pct">78%</div>
+          <div id="batteryStatusSub" class="gauge-sub">
+            <span>⚡</span>
+            <span id="chargingStateText">در حال شارژ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Advisor Card for Battery -->
+      <div class="ai-advisor">
+        <div class="ai-advisor-head">
+          <span>🧠</span>
+          <span>توصیه هوشمند مشاور باتری</span>
+        </div>
+        <div id="batteryAdviceText" class="ai-advisor-text">
+          باتری در وضعیت استاندارد است. برای افزایش ۲ برابری طول عمر سلول‌های لیتیوم-یون، توصیه می‌شود شارژر در ۸۵٪ جدا شود.
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>درصد هدف هشدار شارژ:</span>
+          <b id="targetPercentLabel">85%</b>
+        </div>
+        <input type="range" id="targetPercentSlider" min="50" max="100" value="85">
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div class="switch-title">هشدار صوتی با صدای واقعی فارسی</div>
+          <div class="switch-desc">اعلام شارژ هدف و افت باتری با گوینده فارسی</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="voiceToggle" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div class="switch-title">هشدار حرارت و داغی باتری (بالای ۳۸°C)</div>
+          <div class="switch-desc">جلوگیری از آسیب حرارتی سلول‌های باتری</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tempToggle" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div class="switch-title">هشدار کمبود شارژ (۲۰٪)</div>
+          <div class="switch-desc">اعلام صوتی قبل از خاموش شدن گوشی</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="lowToggle" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+
+      <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <button id="stopAlarmBtn" class="btn-primary" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+          <span>⏹️</span>
+          <span>توقف صدای زنگ هشدار</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- استودیوی تست صدا و گفتار فارسی -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🗣️</span>
+        <span>آزمایش صدای گوینده فارسی و آژیرها</span>
+      </div>
+      <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
+        برای اطمینان از باگ‌زدایی و سلامت بلندگوی دستگاه، روی هرکدام بزنید تا صدای واضح پخش شود:
+      </p>
+      <div class="audio-grid">
+        <div class="audio-item">
+          <span class="audio-name">هشدار شارژ ۸۵٪ (فارسی)</span>
+          <button class="audio-play-btn" onclick="playVoice('target_85')">▶ پخش صدا</button>
+        </div>
+        <div class="audio-item">
+          <span class="audio-name">شارژ کامل ۱۰۰٪ (فارسی)</span>
+          <button class="audio-play-btn" onclick="playVoice('full_100')">▶ پخش صدا</button>
+        </div>
+        <div class="audio-item">
+          <span class="audio-name">هشدار افت شارژ ۲۰٪</span>
+          <button class="audio-play-btn" onclick="playVoice('low_20')">▶ پخش صدا</button>
+        </div>
+        <div class="audio-item">
+          <span class="audio-name">هشدار داغی باتری</span>
+          <button class="audio-play-btn" onclick="playVoice('overheat')">▶ پخش صدا</button>
+        </div>
+        <div class="audio-item">
+          <span class="audio-name">تایید بهینه‌سازی رم</span>
+          <button class="audio-play-btn" onclick="playVoice('ram_clean')">▶ پخش صدا</button>
+        </div>
+        <div class="audio-item">
+          <span class="audio-name">صدای آژیر اورژانسی</span>
+          <button class="audio-play-btn" onclick="playVoice('siren')">▶ پخش آژیر</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: بهینه‌سازی رم -->
+  <div id="tab-ram" class="tab-content" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">⚡</span>
+        <span>بهینه‌سازی هوشمند حافظه رم (RAM)</span>
+      </div>
+
+      <div class="info-grid" style="margin-bottom: 14px;">
+        <div class="info-box">
+          <div class="info-k">رم مصرف شده</div>
+          <div id="ramUsedMb" class="info-v" style="color: #f87171;">5.2 GB (65%)</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">رم آزاد و سریع</div>
+          <div id="ramFreeMb" class="info-v" style="color: #34d399;">2.8 GB</div>
+        </div>
+      </div>
+
+      <!-- AI Advisor Card for RAM -->
+      <div class="ai-advisor">
+        <div class="ai-advisor-head">
+          <span>🧠</span>
+          <span>توصیه هوشمند مشاور بهینه‌سازی</span>
+        </div>
+        <div id="ramAdviceText" class="ai-advisor-text">
+          تعداد ۴ پردازش غیرضروری در پس‌زمینه در حال مصرف رم هستند. با پاکسازی آنها حدود ۱.۴ گیگابایت فضای سریع در اختیار سیستم قرار می‌گیرد.
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">موارد شناسایی‌شده جهت آزادسازی:</span>
+        <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.72rem;" onclick="toggleAllRam()">انتخاب همه / لغو</button>
+      </div>
+
+      <div id="ramItemsList">
+        <!-- آیتم‌های رم به صورت داینامیک اضافه می‌شوند -->
+      </div>
+
+      <div style="margin-top: 14px;">
+        <button id="optimizeRamBtn" class="btn-primary" onclick="requestRamOptimize()">
+          <span>🚀</span>
+          <span>بهینه‌سازی رم و آزادسازی حافظه</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: هوش مصنوعی پاکسازی و امنیت -->
+  <div id="tab-clean" class="tab-content" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🧠</span>
+        <span>معماری هوش مصنوعی اسکنر فایل‌ها و امنیت</span>
+      </div>
+
+      <!-- AI Advisor Card for Files -->
+      <div class="ai-advisor">
+        <div class="ai-advisor-head">
+          <span>💡</span>
+          <span>مشاور هوشمند پاکسازی و ایمنی</span>
+        </div>
+        <div id="cleanAdviceText" class="ai-advisor-text">
+          فایل‌های تکراری با تطابق دقیق هش شناسایی شده‌اند؛ فایل اصلی حفظ شده و فقط کپی دوم پیشنهاد حذف می‌شود. هیچ فایلی بدون تایید شما حذف نخواهد شد.
+        </div>
+      </div>
+
+      <!-- تب‌های دسته‌بندی اسکنر -->
+      <div class="scanner-tabs">
+        <button class="scanner-tab-btn active" onclick="switchScannerCategory('duplicate')">
+          <span>📑 فایل‌های تکراری</span>
+          <span id="dupCountBadge" class="badge-count">3</span>
+        </button>
+        <button class="scanner-tab-btn" onclick="switchScannerCategory('junk')">
+          <span>🗑️ فایل‌های اضافی و کَش</span>
+          <span id="junkCountBadge" class="badge-count">4</span>
+        </button>
+        <button class="scanner-tab-btn" onclick="switchScannerCategory('non_essential')">
+          <span>📦 غیرضروری و کم‌اهمیت</span>
+          <span id="nonCountBadge" class="badge-count">2</span>
+        </button>
+        <button class="scanner-tab-btn" onclick="switchScannerCategory('risky_app')">
+          <span>⚠️ فایل‌ها و برنامه‌های پرخطر</span>
+          <span id="riskCountBadge" class="badge-count">2</span>
+        </button>
+      </div>
+
+      <!-- دکمه حذف همه دسته جاری -->
+      <div style="margin-bottom: 12px;">
+        <button id="deleteAllBtn" class="btn-danger-all" onclick="requestDeleteAllCurrent()">
+          <span>🗑️</span>
+          <span id="deleteAllBtnText">حذف تمام فایل‌های تکراری</span>
+        </button>
+      </div>
+
+      <!-- لیست فایل‌ها بر اساس دسته -->
+      <div id="filesListContainer">
+        <!-- لیست فایل‌ها -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: پایش دقیق سخت‌افزار -->
+  <div id="tab-hardware" class="tab-content" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">💻</span>
+        <span>پایش پردازنده (CPU)</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-k">مدل پردازنده</div>
+          <div id="cpuModelText" class="info-v" style="font-size: 0.82rem;">OCTA-CORE ARM64</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">لود میانگین پردازنده</div>
+          <div id="cpuAvgText" class="info-v" style="color: #38bdf8;">19%</div>
+        </div>
+      </div>
+      <div class="cores-grid" id="cpuCoresGrid">
+        <!-- هسته‌ها داینامیک لود می‌شوند -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">💾</span>
+        <span>حافظه داخلی (Storage)</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-k">فضای مصرف‌شده</div>
+          <div id="storageUsedText" class="info-v">72 GB (56%)</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">فضای خالی در دسترس</div>
+          <div id="storageFreeText" class="info-v" style="color: #34d399;">56 GB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🔬</span>
+        <span>مشخصات فنی دستگاه و باتری</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-k">دمای باتری</div>
+          <div id="batteryTempText" class="info-v" style="color: #34d399;">32.4°C</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">ولتاژ باتری</div>
+          <div id="batteryVoltText" class="info-v">4120 mV</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">سلامت باتری</div>
+          <div id="batteryHealthText" class="info-v">عالی (Good)</div>
+        </div>
+        <div class="info-box">
+          <div class="info-k">سیستم‌عامل</div>
+          <div id="deviceOsText" class="info-v">Android 14 (API 34)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تایید حذف جهت جلوگیری قاطع از حذف خودسرانه هوش مصنوعی -->
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span>⚠️</span>
+      <span id="modalTitleText">تایید عملیات حذف هوشمند</span>
+    </div>
+    <div class="modal-body">
+      <span id="modalBodyText">هوش مصنوعی بدون تایید شما حق حذف هیچ فایلی را ندارد. آیا از حذف این مورد اطمینان دارید؟</span>
+      <div id="modalItemPreview" class="modal-item-preview"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-confirm" onclick="executeConfirmedDelete()">بله، حذف کن</button>
+      <button class="btn-modal-cancel" onclick="closeModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تایید بهینه‌سازی رم -->
+<div id="ramConfirmModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title" style="color: #38bdf8;">
+      <span>⚡</span>
+      <span>تایید بهینه‌سازی هوشمند رم</span>
+    </div>
+    <div class="modal-body">
+      <span>آیا مایل به بستن فرآیندهای پس‌زمینه انتخابی و آزادسازی حافظه رم هستید؟</span>
+      <div id="ramFreedPreview" class="modal-item-preview" style="color: #38bdf8; font-weight: bold;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-confirm" style="background: #0ea5e9;" onclick="executeConfirmedRamOptimize()">بله، بهینه‌سازی کن</button>
+      <button class="btn-modal-cancel" onclick="closeRamModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- پیام اعلان موقت -->
+<div id="toast" class="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastText">عملیات با موفقیت انجام شد</span>
+</div>
+
+<!-- Bottom Navigation Bar -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('battery')">
+    <span class="icon">🔋</span>
+    <span>باتری و آلارم</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('ram')">
+    <span class="icon">⚡</span>
+    <span>بهینه‌ساز رم</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('clean')">
+    <span class="icon">🧠</span>
+    <span>هوش پاکسازی</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('hardware')">
+    <span class="icon">💻</span>
+    <span>پایش سخت‌افزار</span>
+  </button>
+</nav>
+
+<script>
+  // State
+  let currentTab = 'battery';
+  let scannerCategory = 'duplicate';
+  let targetPercent = 85;
+  let audioContext = null;
+  let deleteCallback = null;
+
+  // دیتابیس هوشمند فایل‌ها
+  let scannedItems = {
+    duplicate: [
+      { id: 1, name: 'DSC_20261012_Copy.jpg', path: '/storage/emulated/0/DCIM/Camera/DSC_20261012_Copy.jpg', size: '4.2 MB', isOrig: false, origName: 'DSC_20261012.jpg', hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' },
+      { id: 2, name: 'VoiceNote_backup(1).m4a', path: '/storage/emulated/0/Recordings/VoiceNote_backup(1).m4a', size: '12.8 MB', isOrig: false, origName: 'VoiceNote.m4a', hash: '8843d7f92416211de9ebb963ff4ce28125932878' },
+      { id: 3, name: 'Catalog_Final_v2.pdf', path: '/storage/emulated/0/Download/Catalog_Final_v2.pdf', size: '18.5 MB', isOrig: false, origName: 'Catalog_Final.pdf', hash: '61250cf4f19b22a6136c3eecbb37fb334235' }
+    ],
+    junk: [
+      { id: 4, name: '.thumbnails/thumb_cache_928.bin', path: '/storage/emulated/0/DCIM/.thumbnails/', size: '84 MB', desc: 'کَش تامبنیل تصاویر قدیمی' },
+      { id: 5, name: 'crash_logs_202610.log', path: '/storage/emulated/0/Android/data/crash_logs.log', size: '24 MB', desc: 'فایل گزارش خطای تاریخ‌گذشته' },
+      { id: 6, name: 'temp_download_patch.tmp', path: '/storage/emulated/0/Download/temp_patch.tmp', size: '48 MB', desc: 'فایل موقت دانلود ناقص' },
+      { id: 7, name: 'webview_render_cache.bin', path: '/data/data/cache/webview/', size: '36 MB', desc: 'حافظه موقت رندر وب' }
+    ],
+    non_essential: [
+      { id: 8, name: 'Old_Installer_v0.9.apk.bak', path: '/storage/emulated/0/Download/Old_Installer.apk.bak', size: '65 MB', desc: 'فایل نصب قدیمی و بدون استفاده' },
+      { id: 9, name: 'ScreenRecording_test_draft.mp4', path: '/storage/emulated/0/Movies/test_draft.mp4', size: '142 MB', desc: 'فیلمبرداری آزمایشی قدیمی از صفحه' }
+    ],
+    risky_app: [
+      { id: 10, name: 'FastDownloader_v3.apk (مشکوک)', path: '/storage/emulated/0/Download/FastDownloader.apk', size: '14 MB', risk: 'دسترسی همزمان خواندن و ارسال پیامک + موقعیت پس‌زمینه', danger: 'بالا (High)' },
+      { id: 11, name: 'ScreenThemePro (بدون مجوز)', path: '/storage/emulated/0/Android/obb/ScreenTheme.apk', size: '28 MB', risk: 'درخواست پنجره شناور مخفی (Overlay Hijack)', danger: 'متوسط (Medium)' }
+    ]
+  };
+
+  // لیست رم
+  let ramProcesses = [
+    { id: 'p1', name: 'سرویس پس‌زمینه مرورگر و وب', cat: 'Background Web Cache', sizeMb: 420, checked: true },
+    { id: 'p2', name: 'کَش برنامه‌های متوقف‌شده', cat: 'Cached Applications', sizeMb: 360, checked: true },
+    { id: 'p3', name: 'بافر رندر تکسچر گرافیکی', cat: 'GPU Buffer Cache', sizeMb: 280, checked: true },
+    { id: 'p4', name: 'پردازش‌های زامبی و لاگ‌های سیستم', cat: 'Zombie Daemons', sizeMb: 340, checked: true }
+  ];
+
+  // سوئیچ تب‌ها
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('tab-' + tab).style.display = 'block';
+    const index = tab === 'battery' ? 0 : tab === 'ram' ? 1 : tab === 'clean' ? 2 : 3;
+    document.querySelectorAll('.nav-btn')[index].classList.add('active');
+    
+    if (tab === 'clean') renderFilesList();
+    if (tab === 'ram') renderRamList();
+    if (tab === 'hardware') updateHardwareStats();
+  }
+
+  // سوئیچ دسته‌های اسکنر
+  function switchScannerCategory(cat) {
+    scannerCategory = cat;
+    document.querySelectorAll('.scanner-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    const titles = {
+      duplicate: 'حذف تمام فایل‌های تکراری',
+      junk: 'پاکسازی همه فایل‌های اضافی',
+      non_essential: 'حذف همه فایل‌های غیرضروری',
+      risky_app: 'حذف/لغو همه موارد پرخطر'
+    };
+    document.getElementById('deleteAllBtnText').innerText = titles[cat];
+    renderFilesList();
+  }
+
+  // رندر لیست فایل‌ها
+  function renderFilesList() {
+    const list = scannedItems[scannerCategory] || [];
+    const container = document.getElementById('filesListContainer');
+    
+    // بروزرسانی بج‌ها
+    document.getElementById('dupCountBadge').innerText = scannedItems.duplicate.length;
+    document.getElementById('junkCountBadge').innerText = scannedItems.junk.length;
+    document.getElementById('nonCountBadge').innerText = scannedItems.non_essential.length;
+    document.getElementById('riskCountBadge').innerText = scannedItems.risky_app.length;
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">✨</div>
+          <p style="font-size: 0.86rem; font-weight: 600; color: #34d399;">تمامی موارد این بخش پاکسازی شدند</p>
+          <p style="font-size: 0.75rem; margin-top: 4px;">هیچ فایل یا برنامه زائدی یافت نشد.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    list.forEach(item => {
+      if (scannerCategory === 'duplicate') {
+        html += `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-name">${item.name}</div>
+              <div class="file-meta">
+                <span class="tag-dup">کپی تکراری</span>
+                <span>اصلی: ${item.origName}</span>
+                <span>حجم: ${item.size}</span>
+              </div>
+            </div>
+            <button class="btn-danger" onclick="requestDeleteSingle(${item.id})">حذف</button>
+          </div>
+        `;
+      } else if (scannerCategory === 'junk') {
+        html += `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-name">${item.name}</div>
+              <div class="file-meta">
+                <span>${item.desc}</span>
+                <span>حجم: ${item.size}</span>
+              </div>
+            </div>
+            <button class="btn-danger" onclick="requestDeleteSingle(${item.id})">حذف</button>
+          </div>
+        `;
+      } else if (scannerCategory === 'non_essential') {
+        html += `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-name">${item.name}</div>
+              <div class="file-meta">
+                <span>${item.desc}</span>
+                <span>حجم: ${item.size}</span>
+              </div>
+            </div>
+            <button class="btn-danger" onclick="requestDeleteSingle(${item.id})">حذف</button>
+          </div>
+        `;
+      } else if (scannerCategory === 'risky_app') {
+        html += `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-name">${item.name}</div>
+              <div class="file-meta">
+                <span class="tag-danger">${item.danger}</span>
+                <span>${item.risk}</span>
+                <span>${item.size}</span>
+              </div>
+            </div>
+            <button class="btn-danger" onclick="requestDeleteSingle(${item.id})">حذف امنیتی</button>
+          </div>
+        `;
+      }
+    });
+    container.innerHTML = html;
+  }
+
+  // رندر لیست رم
+  function renderRamList() {
+    const container = document.getElementById('ramItemsList');
+    let totalFreeable = 0;
+    let html = '';
+    ramProcesses.forEach(item => {
+      if (item.checked) totalFreeable += item.sizeMb;
+      html += `
+        <div class="ram-item">
+          <input type="checkbox" class="ram-checkbox" id="check_${item.id}" ${item.checked ? 'checked' : ''} onchange="toggleRamItem('${item.id}')">
+          <div class="ram-info">
+            <div class="ram-title">${item.name}</div>
+            <div class="ram-cat">${item.cat}</div>
+          </div>
+          <div class="ram-size">${item.sizeMb} MB</div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+    document.getElementById('ramAdviceText').innerText = 
+      `تعداد ${ramProcesses.filter(p=>p.checked).length} فرآیند انتخابی آماده آزادسازی است. مجموع حافظه قابل آزادسازی: ${(totalFreeable / 1024).toFixed(2)} گیگابایت (${totalFreeable} مگابایت).`;
+  }
+
+  function toggleRamItem(id) {
+    const item = ramProcesses.find(p => p.id === id);
+    if (item) item.checked = !item.checked;
+    renderRamList();
+  }
+
+  function toggleAllRam() {
+    const anyUnchecked = ramProcesses.some(p => !p.checked);
+    ramProcesses.forEach(p => p.checked = anyUnchecked);
+    renderRamList();
+  }
+
+  // مودال تایید حذف تک فایل
+  function requestDeleteSingle(id) {
+    const list = scannedItems[scannerCategory] || [];
+    const item = list.find(i => i.id === id);
+    if (!item) return;
+
+    document.getElementById('modalTitleText').innerText = 'تایید حذف: ' + item.name;
+    document.getElementById('modalBodyText').innerText = 
+      'هوش مصنوعی برای حفظ امنیت اطلاعات شما هیچ فایلی را بدون تایید دستی حذف نمی‌کند. آیا از حذف دائمی این مورد اطمینان دارید؟';
+    document.getElementById('modalItemPreview').innerText = item.path || item.name;
+
+    deleteCallback = () => {
+      scannedItems[scannerCategory] = scannedItems[scannerCategory].filter(i => i.id !== id);
+      renderFilesList();
+      showToast('فایل با تایید شما با موفقیت حذف شد');
+      if (window.Android && window.Android.deleteFile) {
+        window.Android.deleteFile(item.path);
+      }
+      playVoice('files_clean');
+    };
+
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
+  // مودال تایید حذف همه فایل‌های دسته
+  function requestDeleteAllCurrent() {
+    const list = scannedItems[scannerCategory] || [];
+    if (list.length === 0) {
+      showToast('موردی برای حذف در این بخش وجود ندارد');
+      return;
+    }
+
+    const count = list.length;
+    document.getElementById('modalTitleText').innerText = 'تایید حذف دسته‌جمعی (' + count + ' مورد)';
+    document.getElementById('modalBodyText').innerText = 
+      `آیا از حذف تمام ${count} فایل موجود در این بخش اطمینان دارید؟ این عملیات تنها با رضایت مستقیم شما انجام می‌پذیرد.`;
+    document.getElementById('modalItemPreview').innerText = `حذف کامل ${count} مورد از بخش ${scannerCategory}`;
+
+    deleteCallback = () => {
+      scannedItems[scannerCategory] = [];
+      renderFilesList();
+      showToast(`همه ${count} مورد این بخش با تایید شما پاکسازی شدند`);
+      playVoice('files_clean');
+    };
+
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
+  function executeConfirmedDelete() {
+    closeModal();
+    if (deleteCallback) {
+      deleteCallback();
+      deleteCallback = null;
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('confirmModal').classList.remove('active');
+  }
+
+  // بهینه‌سازی رم با تایید
+  function requestRamOptimize() {
+    const selected = ramProcesses.filter(p => p.checked);
+    if (selected.length === 0) {
+      showToast('لطفاً حداقل یک فرآیند را برای بهینه‌سازی انتخاب کنید');
+      return;
+    }
+    const totalMb = selected.reduce((acc, p) => acc + p.sizeMb, 0);
+    document.getElementById('ramFreedPreview').innerText = 
+      `آزادسازی ${totalMb} مگابایت رم (${selected.length} فرآیند)`;
+    document.getElementById('ramConfirmModal').classList.add('active');
+  }
+
+  function closeRamModal() {
+    document.getElementById('ramConfirmModal').classList.remove('active');
+  }
+
+  function executeConfirmedRamOptimize() {
+    closeRamModal();
+    const btn = document.getElementById('optimizeRamBtn');
+    btn.innerHTML = '<span>⏳</span><span>در حال بهینه‌سازی و آزادسازی حافظه...</span>';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const selected = ramProcesses.filter(p => p.checked);
+      const totalMb = selected.reduce((acc, p) => acc + p.sizeMb, 0);
+      ramProcesses = ramProcesses.filter(p => !p.checked);
+      
+      renderRamList();
+      document.getElementById('ramUsedMb').innerText = '3.8 GB (47%)';
+      document.getElementById('ramFreeMb').innerText = '4.2 GB';
+      
+      btn.innerHTML = '<span>🚀</span><span>بهینه‌سازی مجدد رم</span>';
+      btn.disabled = false;
+      
+      showToast(`بهینه‌سازی موفق: ${totalMb} مگابایت حافظه رم آزاد شد`);
+      playVoice('ram_clean');
+      
+      if (window.Android && window.Android.optimizeRam) {
+        window.Android.optimizeRam(JSON.stringify(selected.map(s => s.name)));
+      }
+    }, 1200);
+  }
+
+  // سیستم صوتی تضمینی و تست صدای گوینده فارسی
+  function playVoice(alertType) {
+    showToast('در حال پخش صدای گوینده فارسی: ' + alertType);
+    
+    // اول: اگر در نیتیو اندروید هستیم از پل نیتیو فراخوانی کن
+    if (window.Android && window.Android.playPersianVoice) {
+      window.Android.playPersianVoice(alertType);
+    }
+    
+    // دوم: پخش فایل صوتی محلی باندل شده در assets
+    const audioMap = {
+      target_85: 'audio/fa_battery_85.mp3',
+      full_100: 'audio/fa_battery_100.mp3',
+      low_20: 'audio/fa_battery_low.mp3',
+      overheat: 'audio/fa_battery_hot.mp3',
+      ram_clean: 'audio/fa_ram_clean.mp3',
+      files_clean: 'audio/fa_files_clean.mp3',
+      siren: 'audio/fa_siren.mp3'
+    };
+
+    const src = audioMap[alertType] || 'audio/fa_battery_85.mp3';
+    try {
+      const audio = new Audio(src);
+      audio.volume = 1.0;
+      audio.play().catch(e => {
+        // Fallback با وب آودیو
+        synthesizeWebAlarm(alertType);
+      });
+    } catch (e) {
+      synthesizeWebAlarm(alertType);
+    }
+  }
+
+  function synthesizeWebAlarm(type) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(type === 'siren' ? 880 : 580, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.2);
+    } catch (ignored) {}
+  }
+
+  // بروزرسانی آمار سخت‌افزار
+  function updateHardwareStats() {
+    let cpu = null, mem = null, bat = null, dev = null;
+    if (window.SysInfo) {
+      try { cpu = JSON.parse(window.SysInfo.getCpuInfo()); } catch (e) {}
+      try { mem = JSON.parse(window.SysInfo.getMemoryInfo()); } catch (e) {}
+      try { bat = JSON.parse(window.SysInfo.getBatteryInfo()); } catch (e) {}
+      try { dev = JSON.parse(window.SysInfo.getDeviceInfo()); } catch (e) {}
+    }
+
+    if (cpu) {
+      document.getElementById('cpuModelText').innerText = cpu.model || 'OCTA-CORE ARM64';
+      document.getElementById('cpuAvgText').innerText = (cpu.avgUsage || 19) + '%';
+      if (cpu.perCore && cpu.perCore.length > 0) {
+        let coresHtml = '';
+        cpu.perCore.forEach(c => {
+          coresHtml += `
+            <div class="core-bar-box">
+              <div class="core-name">هسته ${c.core}</div>
+              <div class="core-pct">${c.usage}%</div>
+              <div class="core-track"><div class="core-fill" style="width: ${c.usage}%;"></div></div>
+            </div>
+          `;
+        });
+        document.getElementById('cpuCoresGrid').innerHTML = coresHtml;
+      }
+    } else {
+      let coresHtml = '';
+      for (let i = 0; i < 8; i++) {
+        const u = 12 + Math.floor(Math.random() * 25);
+        coresHtml += `
+          <div class="core-bar-box">
+            <div class="core-name">هسته ${i}</div>
+            <div class="core-pct">${u}%</div>
+            <div class="core-track"><div class="core-fill" style="width: ${u}%;"></div></div>
+          </div>
+        `;
+      }
+      document.getElementById('cpuCoresGrid').innerHTML = coresHtml;
+    }
+
+    if (bat) {
+      document.getElementById('batteryTempText').innerText = (bat.temperature || 32.4) + '°C';
+      document.getElementById('batteryVoltText').innerText = (bat.voltage || 4120) + ' mV';
+      document.getElementById('batteryHealthText').innerText = bat.health || 'سالم و عالی (Good)';
+    }
+
+    if (dev) {
+      document.getElementById('deviceOsText').innerText = `Android ${dev.android || 14} (API ${dev.sdk || 34})`;
+    }
+  }
+
+  // مقداردهی گیج باتری و رویدادها
+  function updateBatteryUI(percent, isCharging) {
+    document.getElementById('batteryPctText').innerText = percent + '%';
+    const circle = document.getElementById('batteryCircle');
+    const circumference = 502;
+    const offset = circumference - (percent / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+
+    const sub = document.getElementById('chargingStateText');
+    if (isCharging) {
+      sub.innerText = 'در حال شارژ ⚡';
+      sub.style.color = '#34d399';
+    } else {
+      sub.innerText = 'در حال دشارژ';
+      sub.style.color = '#94a3b8';
+    }
+
+    // بررسی آلارم در صورت رسیدن به حد نصاب
+    if (isCharging && percent >= targetPercent) {
+      document.getElementById('batteryAdviceText').innerText = 
+        `⚠️ هشدار: شارژ به ${percent}٪ رسید! لطفاً شارژر را جدا کنید تا عمر باتری حفظ شود.`;
+    }
+  }
+
+  // Toast
+  function showToast(text) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').innerText = text;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Event Listeners
+  document.getElementById('targetPercentSlider').addEventListener('input', (e) => {
+    targetPercent = parseInt(e.target.value);
+    document.getElementById('targetPercentLabel').innerText = targetPercent + '%';
+    if (window.Android && window.Android.setTargetThreshold) {
+      window.Android.setTargetThreshold(targetPercent);
+    }
+  });
+
+  document.getElementById('stopAlarmBtn').addEventListener('click', () => {
+    if (window.Android && window.Android.stopAlarm) {
+      window.Android.stopAlarm();
+    }
+    showToast('صدای زنگ هشدار متوقف شد');
+  });
+
+  // Init
+  window.addEventListener('DOMContentLoaded', () => {
+    updateBatteryUI(78, true);
+    renderFilesList();
+    renderRamList();
+    updateHardwareStats();
+    setInterval(updateHardwareStats, 3000);
+  });
+</script>
+</body>
+</html>

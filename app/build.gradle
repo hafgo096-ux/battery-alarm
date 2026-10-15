@@ -3,18 +3,17 @@ plugins {
 }
 
 android {
-    namespace 'com.dsh.batteryalarm'
-    compileSdk 35
+    namespace 'com.persian.batteryalarm.optimizer'
+    compileSdk 34
 
     defaultConfig {
-        applicationId "com.dsh.batteryalarm"
-        minSdk 26
-        targetSdk 35
+        applicationId "com.persian.batteryalarm.optimizer"
+        minSdk 24
+        targetSdk 34
         versionCode 1
         versionName "1.0.0"
     }
 
-    // فایل HTML رابط کاربری در پوشهٔ assets پروژه است (خارج از app/src)
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets', '../assets']
@@ -23,10 +22,13 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('../keystore/release.keystore')
-            storePassword 'dsh123456'
-            keyAlias 'dsh-battery'
-            keyPassword 'dsh123456'
+            storeFile file("batteryalarm-release-key.jks")
+            storePassword "BatteryAlarm@ReleasePass2025!"
+            keyAlias "batteryalarm_release_alias"
+            keyPassword "BatteryAlarm@ReleasePass2025!"
+            v1SigningEnabled true
+            v2SigningEnabled true
+            v3SigningEnabled true
         }
     }
 
@@ -34,6 +36,7 @@ android {
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -42,7 +45,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    // نام ثابت فایل خروجی برای لینک دانلود پایدار در release
     applicationVariants.all { variant ->
         if (variant.name == 'release') {
             variant.outputs.each { output ->

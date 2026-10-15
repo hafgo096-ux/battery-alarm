@@ -1,4 +1,4 @@
-package com.dsh.batteryalarm;
+package com.persian.batteryalarm.optimizer;
 
 import android.Manifest;
 import android.app.Activity;
@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
@@ -44,11 +43,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // تنظیم نوار وضعیت شیک تیره
+        // تم تیره AMOLED
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.parseColor("#080c16"));
-        window.setNavigationBarColor(Color.parseColor("#080c16"));
+        window.setStatusBarColor(Color.parseColor("#070a13"));
+        window.setNavigationBarColor(Color.parseColor("#070a13"));
 
         webView = new WebView(this);
         setContentView(webView);
@@ -64,9 +63,10 @@ public class MainActivity extends Activity {
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setDatabaseEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        webView.setBackgroundColor(Color.parseColor("#080c16"));
+        webView.setBackgroundColor(Color.parseColor("#070a13"));
         webView.setKeepScreenOn(true);
 
+        // پل‌های ارتباطی نیتیو
         webView.addJavascriptInterface(new WebBridge(this), "Android");
         webView.addJavascriptInterface(new SysInfoBridge(this), "SysInfo");
 
@@ -74,20 +74,19 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("file:///android_asset/index.html");
 
-        requestPermissions();
+        requestAppPermissions();
         startWatchService();
     }
 
-    private void requestPermissions() {
+    private void requestAppPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             try {
                 int check = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS);
                 if (check != PackageManager.PERMISSION_GRANTED) {
-                    String[] perms = {Manifest.permission.POST_NOTIFICATIONS};
-                    requestPermissions(perms, REQ_NOTIF);
+                    requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIF);
                 }
             } catch (Exception e) {
-                Log.w(TAG, "notification permission request failed", e);
+                Log.w(TAG, "Notification permission request failed", e);
             }
         }
         requestIgnoreBatteryOptimizations();
@@ -103,7 +102,7 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         } catch (Exception e) {
-            Log.w(TAG, "battery opt-out request failed", e);
+            Log.w(TAG, "Battery optimization opt-out request failed", e);
         }
     }
 
@@ -116,16 +115,7 @@ public class MainActivity extends Activity {
                 startService(svc);
             }
         } catch (Exception e) {
-            Log.w(TAG, "cannot start service", e);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_NOTIF) {
-            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            Log.i(TAG, "notification permission: " + (granted ? "granted" : "denied"));
+            Log.w(TAG, "Cannot start watch service", e);
         }
     }
 

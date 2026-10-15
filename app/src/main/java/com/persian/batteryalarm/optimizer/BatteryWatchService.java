@@ -1,4 +1,4 @@
-package com.dsh.batteryalarm;
+package com.persian.batteryalarm.optimizer;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -11,10 +11,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
@@ -28,23 +31,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * سرویس پس‌زمینهٔ پایش هوشمند شارژ باتری و وضعیت سیستم.
- * سازگار با اندروید ۸ تا ۱۵ (API 26 تا 35).
+ * سرویس پس‌زمینه پایش هوشمند شارژ، سخت‌افزار و مدیریت بهینه‌سازی
+ * دارای موتور چندلایه صوتی ضد سکوت با صدای فارسی و هشدارهای مطمئن
  */
 public class BatteryWatchService extends Service {
 
-    private static final String TAG = "BatteryWatch";
-    private static final String CH_WATCH = "battery_watch_channel";
-    private static final String CH_ALARM = "battery_alarm_channel";
-    private static final int NOTIF_WATCH = 777;
-    private static final int NOTIF_ALARM = 778;
+    private static final String TAG = "BatteryWatchService";
+    public static final String CH_WATCH = "persian_battery_watch";
+    public static final String CH_ALARM = "persian_battery_alarm";
+    public static final int NOTIF_WATCH = 777;
+    public static final int NOTIF_ALARM = 778;
 
     private PowerManager.WakeLock wakeLock;
     private MediaPlayer mediaPlayer;
+    private ToneGenerator toneGenerator;
     private Vibrator vibrator;
-    boolean alarmFired = false;
-    boolean stopRequested = false;
-    long htmlActiveUntil = 0;
+    public boolean alarmFired = false;
+    public boolean stopRequested = false;
     private Timer timer;
     private boolean receiverRegistered = false;
 
@@ -55,8 +58,7 @@ public class BatteryWatchService extends Service {
         super.onCreate();
         createChannels();
 
-        // شروع Foreground Service سازگار با اندروید ۱۴ و ۱۵ (API 34+)
-        Notification watchNotif = buildWatchNotification("پایش هوشمند شارژ و سخت‌افزار فعال است");
+        Notification watchNotif = buildWatchNotification("پایش هوشمند باتری و سخت‌افزار فعال است");
         if (Build.VERSION.SDK_INT >= 34) {
             startForeground(NOTIF_WATCH, watchNotif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -65,18 +67,14 @@ public class BatteryWatchService extends Service {
             startForeground(NOTIF_WATCH, watchNotif);
         }
 
-        // WakeLock برای اجرای پایدار پایش در حالت قفل صفحه
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         if (pm != null) {
-            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "dsh:batterywatch:watch");
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "persian:batteryalarm:watch");
             wakeLock.setReferenceCounted(false);
-            try {
-                wakeLock.acquire();
-            } catch (Exception ignored) {}
+            try { wakeLock.acquire(); } catch (Exception ignored) {}
         }
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
-        // ثبت دریافت‌کننده تغییرات باتری
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
@@ -85,60 +83,150 @@ public class BatteryWatchService extends Service {
             }
             receiverRegistered = true;
         } catch (Exception e) {
-            Log.w(TAG, "failed to register battery receiver", e);
+            Log.w(TAG, "failed to register receiver", e);
         }
 
-        // تایمر واچ‌داگ برای زنده نگه‌داشتن سرویس در حالت Doze
-        timer = new Timer("dsh-watchdog", true);
+        timer = new Timer("persian-watchdog", true);
         timer.scheduleAtFixedRate(new WatchdogTask(this), 60_000, 60_000);
-
-        Log.i(TAG, "BatteryWatchService started successfully");
+        Log.i(TAG, "BatteryWatchService created and active");
     }
 
-    void triggerAlarm(int percent) {
-        Log.i(TAG, "ALARM at " + percent + "%");
+    public void triggerAlarm(int percent, String soundType) {
+        Log.i(TAG, "Triggering alarm at " + percent + "% with soundType=" + soundType);
+        alarmFired = true;
+        stopRequested = false;
+
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null) {
             nm.notify(NOTIF_ALARM, buildAlarmNotification(percent, null, null));
         }
+
         startVibration();
-        playSystemAlarm();
+        playReliableAlarmSound(soundType != null ? soundType : "fa_battery_85.mp3");
     }
 
-    void triggerAlarmCustom(String title, String sub) {
-        Log.i(TAG, "ALARM custom: " + title);
+    public void triggerAlarmCustom(String title, String sub, String soundAsset) {
+        Log.i(TAG, "Custom alarm: " + title);
+        alarmFired = true;
+        stopRequested = false;
+
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null) {
             nm.notify(NOTIF_ALARM, buildAlarmNotification(0, title, sub));
         }
+
         startVibration();
-        playSystemAlarm();
+        playReliableAlarmSound(soundAsset != null ? soundAsset : "fa_battery_low.mp3");
     }
 
-    private void playSystemAlarm() {
+    /**
+     * پخش تضمینی صدا با ۳ لایه پشتیبان بدون قطعی یا بی‌صدا شدن
+     */
+    public synchronized void playReliableAlarmSound(String assetName) {
+        stopMediaPlayer();
+
+        // افزایش بلندی صدای آلارم
+        try {
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+                int curVol = am.getStreamVolume(AudioManager.STREAM_ALARM);
+                if (curVol < maxVol * 0.7) {
+                    am.setStreamVolume(AudioManager.STREAM_ALARM, (int)(maxVol * 0.85), 0);
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "audioManager volume adjust failed", e);
+        }
+
+        // لایه ۱: فایل صوتی فارسی نیتیو
+        boolean played = false;
+        if (assetName != null && !assetName.isEmpty()) {
+            try {
+                String path = "audio/" + assetName;
+                AssetFileDescriptor afd = getAssets().openFd(path);
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                afd.close();
+
+                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
+                mediaPlayer.setLooping(false);
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    // پس از اتمام پیام صوتی، آژیر هشدار به صورت حلقه پخش شود
+                    playSirenLoop();
+                });
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                played = true;
+                Log.i(TAG, "Playing Persian voice asset: " + path);
+            } catch (Exception e) {
+                Log.w(TAG, "Asset playback failed: " + assetName + ", falling back", e);
+            }
+        }
+
+        // لایه ۲: صدای زنگ سیستم
+        if (!played) {
+            try {
+                Uri uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
+                if (uri == null) uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
+                if (uri == null) uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION);
+
+                if (uri != null) {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(this, uri);
+                    mediaPlayer.setLooping(true);
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    played = true;
+                    Log.i(TAG, "Playing system ringtone fallback");
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "System ringtone failed, using tone generator fallback", e);
+            }
+        }
+
+        // لایه ۳: بوق بیزر ToneGenerator (غیرقابل شکست حتی در بی‌صداترین شرایط)
+        if (!played) {
+            try {
+                toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+                toneGenerator.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 15000);
+                Log.i(TAG, "ToneGenerator fallback active");
+            } catch (Exception e) {
+                Log.e(TAG, "ToneGenerator failed", e);
+            }
+        }
+    }
+
+    private void playSirenLoop() {
+        if (!alarmFired || stopRequested) return;
         try {
             stopMediaPlayer();
-            Uri uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
-            if (uri == null) {
-                uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
-            }
-            if (uri == null) {
-                uri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION);
-            }
-            if (uri == null) return;
-
+            AssetFileDescriptor afd = getAssets().openFd("audio/fa_siren.mp3");
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(this, uri);
-            mediaPlayer.setLooping(true);
+            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            afd.close();
             mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build());
-            mediaPlayer.setOnPreparedListener(new PreparedListener());
-            mediaPlayer.prepareAsync();
-            Log.i(TAG, "playing system alarm sound");
+            mediaPlayer.setLooping(true);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
         } catch (Exception e) {
-            Log.e(TAG, "playAlarm failed", e);
+            Log.w(TAG, "siren loop failed, starting tone beep", e);
+            try {
+                if (toneGenerator == null) {
+                    toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+                }
+                toneGenerator.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 10000);
+            } catch (Exception ignored) {}
         }
     }
 
@@ -164,9 +252,16 @@ public class BatteryWatchService extends Service {
             } catch (Exception ignored) {}
             mediaPlayer = null;
         }
+        if (toneGenerator != null) {
+            try {
+                toneGenerator.stopTone();
+                toneGenerator.release();
+            } catch (Exception ignored) {}
+            toneGenerator = null;
+        }
     }
 
-    void stopAlarm() {
+    public synchronized void stopAlarm() {
         stopMediaPlayer();
         if (vibrator != null) {
             try { vibrator.cancel(); } catch (Exception ignored) {}
@@ -183,14 +278,13 @@ public class BatteryWatchService extends Service {
         NotificationManager nm = getSystemService(NotificationManager.class);
         if (nm == null) return;
         NotificationChannel watch = new NotificationChannel(
-                CH_WATCH, "پایش مداوم باتری", NotificationManager.IMPORTANCE_LOW);
-        watch.setDescription("اعلان برای زنده ماندن سرویس پایش هوشمند");
+                CH_WATCH, "پایش مداوم باتری و سیستم", NotificationManager.IMPORTANCE_LOW);
+        watch.setDescription("اعلان زنده ماندن سرویس پایش هوشمند باتری");
         nm.createNotificationChannel(watch);
 
         NotificationChannel alarm = new NotificationChannel(
-                CH_ALARM, "زنگ هشدار باتری و سخت‌افزار", NotificationManager.IMPORTANCE_HIGH);
-        alarm.setDescription("زنگ هشدار هنگام رسیدن به شارژ هدف یا مصرف بحرانی");
-        alarm.setSound(null, null);
+                CH_ALARM, "زنگ هشدار باتری و بهینه‌ساز", NotificationManager.IMPORTANCE_HIGH);
+        alarm.setDescription("زنگ هشدار صوتی هنگام رسیدن به شارژ هدف یا دمای بحرانی");
         alarm.enableVibration(true);
         nm.createNotificationChannel(alarm);
     }
@@ -202,7 +296,7 @@ public class BatteryWatchService extends Service {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new Notification.Builder(this, CH_WATCH)
-                .setContentTitle("هشدار هوشمند باتری")
+                .setContentTitle("زنگ هوشمند باتری و بهینه‌ساز")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
                 .setOngoing(true)
@@ -245,28 +339,15 @@ public class BatteryWatchService extends Service {
         if (intent != null) {
             if (intent.getBooleanExtra("stop_alarm", false)) {
                 stopAlarm();
-            } else if (intent.getBooleanExtra("html_heartbeat", false)) {
-                htmlActiveUntil = System.currentTimeMillis() + 8000;
-                if (alarmFired) {
-                    stopMediaPlayer();
-                    if (vibrator != null) { try { vibrator.cancel(); } catch (Exception ignored) {} }
-                }
-            } else if (intent.getBooleanExtra("html_stopped", false)) {
-                stopAlarm();
             } else if (intent.getBooleanExtra("native_alarm", false)) {
-                SharedPreferences sp = getSharedPreferences("dsh_settings", Context.MODE_PRIVATE);
-                int target = sp.getInt("target_percent", 85);
-                int percent = intent.getIntExtra("percent", target);
-                String title = intent.getStringExtra("alarm_title");
-                String sub = intent.getStringExtra("alarm_sub");
-                if (!alarmFired && !stopRequested) {
-                    alarmFired = true;
-                    if (title != null && !title.isEmpty()) {
-                        triggerAlarmCustom(title, sub);
-                    } else {
-                        triggerAlarm(percent);
-                    }
-                }
+                int pct = intent.getIntExtra("percent", 85);
+                String sound = intent.getStringExtra("sound_asset");
+                triggerAlarm(pct, sound);
+            } else if (intent.hasExtra("custom_title")) {
+                String title = intent.getStringExtra("custom_title");
+                String sub = intent.getStringExtra("custom_sub");
+                String sound = intent.getStringExtra("sound_asset");
+                triggerAlarmCustom(title, sub, sound);
             }
         }
         return START_STICKY;
@@ -305,13 +386,6 @@ public class BatteryWatchService extends Service {
             } catch (Exception ignored) {}
         }
         super.onDestroy();
-    }
-
-    static class PreparedListener implements MediaPlayer.OnPreparedListener {
-        @Override
-        public void onPrepared(MediaPlayer mp) {
-            try { mp.start(); } catch (Exception e) { Log.e("BatteryWatch", "start failed", e); }
-        }
     }
 
     static class WatchdogTask extends TimerTask {
