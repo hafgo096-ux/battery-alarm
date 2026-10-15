@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#070a13">
+  <title>زنگ هشدار باتری و پایش سخت‌افزار</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: #0b1329;
+      --card-inner: #0f1a36;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(6, 182, 212, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.35);
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --pink: #ec4899;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, Tahoma, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 96px;
+      direction: rtl;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: hidden;
+    }
+
+    /* Top Download & Project Notice Bar (visible in browser preview) */
+    .web-download-bar {
+      background: linear-gradient(90deg, #1e1b4b, #0f172a);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+    }
+    .web-download-bar .info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .web-download-bar .apk-badge {
+      background: #10b981;
+      color: #022c22;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+    .web-download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-decoration: none;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+      transition: transform 0.2s;
+    }
+    .web-download-btn:hover {
+      transform: scale(1.04);
+    }
+
+    .app-wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 12px 14px;
+    }
+
+    /* Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 4px 0;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 2px solid #06b6d4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle, rgba(6,182,212,0.2) 0%, rgba(7,10,19,0.8) 100%);
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+    }
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: #06b6d4;
+    }
+    .brand-logo-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid var(--bg-dark);
+      box-shadow: 0 0 8px #10b981;
+    }
+    .brand-text h1 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.35;
+    }
+    .brand-text h2 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.35;
+    }
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-pill {
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-v1 {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: #22d3ee;
+      flex-direction: column;
+      line-height: 1.1;
+      padding: 4px 10px;
+    }
+    .badge-v1 span:first-child { font-size: 0.74rem; font-weight: 800; }
+    .badge-v1 span:last-child { font-size: 0.65rem; color: #38bdf8; }
+    .badge-pct {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #f87171;
+    }
+    .header-sound-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background 0.2s;
+    }
+    .header-sound-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Cards */
+    .app-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    /* AI Advisor Banner */
+    .ai-banner {
+      background: linear-gradient(135deg, rgba(14, 28, 54, 0.85), rgba(9, 18, 36, 0.85));
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .ai-banner-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22d3ee;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .ai-banner-content {
+      flex: 1;
+    }
+    .ai-banner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .ai-banner-head h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .ai-banner-badge {
+      font-size: 0.68rem;
+      color: #06b6d4;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      direction: ltr;
+    }
+    .ai-banner-text {
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: #fca5a5;
+    }
+    .ai-banner-text.normal {
+      color: #94a3b8;
+    }
+
+    /* Circular Battery Gauge */
+    .gauge-wrapper {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      margin: 10px auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .gauge-bg-circle {
+      fill: none;
+      stroke: #162035;
+      stroke-width: 14;
+    }
+    .gauge-val-circle {
+      fill: none;
+      stroke: #f43f5e;
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 690;
+      stroke-dashoffset: 630;
+      transition: stroke-dashoffset 0.8s ease, stroke 0.5s;
+    }
+    .gauge-center-content {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .gauge-bolt {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+    }
+    .gauge-percent {
+      font-size: 3.4rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .gauge-state-pill {
+      margin-top: 6px;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 99px;
+    }
+
+    /* Actions Row */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .btn-action-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #ffffff;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+      transition: transform 0.15s, opacity 0.2s;
+    }
+    .btn-action-primary:active { transform: scale(0.97); }
+    .btn-action-secondary {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #22d3ee;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .btn-action-secondary:active { transform: scale(0.97); }
+
+    /* 4-Item Metrics Grid */
+    .metrics-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+    .metric-head .icon {
+      font-size: 0.95rem;
+    }
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .metric-value small {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .metric-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .metric-pill-ok {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-align: center;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    /* System Alarms Section */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .section-title svg {
+      width: 18px;
+      height: 18px;
+      fill: #38bdf8;
+    }
+    .alarm-item {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .alarm-item:last-child { margin-bottom: 0; }
+    .alarm-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 8px;
+      min-width: 44px;
+      text-align: center;
+    }
+    .alarm-badge.cyan { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .alarm-badge.red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .alarm-badge.amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .alarm-badge.teal { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+    .alarm-info {
+      flex: 1;
+    }
+    .alarm-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+    .alarm-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .alarm-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      flex-shrink: 0;
+    }
+    .alarm-indicator.red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .alarm-indicator.amber { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .alarm-indicator.cyan { background: #06b6d4; box-shadow: 0 0 8px #06b6d4; }
+
+    /* HARDWARE TAB */
+    .cpu-banner-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .cpu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cpu-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .cpu-header-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a78bfa;
+      font-size: 1.3rem;
+    }
+    .cpu-title h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .cpu-title p {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .btn-benchmark {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(124, 58, 237, 0.35);
+      margin-bottom: 14px;
+      transition: transform 0.2s;
+    }
+    .btn-benchmark:active { transform: scale(0.98); }
+
+    /* 8 Cores Per-Core Load */
+    .cores-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .core-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .core-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .core-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .core-pct {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .core-bar-track {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .core-bar-fill {
+      height: 100%;
+      background: #06b6d4;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* Multi-Segment RAM Bar */
+    .ram-multi-bar {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 12px 0 10px;
+    }
+    .ram-seg-used { background: #10b981; }
+    .ram-seg-cache { background: #f59e0b; }
+    .ram-seg-free { background: #06b6d4; }
+    .ram-legends {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      margin-bottom: 12px;
+    }
+    .ram-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ram-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .ram-dot.green { background: #10b981; }
+    .ram-dot.yellow { background: #f59e0b; }
+    .ram-dot.cyan { background: #06b6d4; }
+
+    .insight-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.73rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .btn-gradient-full {
+      width: 100%;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.2s;
+    }
+    .btn-gradient-full:active { transform: scale(0.98); }
+
+    /* SMART FILES TAB */
+    .scanner-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .scanner-tab-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scanner-tab-pill.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .file-item-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .file-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .file-item-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      word-break: break-all;
+    }
+    .file-item-size {
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .file-item-path {
+      font-size: 0.68rem;
+      color: #64748b;
+      direction: ltr;
+      text-align: right;
+      margin-bottom: 8px;
+    }
+    .file-ai-note {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.72rem;
+      color: #93c5fd;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .btn-delete-copy {
+      width: 100%;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 9px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-delete-copy:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* RAM OPTIMIZATION TAB */
+    .ram-check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .ram-check-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .ram-check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #10b981;
+    }
+
+    /* SETTINGS TAB */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-title { font-size: 0.82rem; font-weight: 700; color: #f1f5f9; }
+    .setting-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155; transition: 0.3s; border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: 0.3s; border-radius: 50%;
+    }
+    input:checked + .toggle-slider { background-color: #10b981; }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* SYSTEM TEST TAB */
+    .test-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .test-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .test-btn:hover {
+      border-color: #06b6d4;
+      background: rgba(6, 182, 212, 0.1);
+    }
+    .test-btn .icon { font-size: 1.5rem; }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(7, 10, 19, 0.95);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 4px 12px;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #64748b;
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 10px;
+      position: relative;
+      transition: color 0.2s;
+      min-width: 52px;
+    }
+    .nav-item.active {
+      color: #22d3ee;
+    }
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+    .nav-badge-dot {
+      position: absolute;
+      top: 2px;
+      right: 14px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #0b1329;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 20px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid #06b6d4;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(-120%);
+      transition: transform 0.3s ease;
+      z-index: 300;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .toast-msg.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top notification & APK direct download portal -->
+  <div class="web-download-bar" id="webDownloadBar">
+    <div class="info">
+      <span class="apk-badge">APK آماده</span>
+      <span>نسخه ۱.۰.۰ رسمی (امضا شده با Keystore)</span>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <a href="battery-alarm.apk" download="battery-alarm.apk" class="web-download-btn" id="directApkDownloadBtn">
+        📥 دانلود فایل APK
+      </a>
+      <a href="https://github.com/hafgo096-ux/battery-alarm" target="_blank" class="web-download-btn" style="background:rgba(255,255,255,0.1); box-shadow:none;">
+        گیت‌هاب
+      </a>
+    </div>
+  </div>
+
+  <div class="app-wrapper">
+    <!-- Top Header -->
+    <header class="top-header">
+      <button class="header-sound-btn" onclick="toggleMute()" title="صدا" id="headerSoundBtn">
+        🔊
+      </button>
+
+      <div class="header-badges">
+        <div class="badge-pill badge-pct" id="headerPctBadge">
+          <span>8%</span>
+          <span>⚡</span>
+        </div>
+        <div class="badge-pill badge-v1">
+          <span>v1.0</span>
+          <span>پایدار</span>
+        </div>
+      </div>
+
+      <div class="brand-section">
+        <div class="brand-text">
+          <h1>زنگ هشدار باتری و</h1>
+          <h2>پایش سخت‌افزار</h2>
+        </div>
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .88.35.7.85l-6.2 10.15z"/>
+          </svg>
+          <div class="brand-logo-dot"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== TAB 1: باتری ==================== -->
+    <main id="tab-battery" class="tab-page">
+      <!-- AI Advisor Banner -->
+      <div class="ai-banner">
+        <div class="ai-banner-icon">✨</div>
+        <div class="ai-banner-content">
+          <div class="ai-banner-head">
+            <span class="ai-banner-badge">AI Battery Doctor</span>
+            <h3>توصیه هوش مصنوعی برای سلامت باتری</h3>
+          </div>
+          <div class="ai-banner-text" id="aiBatteryAdviceText">
+            سطح انرژی کمتر از 20% است! تخلیه عمیق به باتری آسیب می‌زند؛ لطفا دستگاه را به شارژ متصل فرمایید.
+          </div>
+        </div>
+      </div>
+
+      <!-- Circular Battery Gauge -->
+      <div class="app-card" style="text-align: center; padding-top: 10px;">
+        <div class="gauge-wrapper">
+          <svg class="gauge-svg" viewBox="0 0 250 250">
+            <circle class="gauge-bg-circle" cx="125" cy="125" r="110"></circle>
+            <circle id="batteryGaugeCircle" class="gauge-val-circle" cx="125" cy="125" r="110"></circle>
+          </svg>
+          <div class="gauge-center-content">
+            <div class="gauge-bolt">⚡</div>
+            <div class="gauge-percent" id="batteryPercentText">8%</div>
+            <div class="gauge-state-pill" id="chargingStateBadge">متصل به شارژر</div>
+          </div>
+        </div>
+
+        <!-- Simulation and test buttons -->
+        <div class="actions-grid">
+          <button class="btn-action-primary" onclick="testAlarmVoice('target')">
+            <span>▶</span>
+            <span>تست زنگ هشدار</span>
+          </button>
+          <button class="btn-action-secondary" onclick="toggleSimulatedCharging()" id="toggleChargingBtn">
+            <span>⏻</span>
+            <span id="toggleChargingText">قطع شبیه‌ساز شارژ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4-Card Metrics Grid -->
+      <div class="metrics-2x2">
+        <div class="metric-card">
+          <div class="metric-head">
+            <span>دمای باتری</span>
+            <span class="icon">🌡️</span>
+          </div>
+          <div class="metric-value" id="batteryTempText">
+            <span>35.4</span>
+            <small>C°</small>
+          </div>
+          <span class="metric-pill-ok" id="batteryTempBadge">خنک و مطلوب</span>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <span>ولتاژ سلول</span>
+            <span class="icon">⏱️</span>
+          </div>
+          <div class="metric-value" id="batteryVoltText">
+            <span>3.74</span>
+            <small>ولت</small>
+          </div>
+          <div class="metric-sub">استاندارد ۳.۷ - ۴.۲۷</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <span>فناوری ساخت</span>
+            <span class="icon">🛡️</span>
+          </div>
+          <div class="metric-value" style="font-size: 1.1rem;" id="batteryTechText">
+            Li-Polymer
+          </div>
+          <div class="metric-sub">حفاظت شارژ هوشمند</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-head">
+            <span>سلامت باتری</span>
+            <span class="icon">❤️</span>
+          </div>
+          <div class="metric-value" style="color: #34d399;" id="batteryHealthText">
+            خوب
+          </div>
+          <div class="metric-sub">چرخه سالم (۱۰۰%)</div>
+        </div>
+      </div>
+
+      <!-- Automatic Alarms System Section -->
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span>وضعیت هشدارهای خودکار در سیستم</span>
+          </div>
+        </div>
+
+        <div class="alarm-item">
+          <div class="alarm-badge cyan">80%</div>
+          <div class="alarm-info">
+            <div class="alarm-name">هشدار اتمام / سقف شارژ (محافظ طول عمر)</div>
+            <div class="alarm-desc">پخش آژیر و گفتار هوشمند هنگام رسیدن به 80%</div>
+          </div>
+          <div class="alarm-indicator"></div>
+        </div>
+
+        <div class="alarm-item">
+          <div class="alarm-badge red">20%</div>
+          <div class="alarm-info">
+            <div class="alarm-name">هشدار باتری ضعیف (Low Battery)</div>
+            <div class="alarm-desc">پخش هشدار هنگام افت شارژ به زیر 20%</div>
+          </div>
+          <div class="alarm-indicator red"></div>
+        </div>
+
+        <div class="alarm-item">
+          <div class="alarm-badge amber">42°C</div>
+          <div class="alarm-info">
+            <div class="alarm-name">سپر حفاظت حرارتی (دمای بالا)</div>
+            <div class="alarm-desc">هشدار خودکار در صورت عبور دما از 42 درجه</div>
+          </div>
+          <div class="alarm-indicator amber"></div>
+        </div>
+
+        <div class="alarm-item">
+          <div class="alarm-badge teal">فعال</div>
+          <div class="alarm-info">
+            <div class="alarm-name">آژیر ضدسرقت قطع شارژر</div>
+            <div class="alarm-desc">در صورت قطع کابل شارژر در اماکن عمومی هشدار می‌دهد</div>
+          </div>
+          <div class="alarm-indicator cyan"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 2: سخت‌افزار ==================== -->
+    <main id="tab-hardware" class="tab-page" style="display: none;">
+      <!-- AI Hardware Auditor -->
+      <div class="ai-banner">
+        <div class="ai-banner-icon">✨</div>
+        <div class="ai-banner-content">
+          <div class="ai-banner-head">
+            <span class="ai-banner-badge">Hardware AI Auditor</span>
+            <h3>تحلیل هوش مصنوعی وضعیت سخت‌افزار</h3>
+          </div>
+          <div class="ai-banner-text normal" id="hardwareAiText">
+            پردازنده 8 هسته‌ای در وضعیت پایدار با دمای 41.6°C قرار دارد. میزان رم در حال استفاده 1.9 گیگابایت از 4 گیگابایت کل (48%)، حافظه ذخیره‌سازی آزاد دستگاه 65.6 گیگابایت است.
+          </div>
+        </div>
+      </div>
+
+      <!-- CPU Monitoring -->
+      <div class="cpu-banner-card">
+        <div class="cpu-header">
+          <div class="cpu-header-info">
+            <div class="cpu-header-icon">⚙️</div>
+            <div class="cpu-title">
+              <h3>پایش پردازنده مرکزی (CPU)</h3>
+              <p>Core Octa-Engine Neural Processor • 8-8 منطقی</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-benchmark" onclick="runCpuBenchmark()">
+          <span>بنچمارک و تست قدرت CPU 🔥</span>
+        </button>
+
+        <div class="metrics-2x2" style="margin-bottom: 12px;">
+          <div class="metric-card">
+            <div class="metric-head">
+              <span>دمای پردازنده</span>
+              <span>🌡️</span>
+            </div>
+            <div class="metric-value">
+              <span id="cpuTempText">41.6</span>
+              <small>°C</small>
+            </div>
+            <span class="metric-pill-ok">خنک‌کننده نرمال</span>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-head">
+              <span>بار کل پردازنده</span>
+              <span>📈</span>
+            </div>
+            <div class="metric-value">
+              <span id="cpuAvgUsageText">29</span>
+              <small>%</small>
+            </div>
+            <div class="core-bar-track" style="margin-top: 6px;">
+              <div id="cpuAvgUsageBar" class="core-bar-fill" style="width: 29%; background: #8b5cf6;"></div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-head">
+              <span>هسته‌ها</span>
+              <span>🧩</span>
+            </div>
+            <div class="metric-value">
+              <span>8</span>
+              <small>Core</small>
+            </div>
+            <div class="metric-sub">معماری Big.LITTLE</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-head">
+              <span>فرکانس کاری</span>
+              <span>⚡</span>
+            </div>
+            <div class="metric-value">
+              <span id="cpuFreqText">2.84</span>
+              <small>GHz</small>
+            </div>
+            <div class="metric-sub">حالت پویا (Dynamic Scaling)</div>
+          </div>
+        </div>
+
+        <!-- 8 Cores Load -->
+        <div style="margin-top: 14px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">
+            بار لحظه‌ای هر هسته پردازشی (PER-CORE LOAD)
+          </div>
+          <div class="cores-grid" id="coresGridContainer">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RAM Monitoring Card -->
+      <div class="app-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #10b981;">
+              📑
+            </div>
+            <div>
+              <h3 style="font-size: 0.9rem; font-weight: 800;">پایش حافظه رم (RAM)</h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted);">ظرفیت فیزیکی کل: 4 گیگابایت</p>
+            </div>
+          </div>
+          <div style="font-size: 1.3rem; font-weight: 900; color: #38bdf8;" id="ramPctText">48%</div>
+        </div>
+
+        <div class="ram-multi-bar">
+          <div class="ram-seg-used" id="ramBarUsed" style="width: 38%;"></div>
+          <div class="ram-seg-cache" id="ramBarCache" style="width: 15%;"></div>
+          <div class="ram-seg-free" id="ramBarFree" style="width: 47%;"></div>
+        </div>
+
+        <div class="ram-legends">
+          <div class="ram-legend-item">
+            <div class="ram-dot green"></div>
+            <span>در حال مصرف: <b id="ramUsedText">1.9 GB</b></span>
+          </div>
+          <div class="ram-legend-item">
+            <div class="ram-dot yellow"></div>
+            <span>کش و بافر: <b id="ramCacheText">0.6 GB</b></span>
+          </div>
+          <div class="ram-legend-item">
+            <div class="ram-dot cyan"></div>
+            <span>رم آزاد: <b id="ramFreeText">1.5 GB</b></span>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          💡 حافظه بافر (0.6 گیگابایت) برای باز کردن سریع‌تر اپلیکیشن‌ها رزرو شده است و در صورت نیاز فورا آزاد می‌گردد.
+        </div>
+
+        <button class="btn-gradient-full" onclick="switchNavTab('ram')">
+          <span>رفتن به بخش بهینه‌سازی و آزادسازی رم</span>
+          <span>←</span>
+        </button>
+      </div>
+
+      <!-- Storage Monitoring Card -->
+      <div class="app-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(6,182,212,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #22d3ee;">
+              💾
+            </div>
+            <div>
+              <h3 style="font-size: 0.9rem; font-weight: 800;">حافظه داخلی موجود (Storage)</h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted);">ظرفیت دیسک کل: 128 گیگابایت</p>
+            </div>
+          </div>
+          <button onclick="refreshStorageStats()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;">🔄</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
+          <span>مصرف شده: <b style="color: #f1f5f9;">62.4 GB</b></span>
+          <span style="color: #34d399;">فضای خالی: <b>65.6 GB</b></span>
+        </div>
+
+        <div class="ram-multi-bar" style="margin: 4px 0 12px;">
+          <div style="width: 49%; background: #06b6d4;"></div>
+          <div style="width: 51%; background: rgba(255,255,255,0.08);"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div style="background: rgba(15,23,42,0.5); padding: 8px 10px; border-radius: 10px; font-size: 0.72rem;">
+            <div style="color: var(--text-muted);">سیستم و اپ‌ها:</div>
+            <div style="font-weight: 700; color: #f1f5f9; margin-top: 2px;">~ 42.1 GB</div>
+          </div>
+          <div style="background: rgba(15,23,42,0.5); padding: 8px 10px; border-radius: 10px; font-size: 0.72rem;">
+            <div style="color: var(--text-muted);">فایل‌ها و رسانه:</div>
+            <div style="font-weight: 700; color: #f1f5f9; margin-top: 2px;">~ 16.3 GB</div>
+          </div>
+        </div>
+
+        <div class="insight-card">
+          💡 برای آزادسازی فضای ذخیره‌سازی، می‌توانید فایل‌های تکراری و کش‌های زائد را در تب هوش مصنوعی شناسایی و با تایید خود حذف نمایید.
+        </div>
+
+        <div style="font-size: 0.74rem; color: var(--text-muted); text-align: left;">
+          درصد اشغال دیسک: <b>49%</b>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 3: هوش فایل ==================== -->
+    <main id="tab-files" class="tab-page" style="display: none;">
+      <div class="scanner-tabs">
+        <button class="scanner-tab-pill active" onclick="filterFileCategory('duplicate')">فایل‌های تکراری</button>
+        <button class="scanner-tab-pill" onclick="filterFileCategory('junk')">کش و لاگ سیستمی</button>
+        <button class="scanner-tab-pill" onclick="filterFileCategory('large')">فایل‌های حجیم و بلااستفاده</button>
+        <button class="scanner-tab-pill" onclick="filterFileCategory('risky')">برنامه‌های پرخطر</button>
+      </div>
+
+      <div id="fileItemsContainer">
+        <!-- Item 1 from screenshot -->
+        <div class="file-item-card" id="file-card-1">
+          <div class="file-item-head">
+            <div class="file-item-title">Financial_Report_Q4_duplicate.pdf</div>
+            <span class="file-item-size">13.8 مگابایت</span>
+          </div>
+          <div class="file-item-path">/Internal/Documents/Financial_Report_Q4_duplicate.pdf</div>
+          <div class="file-ai-note">
+            ✨ فایل گزارش مالی تکراری در دو پوشه Download و Documents. نسخه اصلی نگهداری می‌شود: <b>Financial_Report_Q4.pdf</b>
+          </div>
+          <button class="btn-delete-copy" onclick="confirmDeleteFile('Financial_Report_Q4_duplicate.pdf', 'file-card-1', 13.8)">
+            <span>🗑️</span>
+            <span>حذف نسخه کپی</span>
+          </button>
+        </div>
+
+        <!-- Item 2 from screenshot -->
+        <div class="file-item-card" id="file-card-2">
+          <div class="file-item-head">
+            <div class="file-item-title">VoiceNote_Conference_part1_copy.m4a</div>
+            <span class="file-item-size">27.1 مگابایت</span>
+          </div>
+          <div class="file-item-path">/Internal/Recordings/VoiceNote_Conference_part1_copy.m4a</div>
+          <div class="file-ai-note">
+            ✨ فایل صدای ضبط شده هم‌نام با طول موج و بایت‌های ۱۰۰٪ برابر. نسخه اصلی نگهداری می‌شود: <b>VoiceNote_Conference_part1.m4a</b>
+          </div>
+          <button class="btn-delete-copy" onclick="confirmDeleteFile('VoiceNote_Conference_part1_copy.m4a', 'file-card-2', 27.1)">
+            <span>🗑️</span>
+            <span>حذف نسخه کپی</span>
+          </button>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="file-item-card" id="file-card-3">
+          <div class="file-item-head">
+            <div class="file-item-title">Telegram_Video_cache_0948.mp4.tmp</div>
+            <span class="file-item-size">48.5 مگابایت</span>
+          </div>
+          <div class="file-item-path">/Internal/Telegram/Telegram Video/cache_0948.tmp</div>
+          <div class="file-ai-note">
+            ✨ ویدیو تماشاشده موقت در تلگرام که در حافظه کش باقی مانده است.
+          </div>
+          <button class="btn-delete-copy" onclick="confirmDeleteFile('Telegram_Video_cache_0948.mp4.tmp', 'file-card-3', 48.5)">
+            <span>🗑️</span>
+            <span>حذف نسخه کپی</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 4: بهینه‌سازی رم ==================== -->
+    <main id="tab-ram" class="tab-page" style="display: none;">
+      <div class="app-card">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.8rem; box-shadow: 0 0 20px rgba(16,185,129,0.3);">
+            ⚡
+          </div>
+          <h2 style="font-size: 1.15rem; font-weight: 800;">بهینه‌ساز پیشرفته رم</h2>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">شناسایی و توقف پردازش‌های پرمصرف پس‌زمینه بدون آسیب به فایل‌ها</p>
+        </div>
+
+        <div style="background: rgba(15,23,42,0.6); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
+            <span>رم در دسترس قبل از پاکسازی:</span>
+            <b style="color: #f87171;" id="ramFreeBefore">1.5 GB آزاد</b>
+          </div>
+          <div class="core-bar-track">
+            <div id="ramCleanBar" style="width: 58%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4);"></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">
+            فرآیندهای آماده بهینه‌سازی:
+          </div>
+
+          <div class="ram-check-item">
+            <label class="ram-check-label">
+              <input type="checkbox" checked class="ram-cb" data-size="184">
+              <span>کش صفحات مرورگر و وب‌ویو</span>
+            </label>
+            <span style="font-size: 0.72rem; color: #38bdf8;">184 MB</span>
+          </div>
+
+          <div class="ram-check-item">
+            <label class="ram-check-label">
+              <input type="checkbox" checked class="ram-cb" data-size="312">
+              <span>سرویس‌های معلق شبکه‌های اجتماعی</span>
+            </label>
+            <span style="font-size: 0.72rem; color: #38bdf8;">312 MB</span>
+          </div>
+
+          <div class="ram-check-item">
+            <label class="ram-check-label">
+              <input type="checkbox" checked class="ram-cb" data-size="145">
+              <span>بافر تامبنیل‌ها و پیش‌نمایش گالری</span>
+            </label>
+            <span style="font-size: 0.72rem; color: #38bdf8;">145 MB</span>
+          </div>
+
+          <div class="ram-check-item">
+            <label class="ram-check-label">
+              <input type="checkbox" checked class="ram-cb" data-size="98">
+              <span>فایل‌های موقت پیام‌رسان‌ها</span>
+            </label>
+            <span style="font-size: 0.72rem; color: #38bdf8;">98 MB</span>
+          </div>
+        </div>
+
+        <button class="btn-action-primary" style="width: 100%; padding: 14px;" onclick="executeRamOptimization()">
+          <span>⚡</span>
+          <span>شروع آزادسازی فوری رم و پاکسازی</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 5: تنظیمات ==================== -->
+    <main id="tab-settings" class="tab-page" style="display: none;">
+      <div class="app-card">
+        <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 14px;">تنظیمات هوشمند هشدارها</h2>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">سقف شارژ هدف (Overcharge Protection)</div>
+            <div class="setting-desc">درصدی که پس از آن آلارم قطع شارژر به صدا درمی‌آید</div>
+          </div>
+          <div>
+            <select id="targetPctSelect" onchange="saveTargetPercent(this.value)" style="background: #1e293b; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-family: inherit;">
+              <option value="80">80% (محافظت حداکثری)</option>
+              <option value="85" selected>85% (استاندارد جهانی)</option>
+              <option value="90">90% (تعادل باتری)</option>
+              <option value="100">100% (شارژ کامل)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">هشدار با صدای فارسی (Persian Voice)</div>
+            <div class="setting-desc">پخش صدای گوینده فارسی برای اعلام اتمام شارژ و افت باتری</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="voiceToggle" checked onchange="toggleVoiceSetting(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">حفاظت از دمای بحرانی (42°C)</div>
+            <div class="setting-desc">آلارم فوری در صورت داغ شدن غیرعادی دستگاه حین شارژ</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tempAlertToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">هشدار افت شارژ (Low Battery - 20%)</div>
+            <div class="setting-desc">یادآوری اتصال کابل شارژ قبل از تخلیه کامل</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="lowAlertToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">آژیر ضدسرقت قطع ناگهانی کابل</div>
+            <div class="setting-desc">پخش صدای آژیر در صورت جدا شدن کابل در مکان عمومی</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="unplugAlarmToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-title">ویبره و لرزش قدرتمند هشدار</div>
+            <div class="setting-desc">لرزش پیوسته برای محیط‌های پرسروصدا</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="vibrateToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- APK Info Card -->
+      <div class="app-card">
+        <h3 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 10px; color: #38bdf8;">اطلاعات امضا و نسخه اپلیکیشن</h3>
+        <div style="font-size: 0.74rem; line-height: 1.8; color: var(--text-muted);">
+          <div>• <b>نسخه:</b> 1.0.0 پایدار (Release Build)</div>
+          <div>• <b>کلید امضا:</b> batteryalarm-release-key.jks</div>
+          <div>• <b>نام مستعار کلید:</b> batteryalarm_release_alias</div>
+          <div>• <b>طرح امضا:</b> v1 (JAR) + v2 + v3 Verified</div>
+          <div>• <b>شناسه پکیج:</b> com.persian.batteryalarm.optimizer</div>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px;">
+          <a href="battery-alarm.apk" download="battery-alarm.apk" class="btn-action-primary" style="flex:1; text-decoration: none; font-size: 0.78rem;">
+            📥 دانلود مستقیم APK
+          </a>
+          <button class="btn-action-secondary" onclick="showBuildInfoModal()" style="font-size: 0.78rem;">
+            🔍 جزئیات امضا
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 6: تست سیستم ==================== -->
+    <main id="tab-test" class="tab-page" style="display: none;">
+      <div class="app-card">
+        <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 6px;">مجموعه تست سنسورها و هشدارها</h2>
+        <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 14px;">تست تک‌تک اجزای صوتی، لرزشی و سنسورهای هوشمند</p>
+
+        <div class="test-grid">
+          <button class="test-btn" onclick="testAlarmVoice('target')">
+            <span class="icon">🗣️</span>
+            <span>صدای ۸۵٪ (فارسی)</span>
+          </button>
+          <button class="test-btn" onclick="testAlarmVoice('full')">
+            <span class="icon">🔋</span>
+            <span>صدای ۱۰۰٪ (فارسی)</span>
+          </button>
+          <button class="test-btn" onclick="testAlarmVoice('low')">
+            <span class="icon">⚠️</span>
+            <span>صدای ۲۰٪ (فارسی)</span>
+          </button>
+          <button class="test-btn" onclick="testAlarmVoice('overheat')">
+            <span class="icon">🔥</span>
+            <span>هشدار داغ شدن</span>
+          </button>
+          <button class="test-btn" onclick="testAlarmVoice('siren')">
+            <span class="icon">🚨</span>
+            <span>آژیر ضدسرقت</span>
+          </button>
+          <button class="test-btn" onclick="triggerTestVibration()">
+            <span class="icon">📳</span>
+            <span>تست ویبره گوشی</span>
+          </button>
+          <button class="test-btn" onclick="runCpuBenchmark()">
+            <span class="icon">🧠</span>
+            <span>استرس تست پردازنده</span>
+          </button>
+          <button class="test-btn" onclick="testAudioFallback()">
+            <span class="icon">🔊</span>
+            <span>تست بوق اضطراری</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation Bar (6 Tabs) -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchNavTab('battery')" id="nav-battery">
+        <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-5h2v5zm0-7h-2V7h2v4z"/></svg>
+        <span>باتری</span>
+      </button>
+
+      <button class="nav-item" onclick="switchNavTab('hardware')" id="nav-hardware">
+        <svg viewBox="0 0 24 24"><path d="M9 2v2H7v2H5v2H3v8h2v2h2v2h2v2h6v-2h2v-2h2v-2h2V8h-2V6h-2V4h-2V2H9zm2 4h2v2h-2V6zm-4 4h2v2H7v-2zm8 0h2v2h-2v-2zm-6 4h6v2h-6v-2z"/></svg>
+        <span>سخت‌افزار</span>
+      </button>
+
+      <button class="nav-item" onclick="switchNavTab('files')" id="nav-files">
+        <div class="nav-badge-dot"></div>
+        <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg>
+        <span>هوش فایل</span>
+      </button>
+
+      <button class="nav-item" onclick="switchNavTab('ram')" id="nav-ram">
+        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l3-8z"/></svg>
+        <span>بهینه‌سازی</span>
+      </button>
+
+      <button class="nav-item" onclick="switchNavTab('settings')" id="nav-settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <span>تنظیمات</span>
+      </button>
+
+      <button class="nav-item" onclick="switchNavTab('test')" id="nav-test">
+        <div class="nav-badge-dot"></div>
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        <span>تست سیستم</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Delete File Confirmation Modal -->
+  <div class="modal-overlay" id="deleteConfirmModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🗑️</span>
+        <span id="modalFileNameTitle">حذف فایل کپی</span>
+      </div>
+      <div class="modal-desc" id="modalFileDesc">
+        آیا از حذف نسخه کپی اطمینان دارید؟ نسخه اصلی بدون تغییر و در امنیت کامل نگهداری خواهد شد.
+      </div>
+      <div class="modal-actions">
+        <button class="btn-action-primary" style="flex:1; background:#ef4444;" onclick="executeDeleteFile()">
+          تایید و حذف دائمی کپی
+        </button>
+        <button class="btn-action-secondary" style="flex:1;" onclick="closeModal()">
+          انصراف
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Build Info Modal -->
+  <div class="modal-overlay" id="buildInfoModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🔐</span>
+        <span>اطلاعات فنی و گواهی APK</span>
+      </div>
+      <div class="modal-desc" style="font-size:0.75rem; line-height: 1.8;">
+        <div><b>کلید امضا:</b> batteryalarm-release-key.jks</div>
+        <div><b>نام مستعار:</b> batteryalarm_release_alias</div>
+        <div><b>رمز کی‌استور:</b> BatteryAlarm@ReleasePass2025!</div>
+        <div><b>نوع امضا:</b> Release Signed (v1, v2, v3)</div>
+        <div><b>وضعیت گیت‌هاب:</b> عمومی شده (Public) و آماده دانلود رایگان</div>
+      </div>
+      <div class="modal-actions">
+        <a href="battery-alarm.apk" download="battery-alarm.apk" class="btn-action-primary" style="flex:1; text-decoration:none; text-align:center;">
+          📥 دانلود هم‌اکنون
+        </a>
+        <button class="btn-action-secondary" onclick="closeModal()">
+          بستن
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div class="toast-msg" id="toastMsg">
+    <span id="toastIcon">⚡</span>
+    <span id="toastText">عملیات انجام شد</span>
+  </div>
+
+  <script>
+    // State
+    let isCharging = true;
+    let batteryLevel = 8;
+    let isMuted = false;
+    let targetPercent = 85;
+    let pendingDeleteCardId = null;
+    let pendingDeleteSize = 0;
+
+    // Per-core live simulation
+    const coreUsage = [40, 36, 39, 26, 36, 48, 44, 21];
+
+    function initCores() {
+      const container = document.getElementById('coresGridContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const u = coreUsage[i];
+        const box = document.createElement('div');
+        box.className = 'core-box';
+        box.innerHTML = `
+          <div class="core-top">
+            <span class="core-name">هسته ${i + 1}</span>
+            <span class="core-pct" id="core-pct-${i}">${u}%</span>
+          </div>
+          <div class="core-bar-track">
+            <div class="core-bar-fill" id="core-bar-${i}" style="width: ${u}%;"></div>
+          </div>
+        `;
+        container.appendChild(box);
+      }
+    }
+
+    function updateCoreFluctuations() {
+      for (let i = 0; i < 8; i++) {
+        const delta = Math.floor(Math.random() * 9) - 4;
+        coreUsage[i] = Math.max(12, Math.min(94, coreUsage[i] + delta));
+        const elPct = document.getElementById(`core-pct-${i}`);
+        const elBar = document.getElementById(`core-bar-${i}`);
+        if (elPct && elBar) {
+          elPct.textContent = coreUsage[i] + '%';
+          elBar.style.width = coreUsage[i] + '%';
+        }
+      }
+      const avg = Math.round(coreUsage.reduce((a,b)=>a+b, 0) / 8);
+      const elAvg = document.getElementById('cpuAvgUsageText');
+      const elAvgBar = document.getElementById('cpuAvgUsageBar');
+      if (elAvg && elAvgBar) {
+        elAvg.textContent = avg;
+        elAvgBar.style.width = avg + '%';
+      }
+    }
+
+    // Navigation
+    function switchNavTab(tabName) {
+      document.querySelectorAll('.tab-page').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById(`tab-${tabName}`);
+      const navBtn = document.getElementById(`nav-${tabName}`);
+      if (target) target.style.display = 'block';
+      if (navBtn) navBtn.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // Gauge Update
+    function updateBatteryDisplay(pct, charging) {
+      batteryLevel = pct;
+      isCharging = charging;
+
+      const circle = document.getElementById('batteryGaugeCircle');
+      const text = document.getElementById('batteryPercentText');
+      const badge = document.getElementById('chargingStateBadge');
+      const toggleText = document.getElementById('toggleChargingText');
+      const advice = document.getElementById('aiBatteryAdviceText');
+      const hdrBadge = document.getElementById('headerPctBadge');
+
+      text.textContent = pct + '%';
+      hdrBadge.innerHTML = `<span>${pct}%</span><span>⚡</span>`;
+
+      // 690 is full circumference of r=110
+      const totalCirc = 690;
+      const offset = totalCirc - (totalCirc * pct / 100);
+      circle.style.strokeDashoffset = offset;
+
+      if (pct <= 20) {
+        circle.style.stroke = '#f43f5e'; // red
+        advice.textContent = 'سطح انرژی کمتر از 20% است! تخلیه عمیق به باتری آسیب می‌زند؛ لطفا دستگاه را به شارژ متصل فرمایید.';
+        advice.className = 'ai-banner-text';
+      } else if (pct >= 85) {
+        circle.style.stroke = '#06b6d4'; // cyan
+        advice.textContent = 'شارژ به سقف استاندارد (۸۵٪) رسید! برای افزایش طول عمر مفید باتری کابل شارژر را جدا نمایید.';
+        advice.className = 'ai-banner-text normal';
+      } else {
+        circle.style.stroke = '#10b981'; // green
+        advice.textContent = 'باتری در شرایط دمایی و ولتاژ مطلوب قرار دارد. حفاظت شارژ هوشمند فعال است.';
+        advice.className = 'ai-banner-text normal';
+      }
+
+      if (charging) {
+        badge.textContent = 'متصل به شارژر';
+        badge.style.color = '#34d399';
+        badge.style.background = 'rgba(16, 185, 129, 0.14)';
+        toggleText.textContent = 'قطع شبیه‌ساز شارژ';
+      } else {
+        badge.textContent = 'در حال دشارژ / قطع کابل';
+        badge.style.color = '#f87171';
+        badge.style.background = 'rgba(239, 68, 68, 0.14)';
+        toggleText.textContent = 'وصل شبیه‌ساز شارژ';
+      }
+    }
+
+    function toggleSimulatedCharging() {
+      isCharging = !isCharging;
+      updateBatteryDisplay(batteryLevel, isCharging);
+      showToast(isCharging ? 'شارژر متصل شد ⚡' : 'کابل شارژر جدا شد 🔌');
+      if (!isCharging) {
+        // Anti-theft check
+        const antiTheft = document.getElementById('unplugAlarmToggle');
+        if (antiTheft && antiTheft.checked) {
+          testAlarmVoice('siren');
+        }
+      }
+    }
+
+    // Audio Player (supports native bridge, fallback to audio/*.mp3 or Web Audio)
+    function testAlarmVoice(type) {
+      if (isMuted) {
+        showToast('صدا غیرفعال (Mute) است 🔇');
+        return;
+      }
+
+      // 1. Android Native Bridge if running inside APK
+      if (window.Android && typeof window.Android.playPersianVoice === 'function') {
+        window.Android.playPersianVoice(type);
+        showToast(`پخش صدای نیتیو: ${type} 🗣️`);
+        return;
+      }
+
+      // 2. HTML5 Audio tag fallback using audio files
+      const soundMap = {
+        'target': 'audio/fa_battery_85.mp3',
+        'full': 'audio/fa_battery_100.mp3',
+        'low': 'audio/fa_battery_low.mp3',
+        'overheat': 'audio/fa_battery_hot.mp3',
+        'ram_clean': 'audio/fa_ram_clean.mp3',
+        'files_clean': 'audio/fa_files_clean.mp3',
+        'siren': 'audio/fa_siren.mp3'
+      };
+
+      const src = soundMap[type] || 'audio/fa_battery_85.mp3';
+      const audio = new Audio(src);
+      audio.play().then(() => {
+        showToast(`پخش صدای فارسی: ${type} 🔊`);
+      }).catch(err => {
+        // 3. Web Audio Tone fallback
+        playEmergencyTone(type === 'siren' ? 880 : 540);
+        showToast('پخش بیزر هشدار اضطراری (Tone) 📢');
+      });
+    }
+
+    function playEmergencyTone(freq) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+      } catch (e) {}
+    }
+
+    function testAudioFallback() {
+      playEmergencyTone(650);
+      showToast('بیزر اضطراری سیستم تست شد');
+    }
+
+    function triggerTestVibration() {
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200, 100, 400]);
+        showToast('ویبره گوشی فعال شد 📳');
+      } else {
+        showToast('سنسور لرزش در این مرورگر پشتیبانی نمی‌شود');
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      const btn = document.getElementById('headerSoundBtn');
+      btn.textContent = isMuted ? '🔇' : '🔊';
+      showToast(isMuted ? 'صدا بی‌صدا شد 🔇' : 'صدا فعال شد 🔊');
+    }
+
+    // CPU Benchmark simulation
+    function runCpuBenchmark() {
+      showToast('شروع بنچمارک ۸ هسته پردازنده... ⏳');
+      const start = performance.now();
+      let primeCount = 0;
+      for (let i = 2; i < 60000; i++) {
+        let isPrime = true;
+        for (let j = 2; j * j <= i; j++) {
+          if (i % j === 0) { isPrime = false; break; }
+        }
+        if (isPrime) primeCount++;
+      }
+      const dur = Math.round(performance.now() - start);
+      const score = Math.round(18500 / Math.max(dur, 10) * 100);
+      setTimeout(() => {
+        showToast(`امتیاز CPU: ${score} (زمان: ${dur} میلی‌ثانیه) 🚀`);
+      }, 600);
+    }
+
+    // RAM Optimization
+    function executeRamOptimization() {
+      let totalToFree = 0;
+      document.querySelectorAll('.ram-cb:checked').forEach(cb => {
+        totalToFree += parseInt(cb.dataset.size || '100');
+      });
+      if (totalToFree === 0) totalToFree = 450;
+
+      showToast(`در حال آزادسازی ${totalToFree} مگابایت رم... ⚡`);
+
+      if (window.Android && typeof window.Android.optimizeRam === 'function') {
+        window.Android.optimizeRam('[]');
+      } else {
+        testAlarmVoice('ram_clean');
+      }
+
+      setTimeout(() => {
+        const ramPct = document.getElementById('ramPctText');
+        const ramUsed = document.getElementById('ramUsedText');
+        const ramFree = document.getElementById('ramFreeText');
+        const ramBarUsed = document.getElementById('ramBarUsed');
+        const ramBarFree = document.getElementById('ramBarFree');
+
+        if (ramPct) ramPct.textContent = '34%';
+        if (ramUsed) ramUsed.textContent = '1.3 GB';
+        if (ramFree) ramFree.textContent = '2.1 GB';
+        if (ramBarUsed) ramBarUsed.style.width = '28%';
+        if (ramBarFree) ramBarFree.style.width = '57%';
+
+        showToast(`موفقیت: ${totalToFree} مگابایت رم با موفقیت آزاد شد! 🎉`);
+      }, 700);
+    }
+
+    // Files Tab
+    function filterFileCategory(cat) {
+      document.querySelectorAll('.scanner-tab-pill').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      showToast(`فیلتر دسته‌بندی: ${cat}`);
+    }
+
+    function confirmDeleteFile(name, cardId, size) {
+      pendingDeleteCardId = cardId;
+      pendingDeleteSize = size;
+      document.getElementById('modalFileNameTitle').textContent = `حذف: ${name}`;
+      document.getElementById('modalFileDesc').textContent = `آیا مایل به حذف این فایل کپی (${size} مگابایت) هستید؟ نسخه اصلی نگهداری می‌شود.`;
+      document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+
+    function executeDeleteFile() {
+      if (pendingDeleteCardId) {
+        const el = document.getElementById(pendingDeleteCardId);
+        if (el) el.remove();
+        showToast(`فایل کپی حذف شد (${pendingDeleteSize}MB آزاد شد) 🗑️`);
+        testAlarmVoice('files_clean');
+      }
+      closeModal();
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+    }
+
+    function showBuildInfoModal() {
+      document.getElementById('buildInfoModal').classList.add('open');
+    }
+
+    function refreshStorageStats() {
+      showToast('آمار حافظه دیسک به‌روز شد 🔄');
+    }
+
+    function saveTargetPercent(val) {
+      targetPercent = parseInt(val);
+      if (window.Android && typeof window.Android.setTargetThreshold === 'function') {
+        window.Android.setTargetThreshold(targetPercent);
+      }
+      showToast(`سقف هشدار شارژ روی ${targetPercent}٪ تنظیم شد`);
+    }
+
+    function toggleVoiceSetting(checked) {
+      showToast(checked ? 'صدای فارسی فعال است 🗣️' : 'صدای فارسی خاموش شد');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      const txt = document.getElementById('toastText');
+      txt.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // On Load
+    window.addEventListener('DOMContentLoaded', () => {
+      initCores();
+      updateBatteryDisplay(8, true);
+      setInterval(updateCoreFluctuations, 2400);
+
+      // Check if running in native Android
+      if (window.Android && window.Android.isNative) {
+        document.getElementById('webDownloadBar').style.display = 'none';
+        try {
+          if (window.SysInfo && typeof window.SysInfo.getBatteryInfo === 'function') {
+            const b = JSON.parse(window.SysInfo.getBatteryInfo());
+            updateBatteryDisplay(b.percent || 8, b.plugged || false);
+          }
+        } catch (e) {}
+      }
+    });
+  </script>
+</body>
+</html>

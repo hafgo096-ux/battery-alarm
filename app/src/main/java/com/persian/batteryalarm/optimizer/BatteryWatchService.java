@@ -61,8 +61,6 @@ public class BatteryWatchService extends Service {
         Notification watchNotif = buildWatchNotification("پایش هوشمند باتری و سخت‌افزار فعال است");
         if (Build.VERSION.SDK_INT >= 34) {
             startForeground(NOTIF_WATCH, watchNotif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIF_WATCH, watchNotif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else {
             startForeground(NOTIF_WATCH, watchNotif);
         }
