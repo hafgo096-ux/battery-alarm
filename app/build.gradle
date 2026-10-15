@@ -10,8 +10,8 @@ android {
         applicationId "com.dsh.batteryalarm"
         minSdk 26
         targetSdk 35
-        versionCode 3
-        versionName "1.2"
+        versionCode 1
+        versionName "1.0.0"
     }
 
     // فایل HTML رابط کاربری در پوشهٔ assets پروژه است (خارج از app/src)

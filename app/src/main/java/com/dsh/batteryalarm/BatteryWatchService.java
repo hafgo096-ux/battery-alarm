@@ -6,10 +6,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
@@ -27,9 +28,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * سرویس پس‌زمینهٔ پایش شارژ. حتی اگر برنامه کامل بسته شود، این سرویس
- * زنده می‌ماند و با صدای آلارم خود اندروید هشدار می‌دهد. زنگ تنها با
- * لمس دکمهٔ «توقف» قطع می‌شود.
+ * سرویس پس‌زمینهٔ پایش هوشمند شارژ باتری و وضعیت سیستم.
+ * سازگار با اندروید ۸ تا ۱۵ (API 26 تا 35).
  */
 public class BatteryWatchService extends Service {
 
@@ -38,7 +38,6 @@ public class BatteryWatchService extends Service {
     private static final String CH_ALARM = "battery_alarm_channel";
     private static final int NOTIF_WATCH = 777;
     private static final int NOTIF_ALARM = 778;
-    private static final int TARGET_PERCENT = 85;
 
     private PowerManager.WakeLock wakeLock;
     private MediaPlayer mediaPlayer;
@@ -47,6 +46,7 @@ public class BatteryWatchService extends Service {
     boolean stopRequested = false;
     long htmlActiveUntil = 0;
     private Timer timer;
+    private boolean receiverRegistered = false;
 
     private final BatteryReceiver batteryReceiver = new BatteryReceiver();
 
@@ -54,24 +54,45 @@ public class BatteryWatchService extends Service {
     public void onCreate() {
         super.onCreate();
         createChannels();
-        startForeground(NOTIF_WATCH, buildWatchNotification("پایش شارژ فعال است"));
 
-        // WakeLock دائمی برای زنده ماندن سرویس
+        // شروع Foreground Service سازگار با اندروید ۱۴ و ۱۵ (API 34+)
+        Notification watchNotif = buildWatchNotification("پایش هوشمند شارژ و سخت‌افزار فعال است");
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(NOTIF_WATCH, watchNotif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIF_WATCH, watchNotif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else {
+            startForeground(NOTIF_WATCH, watchNotif);
+        }
+
+        // WakeLock برای اجرای پایدار پایش در حالت قفل صفحه
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         if (pm != null) {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "dsh:batterywatch:watch");
             wakeLock.setReferenceCounted(false);
-            wakeLock.acquire(); // بدون انقضا
+            try {
+                wakeLock.acquire();
+            } catch (Exception ignored) {}
         }
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
-        registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        // ثبت دریافت‌کننده تغییرات باتری
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
+            } else {
+                registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            }
+            receiverRegistered = true;
+        } catch (Exception e) {
+            Log.w(TAG, "failed to register battery receiver", e);
+        }
 
-        // تایمر یادآور برای زنده نگه‌داشتن سرویس در حالت Doze
+        // تایمر واچ‌داگ برای زنده نگه‌داشتن سرویس در حالت Doze
         timer = new Timer("dsh-watchdog", true);
         timer.scheduleAtFixedRate(new WatchdogTask(this), 60_000, 60_000);
 
-        Log.i(TAG, "service started, watchdog armed");
+        Log.i(TAG, "BatteryWatchService started successfully");
     }
 
     void triggerAlarm(int percent) {
@@ -84,7 +105,6 @@ public class BatteryWatchService extends Service {
         playSystemAlarm();
     }
 
-    /** زنگ سفارشی برای رویدادهای غیر باتری (مثلاً مصرف بحرانی منابع) */
     void triggerAlarmCustom(String title, String sub) {
         Log.i(TAG, "ALARM custom: " + title);
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -114,7 +134,6 @@ public class BatteryWatchService extends Service {
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build());
-            // بدون anonymous class: از Runnable در دستورات استفاده می‌کنیم
             mediaPlayer.setOnPreparedListener(new PreparedListener());
             mediaPlayer.prepareAsync();
             Log.i(TAG, "playing system alarm sound");
@@ -126,7 +145,7 @@ public class BatteryWatchService extends Service {
     private void startVibration() {
         try {
             if (vibrator == null || !vibrator.hasVibrator()) return;
-            long[] pattern = {0, 500, 300, 500, 300, 500};
+            long[] pattern = {0, 600, 250, 600, 250, 800};
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0));
             } else {
@@ -147,7 +166,6 @@ public class BatteryWatchService extends Service {
         }
     }
 
-    /** توقف کامل زنگ — تنها از طریق این متد صدای آلارم قطع می‌شود */
     void stopAlarm() {
         stopMediaPlayer();
         if (vibrator != null) {
@@ -165,29 +183,32 @@ public class BatteryWatchService extends Service {
         NotificationManager nm = getSystemService(NotificationManager.class);
         if (nm == null) return;
         NotificationChannel watch = new NotificationChannel(
-                CH_WATCH, "پایش پس‌زمینه", NotificationManager.IMPORTANCE_LOW);
-        watch.setDescription("اعلان دائمی برای زنده ماندن پایش شارژ");
+                CH_WATCH, "پایش مداوم باتری", NotificationManager.IMPORTANCE_LOW);
+        watch.setDescription("اعلان برای زنده ماندن سرویس پایش هوشمند");
         nm.createNotificationChannel(watch);
 
         NotificationChannel alarm = new NotificationChannel(
-                CH_ALARM, "زنگ هشدار شارژ", NotificationManager.IMPORTANCE_HIGH);
-        alarm.setDescription("زنگ هشدار هنگام رسیدن به ۸۵٪");
+                CH_ALARM, "زنگ هشدار باتری و سخت‌افزار", NotificationManager.IMPORTANCE_HIGH);
+        alarm.setDescription("زنگ هشدار هنگام رسیدن به شارژ هدف یا مصرف بحرانی");
         alarm.setSound(null, null);
+        alarm.enableVibration(true);
         nm.createNotificationChannel(alarm);
     }
 
     private Notification buildWatchNotification(String text) {
+        Intent openIntent = new Intent(this, MainActivity.class);
+        openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent openPending = PendingIntent.getActivity(this, 0, openIntent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
         return new Notification.Builder(this, CH_WATCH)
-                .setContentTitle("هشدار شارژ باتری")
+                .setContentTitle("هشدار هوشمند باتری")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
                 .setOngoing(true)
+                .setContentIntent(openPending)
                 .setPriority(Notification.PRIORITY_LOW)
                 .build();
-    }
-
-    private Notification buildAlarmNotification(int percent) {
-        return buildAlarmNotification(percent, null, null);
     }
 
     private Notification buildAlarmNotification(int percent, String title, String sub) {
@@ -225,23 +246,22 @@ public class BatteryWatchService extends Service {
             if (intent.getBooleanExtra("stop_alarm", false)) {
                 stopAlarm();
             } else if (intent.getBooleanExtra("html_heartbeat", false)) {
-                // برنامه در پیش‌زمینه است و خودش صدا را پخش می‌کند
                 htmlActiveUntil = System.currentTimeMillis() + 8000;
                 if (alarmFired) {
                     stopMediaPlayer();
                     if (vibrator != null) { try { vibrator.cancel(); } catch (Exception ignored) {} }
                 }
             } else if (intent.getBooleanExtra("html_stopped", false)) {
-                // کاربر در برنامه دکمهٔ توقف را زد
                 stopAlarm();
             } else if (intent.getBooleanExtra("native_alarm", false)) {
-                // درخواست زنگ از طرف WebView (HTML تشخیص داد به آستانه رسیده‌ایم)
-                int percent = intent.getIntExtra("percent", TARGET_PERCENT);
+                SharedPreferences sp = getSharedPreferences("dsh_settings", Context.MODE_PRIVATE);
+                int target = sp.getInt("target_percent", 85);
+                int percent = intent.getIntExtra("percent", target);
                 String title = intent.getStringExtra("alarm_title");
                 String sub = intent.getStringExtra("alarm_sub");
                 if (!alarmFired && !stopRequested) {
                     alarmFired = true;
-                    if (title != null) {
+                    if (title != null && !title.isEmpty()) {
                         triggerAlarmCustom(title, sub);
                     } else {
                         triggerAlarm(percent);
@@ -254,7 +274,6 @@ public class BatteryWatchService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        // ری‌استارت سرویس وقتی برنامه از لیست اخیرها پاک شد
         Intent restart = new Intent(this, BatteryWatchService.class);
         PendingIntent pi = PendingIntent.getService(this, 3, restart,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
@@ -279,7 +298,12 @@ public class BatteryWatchService extends Service {
         if (wakeLock != null && wakeLock.isHeld()) {
             try { wakeLock.release(); } catch (Exception ignored) {}
         }
-        try { unregisterReceiver(batteryReceiver); } catch (Exception ignored) {}
+        if (receiverRegistered) {
+            try {
+                unregisterReceiver(batteryReceiver);
+                receiverRegistered = false;
+            } catch (Exception ignored) {}
+        }
         super.onDestroy();
     }
 
@@ -290,8 +314,7 @@ public class BatteryWatchService extends Service {
         }
     }
 
-
-    static class WatchdogTask extends java.util.TimerTask {
+    static class WatchdogTask extends TimerTask {
         private final BatteryWatchService svc;
         WatchdogTask(BatteryWatchService svc) { this.svc = svc; }
         @Override
@@ -301,5 +324,4 @@ public class BatteryWatchService extends Service {
             }
         }
     }
-
 }

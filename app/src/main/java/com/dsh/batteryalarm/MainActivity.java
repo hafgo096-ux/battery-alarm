@@ -4,34 +4,33 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.JavascriptInterface;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-
 public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
     private WebView webView;
     private static final int REQ_NOTIF = 1001;
-    private boolean heartbeatStarted = false;
 
     private static class AppWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             String url = request.getUrl().toString();
-            if (url.startsWith("http")) {
+            if (url.startsWith("http://") || url.startsWith("https://")) {
                 try {
                     view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                 } catch (Exception ignored) {}
@@ -45,8 +44,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        getWindow().getDecorView().setSystemUiVisibility(flags);
+        // تنظیم نوار وضعیت شیک تیره
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#080c16"));
+        window.setNavigationBarColor(Color.parseColor("#080c16"));
 
         webView = new WebView(this);
         setContentView(webView);
@@ -58,9 +60,13 @@ public class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setDatabaseEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webView.setBackgroundColor(Color.parseColor("#080c16"));
         webView.setKeepScreenOn(true);
+
         webView.addJavascriptInterface(new WebBridge(this), "Android");
         webView.addJavascriptInterface(new SysInfoBridge(this), "SysInfo");
 
@@ -73,7 +79,6 @@ public class MainActivity extends Activity {
     }
 
     private void requestPermissions() {
-        // مجوز اعلان (اندروید ۱۳+) با API مستقیم، بدون نیاز به کتابخانهٔ androidx
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             try {
                 int check = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS);
@@ -93,8 +98,7 @@ public class MainActivity extends Activity {
             PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
             String pkg = getPackageName();
             if (pm != null && !pm.isIgnoringBatteryOptimizations(pkg)) {
-                Intent intent = new Intent(
-                        "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATION_SETTINGS");
+                Intent intent = new Intent("android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATION_SETTINGS");
                 intent.setData(Uri.parse("package:" + pkg));
                 startActivity(intent);
             }
@@ -132,11 +136,5 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    protected void onDestroy() {
-        // سرویس پس‌زمینه باقی می‌ماند
-        super.onDestroy();
     }
 }
