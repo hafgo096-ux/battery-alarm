@@ -164,7 +164,7 @@ public class WebBridge {
             res.put("ok", true);
             res.put("volume", MonitorPrefs.alarmVolume(ctx));
         } catch (Exception e) {
-            res.put("ok", false);
+                try { res.put("ok", false); } catch (Exception ignored) {}
         }
         return res.toString();
     }
