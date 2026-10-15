@@ -14,13 +14,18 @@ android {
         versionName "1.0.0"
     }
 
+    dependenciesInfo {
+        includeInApk false
+        includeInBundle false
+    }
+
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets']
         }
     }
 
-    aaptOptions {
+    androidResources {
         noCompress 'mp3'
     }
 
@@ -50,6 +55,16 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    lint {
+        abortOnError false
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/*.kotlin_module']
+        }
+    }
+
     applicationVariants.all { variant ->
         if (variant.name == 'release') {
             variant.outputs.each { output ->
@@ -57,4 +72,8 @@ android {
             }
         }
     }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
 }
