@@ -41,7 +41,7 @@ jobs:
               echo '```'
               echo "### compile errors (اولین ۴۰ مورد)"
               echo '```'
-              grep -nE "error:|\.java:[0-9]+:[0-9]+" /tmp/build.log | head -40 || true
+              grep -n -A 4 "error:" /tmp/build.log | head -80 || true
               echo '```'
               echo "### Caused by"
               echo '```'
