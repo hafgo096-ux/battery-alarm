@@ -35,6 +35,7 @@ public class SysInfoBridge {
     private static final long MEM_TTL = 1200L;
     private static final long STORAGE_TTL = 4000L;
     private static final long DEVICE_TTL = 60000L;
+    private static final long BATTERY_TTL = 1000L;
 
     private final Context ctx;
 
@@ -49,6 +50,8 @@ public class SysInfoBridge {
     private long storageCacheAt = 0;
     private String deviceCache = null;
     private long deviceCacheAt = 0;
+    private String batteryCache = null;
+    private long batteryCacheAt = 0;
 
     public SysInfoBridge(Context ctx) {
         this.ctx = ctx;
@@ -268,6 +271,8 @@ public class SysInfoBridge {
     // ================= Battery =================
     @JavascriptInterface
     public String getBatteryInfo() {
+        long nowB = SystemClock.elapsedRealtime();
+        if (batteryCache != null && (nowB - batteryCacheAt) < BATTERY_TTL) return batteryCache;
         JSONObject o = new JSONObject();
         try {
             Intent i = ctx.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -294,6 +299,8 @@ public class SysInfoBridge {
 
             String tech = i != null ? i.getStringExtra("technology") : null;
             o.put("technology", tech != null && !tech.isEmpty() ? tech : "نامشخص");
+            batteryCache = o.toString();
+            batteryCacheAt = nowB;
         } catch (Exception e) {
             Log.w(TAG, "getBatteryInfo failed", e);
         }

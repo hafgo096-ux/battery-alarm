@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,6 +30,10 @@ import java.util.List;
  *  - monitorState(): وضعیت زنده برای پنل «مصرف باتری» و اجرای تست‌های واقعی.
  *  - optimizeRam(): مقدار آزادسازی واقعی رم (بدون داده‌سازی).
  *  - deleteFile(): نتیجه واقعی حذف (بدون ادعای دروغین موفقیت).
+ *  - getAppCaches()/getLargeMedia()/getOwnStorage()/freeOwnMemory(): اسکن واقعی
+ *    کش برنامه‌ها، فایل‌های حجیم و پاکسازی امن کش خود برنامه (نسخه ۱.۰.۱).
+ *  - openAppInfo()/openInFilesApp()/openUsageAccessSettings()/requestMediaPermission():
+ *    هدایت کاربر به صفحات سیستمی اندروید برای مدیریت امن فایل‌ها.
  */
 public class WebBridge {
 
@@ -405,39 +410,426 @@ public class WebBridge {
         if ((now - riskyAppsCacheAt) < RISKY_APPS_TTL_MS && !"[]".equals(riskyAppsCache)) {
             return riskyAppsCache;
         }
-        JSONArray res = new JSONArray();
+        JSONArray high = new JSONArray();
+        JSONArray medium = new JSONArray();
         try {
             PackageManager pm = ctx.getPackageManager();
             List<PackageInfo> pkgs = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
             for (PackageInfo pi : pkgs) {
                 if (pi.applicationInfo == null) continue;
                 if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
+                if (pi.packageName.equals(ctx.getPackageName())) continue;
                 String[] reqPerms = pi.requestedPermissions;
                 if (reqPerms == null) continue;
-                boolean hasSms = false, hasLoc = false, hasCam = false, hasOverlay = false;
+                boolean hasSms = false, hasLoc = false, hasCam = false, hasOverlay = false,
+                        hasMic = false, hasContacts = false, hasCallLog = false;
                 for (String p : reqPerms) {
                     if (p == null) continue;
-                    if (p.contains("SEND_SMS") || p.contains("READ_SMS")) hasSms = true;
+                    if (p.contains("SEND_SMS") || p.contains("READ_SMS") || p.contains("RECEIVE_SMS")) hasSms = true;
                     if (p.contains("ACCESS_FINE_LOCATION") || p.contains("ACCESS_BACKGROUND_LOCATION")) hasLoc = true;
                     if (p.contains("CAMERA")) hasCam = true;
                     if (p.contains("SYSTEM_ALERT_WINDOW")) hasOverlay = true;
+                    if (p.contains("RECORD_AUDIO")) hasMic = true;
+                    if (p.contains("READ_CONTACTS")) hasContacts = true;
+                    if (p.contains("READ_CALL_LOG")) hasCallLog = true;
                 }
-                if ((hasSms && hasLoc) || (hasOverlay && hasSms) || (hasCam && hasLoc && hasSms)) {
-                    JSONObject app = new JSONObject();
-                    app.put("name", pi.applicationInfo.loadLabel(pm).toString());
-                    app.put("pkg", pi.packageName);
-                    app.put("riskReason", "دسترسی همزمان به پیامک‌ها و موقعیت مکانی / پنجره شناور");
-                    app.put("dangerLevel", (hasSms && hasLoc && hasOverlay) ? "بسیار بالا" : "بالا");
-                    app.put("size", 0);
-                    res.put(app);
+                int sensitive = 0;
+                if (hasSms) sensitive++;
+                if (hasLoc) sensitive++;
+                if (hasCam) sensitive++;
+                if (hasOverlay) sensitive++;
+                if (hasMic) sensitive++;
+                if (hasContacts) sensitive++;
+                if (hasCallLog) sensitive++;
+                boolean critical = (hasSms && hasLoc) || (hasOverlay && hasSms)
+                        || (hasCam && hasLoc && hasSms);
+                if (!critical && sensitive < 2) continue;
+
+                List<String> parts = new ArrayList<>();
+                if (hasSms) parts.add("پیامک‌ها");
+                if (hasLoc) parts.add("موقعیت مکانی");
+                if (hasCam) parts.add("دوربین");
+                if (hasMic) parts.add("میکروفون");
+                if (hasContacts) parts.add("مخاطبان");
+                if (hasCallLog) parts.add("سوابق تماس");
+                if (hasOverlay) parts.add("پنجره شناور");
+                StringBuilder sb = new StringBuilder("دسترسی همزمان به ");
+                for (int i = 0; i < parts.size(); i++) {
+                    if (i > 0) sb.append(" و ");
+                    sb.append(parts.get(i));
                 }
+                String reason = sb.toString();
+                String danger = critical
+                        ? ((hasSms && hasLoc && hasOverlay) ? "بسیار بالا" : "بالا")
+                        : "متوسط";
+
+                JSONObject app = new JSONObject();
+                app.put("name", pi.applicationInfo.loadLabel(pm).toString());
+                app.put("pkg", pi.packageName);
+                app.put("riskReason", reason);
+                app.put("note", reason);
+                app.put("dangerLevel", danger);
+                app.put("sizeText", "خطر: " + danger);
+                app.put("action", "appinfo");
+                app.put("path", pi.packageName);
+                app.put("size", 0);
+                (critical ? high : medium).put(app);
             }
         } catch (Exception e) {
             Log.w(TAG, "risky apps scan error", e);
         }
+        JSONArray res = new JSONArray();
+        for (int i = 0; i < high.length() && res.length() < 40; i++) {
+            try { res.put(high.get(i)); } catch (Exception ignored) {}
+        }
+        for (int i = 0; i < medium.length() && res.length() < 40; i++) {
+            try { res.put(medium.get(i)); } catch (Exception ignored) {}
+        }
         riskyAppsCache = res.toString();
         riskyAppsCacheAt = now;
         return riskyAppsCache;
+    }
+
+    // ================== کش واقعی برنامه‌ها (StorageStatsManager) ==================
+
+    private static String formatSizeFa(long bytes) {
+        if (bytes >= 1073741824L) {
+            return String.format(java.util.Locale.US, "%.1f GB", bytes / 1073741824.0);
+        }
+        if (bytes >= 1048576L) {
+            return String.format(java.util.Locale.US, "%.1f MB", bytes / 1048576.0);
+        }
+        if (bytes >= 1024L) return (bytes / 1024L) + " KB";
+        return bytes + " B";
+    }
+
+    @JavascriptInterface
+    public String getAppCaches() {
+        JSONArray res = new JSONArray();
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                JSONObject info = new JSONObject();
+                info.put("name", "نمایش کش برنامه‌ها نیاز به اندروید ۸ به بالا دارد");
+                info.put("note", "نسخه اندروید این دستگاه قدیمی‌تر است");
+                info.put("action", "none");
+                res.put(info);
+                return res.toString();
+            }
+            android.app.usage.StorageStatsManager ssm =
+                    (android.app.usage.StorageStatsManager) ctx.getSystemService(Context.STORAGE_STATS_SERVICE);
+            if (ssm == null) return res.toString();
+            java.util.UUID uuid = android.os.storage.StorageManager.UUID_DEFAULT;
+            PackageManager pm = ctx.getPackageManager();
+            List<PackageInfo> pkgs = pm.getInstalledPackages(0);
+
+            List<JSONObject> found = new ArrayList<>();
+            boolean blocked = false;
+            for (PackageInfo pi : pkgs) {
+                if (pi.packageName.equals(ctx.getPackageName())) continue;
+                try {
+                    android.app.usage.StorageStats stats = ssm.queryStatsForPackage(
+                            uuid, pi.packageName, android.os.Process.myUserHandle());
+                    long cache = stats.getCacheBytes();
+                    if (cache >= 512L * 1024L) {
+                        String label = pi.packageName;
+                        try {
+                            if (pi.applicationInfo != null) label = pi.applicationInfo.loadLabel(pm).toString();
+                        } catch (Exception ignored) {}
+                        JSONObject o = new JSONObject();
+                        o.put("name", label);
+                        o.put("pkg", pi.packageName);
+                        o.put("sizeMb", Math.round(cache / 1048576.0));
+                        o.put("sizeText", formatSizeFa(cache));
+                        o.put("note", "کش موقت — برای پاکسازی از تنظیمات اندروید اقدام کنید");
+                        o.put("action", "appinfo");
+                        o.put("path", pi.packageName);
+                        o.put("_cache", cache);
+                        found.add(o);
+                    }
+                } catch (SecurityException se) {
+                    blocked = true;
+                    break;
+                } catch (Exception ignored) {}
+            }
+            if (blocked && found.isEmpty()) {
+                JSONObject grant = new JSONObject();
+                grant.put("name", "برای مشاهده کش برنامه‌ها دسترسی لازم است");
+                grant.put("note", "روی دکمه زیر بزنید، این برنامه را در لیست روشن کنید و برگردید");
+                grant.put("action", "grant");
+                res.put(grant);
+                return res.toString();
+            }
+            java.util.Collections.sort(found, new java.util.Comparator<JSONObject>() {
+                @Override
+                public int compare(JSONObject a, JSONObject b) {
+                    return Long.compare(b.optLong("_cache", 0), a.optLong("_cache", 0));
+                }
+            });
+            int n = 0;
+            for (JSONObject o : found) {
+                if (n++ >= 25) break;
+                o.remove("_cache");
+                res.put(o);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "getAppCaches failed", e);
+        }
+        return res.toString();
+    }
+
+    // ================== فایل‌های حجیم رسانه‌ای (MediaStore) ==================
+
+    private boolean hasMediaPermission() {
+        try {
+            if (Build.VERSION.SDK_INT >= 33) {
+                return ctx.checkSelfPermission("android.permission.READ_MEDIA_IMAGES")
+                                == PackageManager.PERMISSION_GRANTED
+                        || ctx.checkSelfPermission("android.permission.READ_MEDIA_VIDEO")
+                                == PackageManager.PERMISSION_GRANTED;
+            }
+            return ctx.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private List<JSONObject> queryLargeMediaList(android.net.Uri table, long minBytes) {
+        List<JSONObject> out = new ArrayList<>();
+        String[] proj = {
+                android.provider.MediaStore.MediaColumns._ID,
+                android.provider.MediaStore.MediaColumns.DISPLAY_NAME,
+                android.provider.MediaStore.MediaColumns.SIZE
+        };
+        String sel = android.provider.MediaStore.MediaColumns.SIZE + " >= ?";
+        String[] args = { String.valueOf(minBytes) };
+        android.database.Cursor c = null;
+        try {
+            c = ctx.getContentResolver().query(
+                    table, proj, sel, args, android.provider.MediaStore.MediaColumns.SIZE + " DESC");
+            if (c == null) return out;
+            int idCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns._ID);
+            int nameCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
+            int sizeCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.SIZE);
+            int count = 0;
+            while (c.moveToNext() && count < 30) {
+                long id = c.getLong(idCol);
+                String name = c.getString(nameCol);
+                long size = c.getLong(sizeCol);
+                android.net.Uri uri = android.content.ContentUris.withAppendedId(table, id);
+                JSONObject o = new JSONObject();
+                o.put("name", (name != null && !name.isEmpty()) ? name : "فایل رسانه‌ای");
+                o.put("path", uri.toString());
+                o.put("sizeMb", Math.round(size / 1048576.0));
+                o.put("sizeText", formatSizeFa(size));
+                o.put("note", "برای حذف از برنامه مدیریت فایل خود اندروید استفاده کنید");
+                o.put("action", "media");
+                o.put("_size", size);
+                out.add(o);
+                count++;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "media query failed", e);
+        } finally {
+            if (c != null) {
+                try { c.close(); } catch (Exception ignored) {}
+            }
+        }
+        return out;
+    }
+
+    @JavascriptInterface
+    public String getLargeMedia(int minMb) {
+        JSONArray res = new JSONArray();
+        try {
+            if (!hasMediaPermission()) {
+                JSONObject g = new JSONObject();
+                g.put("name", "برای مشاهده فایل‌های حجیم، دسترسی به رسانه‌ها لازم است");
+                g.put("note", "اجازه دسترسی به عکس‌ها و ویدیوها را تأیید کنید و دوباره اسکن کنید");
+                g.put("action", "grant_media");
+                res.put(g);
+                return res.toString();
+            }
+            long minBytes = Math.max(1, minMb) * 1024L * 1024L;
+            List<JSONObject> all = new ArrayList<>();
+            all.addAll(queryLargeMediaList(
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, minBytes));
+            all.addAll(queryLargeMediaList(
+                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, minBytes));
+            java.util.Collections.sort(all, new java.util.Comparator<JSONObject>() {
+                @Override
+                public int compare(JSONObject a, JSONObject b) {
+                    return Long.compare(b.optLong("_size", 0), a.optLong("_size", 0));
+                }
+            });
+            int n = 0;
+            for (JSONObject o : all) {
+                if (n++ >= 30) break;
+                o.remove("_size");
+                res.put(o);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "getLargeMedia failed", e);
+        }
+        return res.toString();
+    }
+
+    // ================== کش خود برنامه + آزادسازی امن ==================
+
+    private static long dirSize(File dir) {
+        long total = 0;
+        if (dir == null || !dir.exists()) return 0;
+        File[] files = dir.listFiles();
+        if (files == null) return 0;
+        for (File f : files) {
+            try {
+                if (f.isDirectory()) total += dirSize(f);
+                else total += f.length();
+            } catch (Exception ignored) {}
+        }
+        return total;
+    }
+
+    private static long deleteChildren(File dir) {
+        long cleared = 0;
+        if (dir == null || !dir.exists()) return 0;
+        File[] files = dir.listFiles();
+        if (files == null) return 0;
+        for (File f : files) {
+            try {
+                if (f.isDirectory()) {
+                    cleared += deleteChildren(f);
+                    f.delete();
+                } else {
+                    cleared += f.length();
+                    f.delete();
+                }
+            } catch (Exception ignored) {}
+        }
+        return cleared;
+    }
+
+    @JavascriptInterface
+    public String getOwnStorage() {
+        JSONArray res = new JSONArray();
+        try {
+            long cacheBytes = dirSize(ctx.getCacheDir());
+            File extCache = ctx.getExternalCacheDir();
+            if (extCache != null) cacheBytes += dirSize(extCache);
+            JSONObject o = new JSONObject();
+            o.put("name", "کش موقت این برنامه");
+            o.put("path", ctx.getCacheDir().getAbsolutePath());
+            o.put("sizeMb", Math.round(cacheBytes / 104857.6) / 10.0);
+            o.put("sizeText", formatSizeFa(cacheBytes));
+            o.put("note", "پاکسازی امن: فقط فایل‌های موقت خود برنامه پاک می‌شود");
+            o.put("action", "owncache");
+            res.put(o);
+        } catch (Exception e) {
+            Log.w(TAG, "getOwnStorage failed", e);
+        }
+        return res.toString();
+    }
+
+    @JavascriptInterface
+    public String freeOwnMemory() {
+        JSONObject res = new JSONObject();
+        try {
+            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager.MemoryInfo before = new ActivityManager.MemoryInfo();
+            if (am != null) am.getMemoryInfo(before);
+
+            long cleared = deleteChildren(ctx.getCacheDir());
+            File extCache = ctx.getExternalCacheDir();
+            if (extCache != null) cleared += deleteChildren(extCache);
+            try { Runtime.getRuntime().gc(); } catch (Exception ignored) {}
+            SystemClock.sleep(300);
+
+            ActivityManager.MemoryInfo after = new ActivityManager.MemoryInfo();
+            if (am != null) am.getMemoryInfo(after);
+            long freedBytes = after.availMem - before.availMem;
+
+            res.put("ok", true);
+            res.put("freedMb", Math.round(freedBytes / 1048576.0));
+            res.put("cacheClearedMb", Math.round(cleared / 1048576.0));
+            res.put("cacheClearedKb", Math.round(cleared / 1024.0));
+            res.put("availAfterMb", Math.round(after.availMem / 1048576.0));
+        } catch (Exception e) {
+            Log.w(TAG, "freeOwnMemory failed", e);
+            try { res.put("ok", false); } catch (Exception ignored) {}
+        }
+        return res.toString();
+    }
+
+    // ================== باز کردن صفحات سیستمی اندروید ==================
+
+    @JavascriptInterface
+    public void openAppInfo(String pkg) {
+        try {
+            if (pkg == null || pkg.isEmpty()) return;
+            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            i.setData(android.net.Uri.parse("package:" + pkg));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(i);
+        } catch (Exception e) {
+            Log.w(TAG, "openAppInfo failed", e);
+        }
+    }
+
+    @JavascriptInterface
+    public void openInFilesApp(String uriStr) {
+        try {
+            if (uriStr == null || uriStr.isEmpty()) return;
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(android.net.Uri.parse(uriStr), "*/*");
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            ctx.startActivity(i);
+        } catch (Exception e) {
+            Log.w(TAG, "openInFilesApp failed", e);
+        }
+    }
+
+    @JavascriptInterface
+    public void openUsageAccessSettings() {
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(i);
+        } catch (Exception e) {
+            Log.w(TAG, "openUsageAccessSettings failed", e);
+        }
+    }
+
+    @JavascriptInterface
+    public String requestMediaPermission() {
+        JSONObject res = new JSONObject();
+        try {
+            res.put("requested", false);
+            if (!(ctx instanceof android.app.Activity)) {
+                res.put("reason", "no_activity");
+                return res.toString();
+            }
+            final android.app.Activity act = (android.app.Activity) ctx;
+            final String[] perms;
+            if (Build.VERSION.SDK_INT >= 33) {
+                perms = new String[]{
+                        "android.permission.READ_MEDIA_IMAGES",
+                        "android.permission.READ_MEDIA_VIDEO"};
+            } else {
+                perms = new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE};
+            }
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try { act.requestPermissions(perms, 2001); } catch (Exception e) {
+                        Log.w(TAG, "requestMediaPermission failed", e);
+                    }
+                }
+            });
+            res.put("requested", true);
+        } catch (Exception e) {
+            Log.w(TAG, "requestMediaPermission failed", e);
+        }
+        return res.toString();
     }
 
     @JavascriptInterface

@@ -64,6 +64,7 @@ public class BatteryMonitorJobService extends JobService {
                 if (d != null && !BatteryWatchService.isRunning) {
                     AlertEngine.postAlarmNotification(ctx, d);
                     MonitorPrefs.markAlarm(ctx, d.type);
+                    playLowPowerSound(ctx, d);
                     Log.i(TAG, "low-power alarm notification: " + d.type);
                 }
             } else if (!BatteryWatchService.isRunning) {
@@ -80,6 +81,49 @@ public class BatteryMonitorJobService extends JobService {
         }
         jobFinished(params, false);
         return false;
+    }
+
+    /**
+     * پخش یک‌باره صدای هشدار در حالت کم‌مصرف (نسخه ۱.۰.۱).
+     * بدون حلقه و بدون سرویس دائمی؛ فقط همان پیام فارسی مربوط به هشدار،
+     * با احترام به بلندی صدای تعیین‌شده توسط کاربر.
+     */
+    private void playLowPowerSound(Context ctx, AlertEngine.Decision d) {
+        try {
+            int volume = MonitorPrefs.alarmVolume(ctx);
+            if (volume <= 0 || d == null || d.soundAsset == null || d.soundAsset.isEmpty()) return;
+            final float fraction = MonitorPrefs.clamp(volume, 0, 100) / 100f;
+            final android.media.MediaPlayer mp = new android.media.MediaPlayer();
+            android.content.res.AssetFileDescriptor afd = ctx.getAssets().openFd("audio/" + d.soundAsset);
+            try {
+                mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            } finally {
+                try { afd.close(); } catch (Exception ignored) {}
+            }
+            mp.setAudioAttributes(new android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build());
+            mp.setVolume(fraction, fraction);
+            mp.setLooping(false);
+            mp.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(android.media.MediaPlayer player) {
+                    try { player.release(); } catch (Exception ignored) {}
+                }
+            });
+            mp.setOnErrorListener(new android.media.MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(android.media.MediaPlayer player, int what, int extra) {
+                    try { player.release(); } catch (Exception ignored) {}
+                    return true;
+                }
+            });
+            mp.prepare();
+            mp.start();
+        } catch (Exception e) {
+            Log.w(TAG, "low-power sound failed", e);
+        }
     }
 
     @Override

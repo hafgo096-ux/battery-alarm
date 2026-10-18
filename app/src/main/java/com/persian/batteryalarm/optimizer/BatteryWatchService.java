@@ -167,6 +167,11 @@ public class BatteryWatchService extends Service {
                 public void run() {
                     Log.i(TAG, "auto stopping alarm after " + seconds + "s");
                     stopAlarm();
+                    // اگر پایش خاموش است، سرویس فقط برای تست روشن شده بود؛ پس خودش را ببندد
+                    if (!MonitorPrefs.monitoringEnabled(BatteryWatchService.this)) {
+                        stopForeground(true);
+                        stopSelf();
+                    }
                 }
             };
             handler.postDelayed(autoStopRunnable, autoStop * 1000L);
@@ -401,10 +406,12 @@ public class BatteryWatchService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
+            boolean wantsSound = false;
             if (intent != null) {
                 if (intent.getBooleanExtra("stop_alarm", false)) {
                     stopAlarm();
                 } else if (intent.getBooleanExtra("test_alarm", false)) {
+                    wantsSound = true;
                     AlertEngine.Decision d = new AlertEngine.Decision();
                     d.type = "test";
                     d.title = "🔔 تست زنگ هشدار";
@@ -413,6 +420,7 @@ public class BatteryWatchService extends Service {
                     d.vibrate = false;
                     startAlarm(d, true);
                 } else if (intent.getBooleanExtra("native_alarm", false)) {
+                    wantsSound = true;
                     AlertEngine.Decision d = new AlertEngine.Decision();
                     d.type = "manual";
                     d.percent = intent.getIntExtra("percent", MonitorPrefs.targetPercent(this));
@@ -422,6 +430,7 @@ public class BatteryWatchService extends Service {
                     d.sub = "هشدار دستی از داخل برنامه";
                     startAlarm(d, false);
                 } else if (intent.hasExtra("custom_title")) {
+                    wantsSound = true;
                     AlertEngine.Decision d = new AlertEngine.Decision();
                     d.type = "custom";
                     d.title = intent.getStringExtra("custom_title");
@@ -432,7 +441,10 @@ public class BatteryWatchService extends Service {
                 }
             }
 
-            if (!MonitorPrefs.monitoringEnabled(this)) {
+            // اگر کاربر صراحتاً درخواست پخش صدا (تست/صدای فارسی) کرده، حتی با پایش
+            // خاموش هم صدا پخش شود و سرویس بلافاصله خودکشی نکند (توقف خودکار،
+            // سرویس را هم بعداً می‌بندد). در غیر این صورت، سرویس متوقف می‌شود.
+            if (!MonitorPrefs.monitoringEnabled(this) && !wantsSound) {
                 Log.i(TAG, "monitoring disabled -> stopping service");
                 stopAlarm();
                 stopForeground(true);
