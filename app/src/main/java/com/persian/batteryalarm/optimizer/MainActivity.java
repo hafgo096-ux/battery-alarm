@@ -8,8 +8,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.content.res.AssetFileDescriptor;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -28,7 +28,6 @@ import android.webkit.WebViewClient;
 
 import androidx.webkit.WebViewAssetLoader;
 
-import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -163,10 +162,10 @@ public class MainActivity extends Activity {
             if (mime == null || mime.isEmpty()) mime = guessMime(mediaUri);
             boolean isMedia = mime.startsWith("video/") || mime.startsWith("audio/");
 
-            // طول کل فایله (برای Content-Length و محاسبه Range)
+            // طول کل فایل (برای Content-Length و محاسبه Range)
             long total = -1;
-            try (AssetFileDescriptor probe = cr.openAssetFileDescriptor(mediaUri, "r")) {
-                if (probe != null) total = probe.getLength();
+            try (ParcelFileDescriptor probe = cr.openFileDescriptor(mediaUri, "r")) {
+                if (probe != null) total = probe.getStatSize();
             } catch (Exception ignored) {}
 
             long rangeStart = 0;
@@ -206,39 +205,52 @@ public class MainActivity extends Activity {
             if (total <= 0) partial = false;
 
             final long fStart = rangeStart;
-            final long fLimit = (partial && rangeEnd > 0)
+            // نکته: rangeEnd == 0 یعنی «فقط بایت اول» (bytes=0-0) و باید معتبر باشد ⇒ >= 0
+            final long fLimit = (partial && rangeEnd >= 0)
                     ? (rangeEnd - rangeStart + 1)
                     : (partial && total > 0 ? (total - rangeStart) : -1);
 
             InputStream stream = null;
-            try (AssetFileDescriptor afd = cr.openAssetFileDescriptor(mediaUri, "r")) {
-                if (afd != null) {
-                    // کپی مستقل فایل‌دیسکریپتور تا پس از بسته‌شدن afd استریم زنده بماند
-                    // (ParcelFileDescriptor با finalizer خودش آزاد می‌شود)
-                    FileInputStream fis = new FileInputStream(
-                            android.os.ParcelFileDescriptor.dup(afd.getFileDescriptor()).getFileDescriptor());
-                    stream = new SkippedLimitedInputStream(fis, fStart, fLimit);
+            try {
+                ParcelFileDescriptor pfd = cr.openFileDescriptor(mediaUri, "r");
+                if (pfd == null) {
+                    stream = cr.openInputStream(mediaUri);
+                    if (stream != null && (fStart > 0 || fLimit > 0)) {
+                        stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
+                    }
+                } else {
+                    // مالکیت pfd به استریم منتقل می‌شود (AutoCloseInputStream هنگام بسته‌شدن
+                    // استریم توسط WebView، fd را هم می‌بندد) — بدون نیاز به FileDescriptor#dup
+                    stream = new SkippedLimitedInputStream(new ParcelFileDescriptor.AutoCloseInputStream(pfd), fStart, fLimit);
                 }
             } catch (Exception e) {
-                Log.w(TAG, "openAssetFileDescriptor failed", e);
+                if (stream == null) {
+                    try { stream = cr.openInputStream(mediaUri); } catch (Exception ignored) {}
+                    if (stream == null) return mediaError(404, "cannot open media");
+                    if (fStart > 0 || fLimit > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
+                }
             }
-            if (stream == null) {
-                try { stream = cr.openInputStream(mediaUri); } catch (Exception ignored) {}
-                if (stream == null) return mediaError(404, "cannot open media");
-                if (fStart > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
-            }
+            if (stream == null) return mediaError(404, "cannot open media");
 
-            WebResourceResponse r = new WebResourceResponse(mime, isMedia ? "" : "utf-8", stream);
-            Map<String, String> respHeaders = new java.util.HashMap<>();
-            if (partial) {
-                r.setStatusCodeAndReasonPhrase(206, "Partial Content");
-                long end = (rangeEnd > 0) ? rangeEnd : (total > 0 ? total - 1 : -1);
-                respHeaders.put("Content-Range", "bytes " + fStart + "-" + end + (total > 0 ? "/" + total : "/-"));
-            }
-            if (total > 0) respHeaders.put("Content-Length", String.valueOf(total));
+            // نکته API: WebResourceResponse#addHeader وجود عمومی ندارد؛ هدرها باید از طریق
+            // سازنده ۶ آرگومانی (statusCode, reasonPhrase, responseHeaders) ست شوند.
+            java.util.Map<String, String> respHeaders = new java.util.HashMap<>();
             respHeaders.put("Accept-Ranges", "bytes");
-            r.setResponseHeaders(respHeaders);
-            return r;
+            int status;
+            String reason;
+            if (partial) {
+                status = 206;
+                reason = "Partial Content";
+                long end = (rangeEnd >= 0) ? rangeEnd : (total > 0 ? total - 1 : -1);
+                respHeaders.put("Content-Range", "bytes " + fStart + "-" + end + "/" + total);
+                respHeaders.put("Content-Length", String.valueOf(fLimit > 0 ? fLimit : (total - fStart)));
+            } else {
+                status = 200;
+                reason = "OK";
+                if (total > 0) respHeaders.put("Content-Length", String.valueOf(total));
+            }
+            return new WebResourceResponse(mime, isMedia ? "" : "utf-8",
+                    status, reason, respHeaders, stream);
         } catch (Exception e) {
             Log.w(TAG, "media proxy failed", e);
             return mediaError(500, "proxy error");

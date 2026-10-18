@@ -1,31 +1,56 @@
-# 🔋 زنگ هوشمند باتری و بهینه‌ساز (نسخه ۱.۰.۳ — داده واقعی در همه بخش‌ها)
+# 🔋 زنگ هوشمند باتری و بهینه‌ساز (نسخه ۱.۰.۴ — بیلد سالم + آموزش‌های بیشتر)
 
 [![Download APK](https://img.shields.io/badge/دانلود_آخرین_نسخه-battery--alarm.apk-10b981?style=for-the-badge&logo=android&logoColor=white)](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk)
-[![Latest Release](https://img.shields.io/badge/GitHub_Release-v1.0.3-06b6d4?style=for-the-badge&logo=github)](https://github.com/hafgo096-ux/battery-alarm/releases/latest)
+[![Latest Release](https://img.shields.io/badge/GitHub_Release-v1.0.4-06b6d4?style=for-the-badge&logo=github)](https://github.com/hafgo096-ux/battery-alarm/releases/latest)
 [![Build](https://img.shields.io/badge/Build-GitHub_Actions-success?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/hafgo096-ux/battery-alarm/actions)
 
 > اپلیکیشن اندروید پایش شارژ باتری (Overcharge Protection)، هشدار صوتی فارسی، پایش سخت‌افزار،
-> بهینه‌سازی رم و اسکنر هوشمند فایل‌ها — نسخه ۱.۰.۳ با **رفع کامل «بخش‌های بدون داده»**:
-> دمای/بار/فرکانس واقعی پردازنده، حافظه داخلی واقعی، پردازش‌های فعال، پخش ویدیو با پراکسی Range،
-> زوم حرفه‌ای تصویر، هوش فایل با پایگاه‌دانش واقعی و سطح‌بندی صادقانه مجوزها (شامل حافظه تلگرام).
+> بهینه‌سازی رم و اسکنر هوشمند فایل‌ها — نسخه ۱.۰.۴ با **رفع قطعی شکست بیلد** (نسخه ۱.۰.۳ هرگز ساخته نشده بود)،
+> **۳۵ آموزش واقعی هوش فایل + کتابخانه قابل مرور**، اندازه‌گیری صادقانه بهینه‌سازی و سازگاری کامل WebView.
 
 ---
 
-## 📥 لینک‌های دسترسی (به‌روز شده برای نسخه ۱.۰.۳)
+## 📥 لینک‌های دسترسی (به‌روز شده برای نسخه ۱.۰.۴)
 
 | مورد | لینک | توضیح |
 | :--- | :--- | :--- |
-| 📲 **دانلود مستقیم APK** | [**battery-alarm.apk**](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk) | همیشه آخرین فایل امضاشده (فعلاً نسخه ۱.۰.۳) را می‌دهد |
-| 🏷️ **آخرین انتشار** | [Releases (latest)](https://github.com/hafgo096-ux/battery-alarm/releases/latest) | صفحه رسمی انتشار نسخه ۱.۰.۳، دارایی‌ها و وضعیت ساخت |
+| 📲 **دانلود مستقیم APK** | [**battery-alarm.apk**](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk) | همیشه آخرین فایل امضاشده (فعلاً نسخه ۱.۰.۴) را می‌دهد |
+| 🏷️ **آخرین انتشار** | [Releases (latest)](https://github.com/hafgo096-ux/battery-alarm/releases/latest) | صفحه رسمی انتشار نسخه ۱.۰.۴، دارایی‌ها و وضعیت ساخت |
 | 🧪 **وضعیت ساخت خودکار** | [GitHub Actions](https://github.com/hafgo096-ux/battery-alarm/actions) | ساخت APK با کلید امضای اختصاصی در هر Push |
-| 🌐 **رابط کاربری وب (پیش‌نمایش)** | [index.html](index.html) · [assets/index.html](assets/index.html) | همان رابط WebView با قابلیت اجرای ۲۸۰+ تست واقعی |
+| 🌐 **رابط کاربری وب (پیش‌نمایش)** | [index.html](index.html) · [assets/index.html](assets/index.html) | همان رابط WebView با قابلیت اجرای ۲۹۸ تست واقعی |
 
 > نصب: فایل APK را دانلود و نصب کنید (اجازه «نصب از منابع نامشخص» لازم است).
-> اگر نسخه قبلی (۱.۰.۰ تا ۱.۰.۲) را دارید، نسخه ۱.۰.۳ با همان امضا روی آن نصب می‌شود (بدون نیاز به حذف).
+> اگر نسخه قبلی (۱.۰.۰ تا ۱.۰.۳) را دارید، نسخه ۱.۰.۴ با همان امضا روی آن نصب می‌شود (بدون نیاز به حذف).
 
 ---
 
-## 🆕 گزارش تحلیل و رفع باگ‌ها (نسخه ۱.۰.۳ — داده واقعی در همه بخش‌ها)
+## 🆕 گزارش نسخه ۱.۰.۴ — چرا نسخه قبل نرسید و حالا چه چیزی ساخته شد
+
+### الف) ریشه شکست بیلد نسخه ۱.۰.۳ (دلیل «نصف‌راه ماندن» سشن قبل) ✅ رفع قطعی
+| # | خطای کامپایل | ریشه | اصلاح |
+| :- | :--- | :--- | :--- |
+| ۱ | `cannot find symbol: AssetFileDescriptor` | ایمپورت `android.os.AssetFileDescriptor` وجود خارجی ندارد؛ `ContentResolver.openFileDescriptor` هم `ParcelFileDescriptor` برمی‌گرداند | ایمپورت/نوع صحیح `ParcelFileDescriptor` + `getStatSize()` به‌جای `getLength()` |
+| ۲ | `cannot find symbol: method addHeader` | `WebResourceResponse.addHeader` API عمومی اندروید نیست (مخفی) | هدرهای `Content-Range`/`Content-Length`/`Accept-Ranges` از **سازنده عمومی ۶ آرگومانی** (status, reason, headers) ست می‌شوند |
+| ۳ | ریسک بسته‌شدن fd زودهنگام | `FileDescriptor#dup` در android.jar عمومی نیست | `ParcelFileDescriptor.AutoCloseInputStream` (مالکیت fd به استریم منتقل می‌شود) |
+| ۴ | باگ بازه ویدیو `bytes=0-0` | شرط `rangeEnd > 0` بایت اول را رد می‌کرد | شرط صحیح `rangeEnd >= 0` |
+
+### ب) هوش فایل — ۳۵ آموزش واقعی + کتابخانه قابل مرور ✅
+- پایگاه‌دانش از ۱۹ به **۳۵ قانون کاربردی** افزایش یافت (کش برنامه‌ها، رسانه و ویدیو، حافظه داخلی، مجوزها، مدیریت کلی) — همه واقعی، قابل‌استناد و بدون توصیه الکی.
+- **کتابخانه آموزش‌ها** در تب «هوش فایل»: دسته‌بندی‌دار با آیکون SVG، نمایش تدریجی (۶ آموزش + «مشاهده همه») — قابل مرور و خواندن.
+
+### ج) بهینه‌سازی — اندازه‌گیری صادقانه‌تر ✅
+- `optimizeRam`: نمونه‌برداری دومرحله‌ای قبل/بعد (کاهش نوسان لحظه‌ای)، **هرگز عدد منفی**، گزارش رم قبل/بعد + رم استفاده‌شده + یادداشت شفاف.
+- دمای پردازنده با دقت اعشار (۴۲.۵° نه ۴۲) + بررسی تا ۳۲ thermal zone + فیلد `temperatureSource` (سنسور انتخاب‌شده).
+
+### د) سازگاری WebView (پخش ویدیو/صدا) ✅
+- رفع خطای `play()/exitFullscreen()` در WebViewهای قدیمی که Promise برنمی‌گردانند (کرش بی‌صدای پخش) — حالا روی همه نسخه‌های WebView امن است.
+
+### هـ) کیفیت و تست ✅
+- **۲۹۸ آزمون داخل اپ** (همه پاس) + **۳۱ تست دودی DOM** با پل نیتیو ماک: سخت‌افزار (دما/بار/فرکانس)، رم، حافظه داخلی، پردازش‌های فعال، بهینه‌سازی، برنامه‌های پرخطر (شامل تلگرام با حافظه)، کش واقعی، گالری رسانه، زوم تصویر، پخش ویدیو با پراکسی و هوش فایل.
+
+---
+
+## 📜 گزارش تحلیل و رفع باگ‌ها (نسخه ۱.۰.۳ — داده واقعی در همه بخش‌ها؛ در ۱.۰.۴ منتشر شد)
 
 ### الف) بخش سخت‌افزار — «هیچ داده‌ای نشون نمی‌ده» ✅ رفع شد
 | # | ریشه باگ | اصلاح |
@@ -129,7 +154,8 @@
 ---
 
 ## 🧪 تست و اعتبارسنجی
-- **۲۸۰+ آزمون داخل اپ:** تب «تست سیستم» → «اجرای N تست واقعی» (شمارش داینامیک؛ گروه‌ها: BRIDGE, SETTINGS, PERSIST, VALIDATION, VOLUME, BATTERY, POWER, UI, DATA, PERF, TYPE, RANGE, SECURITY, STRESS, FUZZ, PERMISSION, MEDIA, RAM, HARDWARE, STORAGE, FILEINTEL).
+- **۲۹۸ آزمون داخل اپ (همه پاس در نسخه ۱.۰.۴):** تب «تست سیستم» → «اجرای N تست واقعی» (شمارش داینامیک؛ گروه‌ها: BRIDGE, SETTINGS, PERSIST, VALIDATION, VOLUME, BATTERY, POWER, UI, DATA, PERF, TYPE, RANGE, SECURITY, STRESS, FUZZ, PERMISSION, MEDIA, RAM, HARDWARE, STORAGE, FILEINTEL).
+- **۳۱ تست دودی DOM** (jsdom + پل نیتیو ماک) برای همه بخش‌های گزارش‌شده: سخت‌افزار، رم، حافظه، پردازش‌ها، بهینه‌سازی، پرخطر/کش، رسانه، زوم، پخش ویدیو، هوش فایل.
 - استرس نیتیو: `stressTestNative(10000)` با 10K تکرار clamp/percentOf/tempOf.
 - در مرورگر وب تست‌های سخت‌افزاری درست SKIP می‌شوند.
 
@@ -146,7 +172,7 @@
 
 ## 🔐 مشخصات امضا
 - **Package ID:** `com.persian.batteryalarm.optimizer`
-- **Version:** 1.0.3 (Code: 4) — **minSdk 24 — targetSdk 34**
+- **Version:** 1.0.4 (Code: 5) — **minSdk 24 — targetSdk 34**
 - **Key Alias:** `batteryalarm_release_alias` — v1+v2+v3
 
 ---
