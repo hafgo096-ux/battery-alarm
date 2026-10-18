@@ -1,49 +1,71 @@
 package com.persian.batteryalarm.optimizer;
 
 import android.app.ActivityManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.SystemClock;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
+import android.util.LruCache;
 import android.webkit.JavascriptInterface;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
- * پل ارتباطی جاوااسکریپت ↔ اندروید نیتیو (نسخه ۱.۰.۱).
+ * پل ارتباطی جاوااسکریپت ↔ اندروید نیتیو (نسخه ۱.۰.۲ - اصلاح جامع).
  *
- * قابلیت‌های جدید:
- *  - settingsJson() / setSetting(): ذخیره‌سازی دائمی همه تنظیمات در SharedPreferences
- *    (رفع کامل باگ «پاک شدن تنظیمات پس از بستن برنامه»).
- *  - setAlarmVolume()/getAlarmVolume(): کنترل بلندی صدای هشدار از داخل برنامه.
- *  - setMonitoringEnabled()/setLowPowerMode(): مدیریت مصرف باتری توسط کاربر.
- *  - monitorState(): وضعیت زنده برای پنل «مصرف باتری» و اجرای تست‌های واقعی.
- *  - optimizeRam(): مقدار آزادسازی واقعی رم (بدون داده‌سازی).
- *  - deleteFile(): نتیجه واقعی حذف (بدون ادعای دروغین موفقیت).
- *  - getAppCaches()/getLargeMedia()/getOwnStorage()/freeOwnMemory(): اسکن واقعی
- *    کش برنامه‌ها، فایل‌های حجیم و پاکسازی امن کش خود برنامه (نسخه ۱.۰.۱).
- *  - openAppInfo()/openInFilesApp()/openUsageAccessSettings()/requestMediaPermission():
- *    هدایت کاربر به صفحات سیستمی اندروید برای مدیریت امن فایل‌ها.
+ * تغییرات اصلی ۱.۰.۲:
+ *  - getRiskyApps: اصلاح باگ بحرانی "تلگرام به مکان دسترسی دارد" - اکنون فقط مجوزهای
+ *    واقعاً اعطا شده (GRANTED) بررسی می‌شود، نه مجوزهای درخواستی manifest.
+ *    قبلاً هر برنامه‌ای که در manifest مکان را درخواست کرده بود (مثل تلگرام برای
+ *    اشتراک مکان اختیاری) به اشتباه "پرخطر" نشان داده می‌شد.
+ *  - getAppIcon / getAppIconBatch: آیکون واقعی برنامه‌ها با Base64 برای نمایش زیبا
+ *  - getLargeMedia: بازنویسی کامل - برچسب فارسی "تصویر ۱/۲" و "ویدیو ۱/۲"،
+ *    نمایش ابعاد، مدت‌زمان ویدیو، تاریخ، و thumbUri برای لایت‌باکس
+ *  - getMediaThumbnail: تولید thumbnail بهینه برای نمایش سبک
+ *  - getRunningProcesses: لیست پردازش‌های واقعی با مصرف رم برای بهینه‌سازی صادقانه
+ *  - بهینه‌سازی مصرف باتری: کش، محدودیت تعداد، TTL
  */
 public class WebBridge {
 
     private static final String TAG = "WebBridge";
     private static final long RISKY_APPS_TTL_MS = 5L * 60L * 1000L;
+    private static final long CACHE_TTL_MS = 120000L;
 
     private final Context ctx;
 
     private String riskyAppsCache = "[]";
     private long riskyAppsCacheAt = 0L;
+    private String runningCache = null;
+    private long runningCacheAt = 0L;
+
+    // کش آیکون‌ها - حداکثر ۳۰ آیکون، هرکدام ~15KB Base64
+    private final LruCache<String, String> iconCache = new LruCache<String, String>(30) {
+        @Override
+        protected int sizeOf(String key, String value) { return 1; }
+    };
 
     public WebBridge(Context ctx) {
         this.ctx = ctx;
@@ -345,12 +367,11 @@ public class WebBridge {
                 }
             }
 
-            // اندازه‌گیری واقعی تغییر رم آزاد (بدون هیچ عدد ساختگی)
             SystemClock.sleep(400);
             ActivityManager.MemoryInfo after = new ActivityManager.MemoryInfo();
             if (am != null) am.getMemoryInfo(after);
 
-            long freedBytes = after.availMem - before.availMem; // می‌تواند ۰ یا منفی باشد
+            long freedBytes = after.availMem - before.availMem;
             res.put("success", true);
             res.put("freedKb", Math.round(freedBytes / 1024.0));
             res.put("freedMb", Math.round(freedBytes / 1048576.0));
@@ -365,6 +386,81 @@ public class WebBridge {
         } catch (Exception e) {
             Log.w(TAG, "optimizeRam native error", e);
             try { res.put("success", false); } catch (Exception ignored) {}
+        }
+        return res.toString();
+    }
+
+    /**
+     * لیست پردازش‌های جاری با مصرف واقعی رم (PSS) - برای بهینه‌سازی شفاف.
+     * فقط اطلاعات خواندنی؛ بستن فقط با اجازه کاربر و killBackgroundProcesses.
+     */
+    @JavascriptInterface
+    public String getRunningProcesses() {
+        long now = SystemClock.elapsedRealtime();
+        if (runningCache != null && (now - runningCacheAt) < CACHE_TTL_MS) return runningCache;
+
+        JSONArray res = new JSONArray();
+        try {
+            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+            PackageManager pm = ctx.getPackageManager();
+            if (am == null) return res.toString();
+
+            List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
+            if (procs == null || procs.isEmpty()) return res.toString();
+
+            // جمع‌آوری pids برای getProcessMemoryInfo
+            int[] pids = new int[Math.min(procs.size(), 25)];
+            List<ActivityManager.RunningAppProcessInfo> limited = procs.subList(0, Math.min(procs.size(), 25));
+            for (int i = 0; i < limited.size(); i++) pids[i] = limited.get(i).pid;
+            android.os.Debug.MemoryInfo[] mems = am.getProcessMemoryInfo(pids);
+
+            List<JSONObject> tmp = new ArrayList<>();
+            for (int i = 0; i < limited.size(); i++) {
+                ActivityManager.RunningAppProcessInfo pi = limited.get(i);
+                if (pi.pkgList == null || pi.pkgList.length == 0) continue;
+                String pkg = pi.pkgList[0];
+                if (pkg.equals(ctx.getPackageName())) continue;
+                // فقط پردازش‌های کاربر، نه سیستم
+                try {
+                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
+                    String label = ai.loadLabel(pm).toString();
+                    long pssKb = (mems != null && i < mems.length && mems[i] != null) ? mems[i].getTotalPss() : 0;
+
+                    JSONObject o = new JSONObject();
+                    o.put("name", label);
+                    o.put("pkg", pkg);
+                    o.put("procName", pi.processName);
+                    o.put("pssKb", pssKb);
+                    o.put("pssMb", Math.round(pssKb / 1024.0 * 10) / 10.0);
+                    o.put("sizeText", pssKb >= 1024 ? String.format(java.util.Locale.US, "%.1f MB", pssKb / 1024.0) : pssKb + " KB");
+                    o.put("importance", pi.importance);
+                    String impText = "پس‌زمینه";
+                    if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) impText = "فعال";
+                    else if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE) impText = "قابل مشاهده";
+                    o.put("statusText", impText);
+                    o.put("note", impText + " • " + (pssKb >= 1024 ? String.format(java.util.Locale.US, "%.1f مگابایت", pssKb / 1024.0) : pssKb + " کیلوبایت"));
+                    o.put("action", "ramkill");
+                    o.put("path", pkg);
+                    o.put("_pss", pssKb);
+                    tmp.add(o);
+                } catch (Exception ignored) {}
+            }
+            // مرتب‌سازی بر اساس مصرف رم (نزولی)
+            Collections.sort(tmp, new Comparator<JSONObject>() {
+                @Override public int compare(JSONObject a, JSONObject b) {
+                    return Long.compare(b.optLong("_pss", 0), a.optLong("_pss", 0));
+                }
+            });
+            for (JSONObject o : tmp) {
+                o.remove("_pss");
+                res.put(o);
+                if (res.length() >= 20) break;
+            }
+            runningCache = res.toString();
+            runningCacheAt = now;
+        } catch (Exception e) {
+            Log.w(TAG, "getRunningProcesses failed", e);
         }
         return res.toString();
     }
@@ -402,7 +498,103 @@ public class WebBridge {
         return res.toString();
     }
 
-    // ================== شناسایی برنامه‌های پرخطر (با کش ۵ دقیقه‌ای) ==================
+    // ================== آیکون برنامه‌ها (برای نمایش زیبا) ==================
+
+    private String drawableToBase64(Drawable d, int sizeDp) {
+        try {
+            int sizePx = Math.round(sizeDp * ctx.getResources().getDisplayMetrics().density);
+            if (sizePx <= 0) sizePx = 96;
+            Bitmap bmp;
+            if (d instanceof BitmapDrawable) {
+                Bitmap src = ((BitmapDrawable) d).getBitmap();
+                if (src != null && src.getWidth() == sizePx && src.getHeight() == sizePx) {
+                    bmp = src;
+                } else {
+                    bmp = Bitmap.createScaledBitmap(src != null ? src : Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888), sizePx, sizePx, true);
+                }
+            } else {
+                bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(bmp);
+                d.setBounds(0, 0, sizePx, sizePx);
+                d.draw(c);
+            }
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 90, bos);
+            byte[] bytes = bos.toByteArray();
+            // برای صرفه‌جویی، resize اگر بزرگ است
+            String b64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+            // آزادسازی اگر bitmap جدید ساختیم
+            if (!(d instanceof BitmapDrawable) || bmp != ((BitmapDrawable) d).getBitmap()) {
+                try { bmp.recycle(); } catch (Exception ignored) {}
+            }
+            return "data:image/png;base64," + b64;
+        } catch (Exception e) {
+            Log.w(TAG, "drawableToBase64 failed", e);
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public String getAppIcon(String pkg) {
+        if (pkg == null || pkg.isEmpty()) return "";
+        String cached = iconCache.get(pkg);
+        if (cached != null) return cached;
+        try {
+            PackageManager pm = ctx.getPackageManager();
+            ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+            Drawable icon = pm.getApplicationIcon(ai);
+            if (icon == null) icon = ai.loadIcon(pm);
+            String b64 = drawableToBase64(icon, 48);
+            if (!b64.isEmpty()) iconCache.put(pkg, b64);
+            return b64;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public String getAppIconBatch(String pkgsJson) {
+        JSONObject res = new JSONObject();
+        try {
+            JSONArray arr = new JSONArray(pkgsJson != null ? pkgsJson : "[]");
+            for (int i = 0; i < arr.length(); i++) {
+                String pkg = arr.optString(i, "");
+                if (pkg.isEmpty()) continue;
+                String icon = getAppIcon(pkg);
+                if (!icon.isEmpty()) res.put(pkg, icon);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "getAppIconBatch failed", e);
+        }
+        return res.toString();
+    }
+
+    // ================== شناسایی برنامه‌های پرخطر (اصلاح‌شده: فقط مجوزهای GRANTED) ==================
+    /**
+     * باگ ۱.۰.۱: از requestedPermissions استفاده می‌شد که همه مجوزهای manifest را
+     * برمی‌گرداند حتی اگر کاربر آن‌ها را نداده باشد. مثلاً تلگرام ACCESS_FINE_LOCATION
+     * را در manifest دارد (برای اشتراک‌گذاری اختیاری مکان) ولی تا کاربر تأیید نکند
+     * GRANTED نیست. با این حال نسخه قبل تلگرام را "پرخطر" نشان می‌داد.
+     *
+     * اصلاح ۱.۰.۲: فقط مجوزهایی که (requestedPermissionsFlags & GRANTED) == GRANTED هستند
+     * بررسی می‌شوند. برای اندروید <23 همه مجوزها در نصب اعطا می‌شوند (درست است).
+     */
+
+    private boolean isGranted(String[] perms, int[] flags, String needle) {
+        if (perms == null) return false;
+        for (int i = 0; i < perms.length; i++) {
+            if (perms[i] == null) continue;
+            if (!perms[i].contains(needle)) continue;
+            // در اندروید ۶+ flags موجود است؛ در غیر اینصورت مجوز اعطا شده فرض می‌شود
+            if (flags != null && i < flags.length) {
+                boolean granted = (flags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0;
+                if (granted) return true;
+            } else {
+                return true; // pre-M: همه مجوزهای لیست اعطا شده‌اند
+            }
+        }
+        return false;
+    }
 
     @JavascriptInterface
     public String getRiskyApps() {
@@ -420,19 +612,19 @@ public class WebBridge {
                 if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
                 if (pi.packageName.equals(ctx.getPackageName())) continue;
                 String[] reqPerms = pi.requestedPermissions;
+                int[] reqFlags = null;
+                try { reqFlags = pi.requestedPermissionsFlags; } catch (Exception ignored) {}
                 if (reqPerms == null) continue;
-                boolean hasSms = false, hasLoc = false, hasCam = false, hasOverlay = false,
-                        hasMic = false, hasContacts = false, hasCallLog = false;
-                for (String p : reqPerms) {
-                    if (p == null) continue;
-                    if (p.contains("SEND_SMS") || p.contains("READ_SMS") || p.contains("RECEIVE_SMS")) hasSms = true;
-                    if (p.contains("ACCESS_FINE_LOCATION") || p.contains("ACCESS_BACKGROUND_LOCATION")) hasLoc = true;
-                    if (p.contains("CAMERA")) hasCam = true;
-                    if (p.contains("SYSTEM_ALERT_WINDOW")) hasOverlay = true;
-                    if (p.contains("RECORD_AUDIO")) hasMic = true;
-                    if (p.contains("READ_CONTACTS")) hasContacts = true;
-                    if (p.contains("READ_CALL_LOG")) hasCallLog = true;
-                }
+
+                // فقط مجوزهای واقعاً اعطا شده - نه همه درخواستی‌ها
+                boolean hasSms = isGranted(reqPerms, reqFlags, "SEND_SMS") || isGranted(reqPerms, reqFlags, "READ_SMS") || isGranted(reqPerms, reqFlags, "RECEIVE_SMS");
+                boolean hasLoc = isGranted(reqPerms, reqFlags, "ACCESS_FINE_LOCATION") || isGranted(reqPerms, reqFlags, "ACCESS_BACKGROUND_LOCATION") || isGranted(reqPerms, reqFlags, "ACCESS_COARSE_LOCATION");
+                boolean hasCam = isGranted(reqPerms, reqFlags, "CAMERA");
+                boolean hasOverlay = isGranted(reqPerms, reqFlags, "SYSTEM_ALERT_WINDOW");
+                boolean hasMic = isGranted(reqPerms, reqFlags, "RECORD_AUDIO");
+                boolean hasContacts = isGranted(reqPerms, reqFlags, "READ_CONTACTS");
+                boolean hasCallLog = isGranted(reqPerms, reqFlags, "READ_CALL_LOG");
+
                 int sensitive = 0;
                 if (hasSms) sensitive++;
                 if (hasLoc) sensitive++;
@@ -441,8 +633,12 @@ public class WebBridge {
                 if (hasMic) sensitive++;
                 if (hasContacts) sensitive++;
                 if (hasCallLog) sensitive++;
+
+                // منطق سطح‌بندی: فقط با ترکیب‌های واقعاً خطرناک
                 boolean critical = (hasSms && hasLoc) || (hasOverlay && hasSms)
-                        || (hasCam && hasLoc && hasSms);
+                        || (hasCam && hasLoc && hasSms) || (hasSms && hasCallLog && hasContacts);
+
+                // حداقل ۲ مجوز حساس اعطا شده یا یک ترکیب بحرانی
                 if (!critical && sensitive < 2) continue;
 
                 List<String> parts = new ArrayList<>();
@@ -453,18 +649,31 @@ public class WebBridge {
                 if (hasContacts) parts.add("مخاطبان");
                 if (hasCallLog) parts.add("سوابق تماس");
                 if (hasOverlay) parts.add("پنجره شناور");
-                StringBuilder sb = new StringBuilder("دسترسی همزمان به ");
+
+                StringBuilder sb = new StringBuilder();
+                if (parts.isEmpty()) continue;
+                // ساخت جمله فارسی دقیق: "دسترسی به X و Y (اعطا شده)"
+                sb.append("دسترسی فعال به ");
                 for (int i = 0; i < parts.size(); i++) {
-                    if (i > 0) sb.append(" و ");
+                    if (i > 0) {
+                        if (i == parts.size() - 1) sb.append(" و ");
+                        else sb.append("، ");
+                    }
                     sb.append(parts.get(i));
                 }
+                if (critical) sb.append(" — ترکیب حساس");
+
                 String reason = sb.toString();
                 String danger = critical
                         ? ((hasSms && hasLoc && hasOverlay) ? "بسیار بالا" : "بالا")
                         : "متوسط";
 
                 JSONObject app = new JSONObject();
-                app.put("name", pi.applicationInfo.loadLabel(pm).toString());
+                String label = pi.packageName;
+                try {
+                    if (pi.applicationInfo != null) label = pi.applicationInfo.loadLabel(pm).toString();
+                } catch (Exception ignored) {}
+                app.put("name", label);
                 app.put("pkg", pi.packageName);
                 app.put("riskReason", reason);
                 app.put("note", reason);
@@ -473,6 +682,17 @@ public class WebBridge {
                 app.put("action", "appinfo");
                 app.put("path", pi.packageName);
                 app.put("size", 0);
+                // لیست مجوزهای اعطا شده برای نمایش جزئیات
+                JSONArray grantedList = new JSONArray();
+                if (hasSms) grantedList.put("SMS");
+                if (hasLoc) grantedList.put("LOCATION");
+                if (hasCam) grantedList.put("CAMERA");
+                if (hasMic) grantedList.put("MIC");
+                if (hasContacts) grantedList.put("CONTACTS");
+                if (hasCallLog) grantedList.put("CALL_LOG");
+                if (hasOverlay) grantedList.put("OVERLAY");
+                app.put("grantedPerms", grantedList);
+                app.put("grantedCount", sensitive);
                 (critical ? high : medium).put(app);
             }
         } catch (Exception e) {
@@ -501,6 +721,13 @@ public class WebBridge {
         }
         if (bytes >= 1024L) return (bytes / 1024L) + " KB";
         return bytes + " B";
+    }
+
+    private static String formatSizeFaShort(long bytes) {
+        if (bytes >= 1073741824L) return String.format(java.util.Locale.US, "%.1f گیگ", bytes / 1073741824.0);
+        if (bytes >= 1048576L) return String.format(java.util.Locale.US, "%.1f مگ", bytes / 1048576.0);
+        if (bytes >= 1024L) return (bytes / 1024L) + " کیلو";
+        return bytes + " بایت";
     }
 
     @JavascriptInterface
@@ -559,7 +786,7 @@ public class WebBridge {
                 res.put(grant);
                 return res.toString();
             }
-            java.util.Collections.sort(found, new java.util.Comparator<JSONObject>() {
+            Collections.sort(found, new Comparator<JSONObject>() {
                 @Override
                 public int compare(JSONObject a, JSONObject b) {
                     return Long.compare(b.optLong("_cache", 0), a.optLong("_cache", 0));
@@ -577,7 +804,7 @@ public class WebBridge {
         return res.toString();
     }
 
-    // ================== فایل‌های حجیم رسانه‌ای (MediaStore) ==================
+    // ================== فایل‌های حجیم رسانه‌ای (MediaStore) - بازنویسی کامل ۱.۰.۲ ==================
 
     private boolean hasMediaPermission() {
         try {
@@ -594,42 +821,139 @@ public class WebBridge {
         }
     }
 
-    private List<JSONObject> queryLargeMediaList(android.net.Uri table, long minBytes) {
+    private static String formatDurationMs(long durationMs) {
+        if (durationMs <= 0) return "—";
+        long totalSec = durationMs / 1000;
+        long min = totalSec / 60;
+        long sec = totalSec % 60;
+        if (min > 60) {
+            long hr = min / 60;
+            min = min % 60;
+            return String.format(java.util.Locale.US, "%d:%02d:%02d", hr, min, sec);
+        }
+        return String.format(java.util.Locale.US, "%d:%02d", min, sec);
+    }
+
+    private static String formatDateFa(long epochSec) {
+        if (epochSec <= 0) return "";
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.US);
+            return sdf.format(new java.util.Date(epochSec * 1000L));
+        } catch (Exception e) { return ""; }
+    }
+
+    /**
+     * کوئری بهینه برای MediaStore - برچسب فارسی تمیز، بدون نام انگلیسی درهم.
+     * برای تصاویر: "تصویر ۱"، "تصویر ۲" ...
+     * برای ویدیوها: "ویدیو ۱"، "ویدیو ۲" ...
+     * به همراه thumbUri، ابعاد، مدت‌زمان، تاریخ
+     */
+    private List<JSONObject> queryLargeMediaList(android.net.Uri table, long minBytes, String kindLabel, boolean isVideo) {
         List<JSONObject> out = new ArrayList<>();
-        String[] proj = {
-                android.provider.MediaStore.MediaColumns._ID,
-                android.provider.MediaStore.MediaColumns.DISPLAY_NAME,
-                android.provider.MediaStore.MediaColumns.SIZE
-        };
-        String sel = android.provider.MediaStore.MediaColumns.SIZE + " >= ?";
+        String[] proj;
+        if (isVideo) {
+            proj = new String[]{
+                    MediaStore.MediaColumns._ID,
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.SIZE,
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    MediaStore.MediaColumns.DATE_MODIFIED,
+                    MediaStore.Video.Media.WIDTH,
+                    MediaStore.Video.Media.HEIGHT,
+                    MediaStore.Video.Media.DURATION
+            };
+        } else {
+            proj = new String[]{
+                    MediaStore.MediaColumns._ID,
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.SIZE,
+                    MediaStore.MediaColumns.MIME_TYPE,
+                    MediaStore.MediaColumns.DATE_MODIFIED,
+                    MediaStore.Images.Media.WIDTH,
+                    MediaStore.Images.Media.HEIGHT
+            };
+        }
+        String sel = MediaStore.MediaColumns.SIZE + " >= ?";
         String[] args = { String.valueOf(minBytes) };
-        android.database.Cursor c = null;
+        Cursor c = null;
         try {
             c = ctx.getContentResolver().query(
-                    table, proj, sel, args, android.provider.MediaStore.MediaColumns.SIZE + " DESC");
+                    table, proj, sel, args, MediaStore.MediaColumns.SIZE + " DESC");
             if (c == null) return out;
-            int idCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns._ID);
-            int nameCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
-            int sizeCol = c.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.SIZE);
+            int idCol = c.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
+            int sizeCol = c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE);
+            int mimeCol = c.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE);
+            int dateCol = c.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED);
+            int widthCol = -1, heightCol = -1, durCol = -1;
+            try { widthCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH); } catch (Exception ignored) {}
+            if (isVideo) {
+                try { widthCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH); } catch (Exception ignored) {}
+                try { heightCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT); } catch (Exception ignored) {}
+                try { durCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION); } catch (Exception ignored) {}
+            } else {
+                try { heightCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT); } catch (Exception ignored) {}
+            }
+
             int count = 0;
-            while (c.moveToNext() && count < 30) {
+            while (c.moveToNext() && count < 25) {
                 long id = c.getLong(idCol);
-                String name = c.getString(nameCol);
                 long size = c.getLong(sizeCol);
-                android.net.Uri uri = android.content.ContentUris.withAppendedId(table, id);
+                String mime = "";
+                try { mime = c.getString(mimeCol); } catch (Exception ignored) {}
+                long dateMod = 0;
+                try { dateMod = c.getLong(dateCol); } catch (Exception ignored) {}
+                int w = 0, h = 0;
+                long duration = 0;
+                try { if (widthCol >= 0) w = c.getInt(widthCol); } catch (Exception ignored) {}
+                try { if (heightCol >= 0) h = c.getInt(heightCol); } catch (Exception ignored) {}
+                try { if (durCol >= 0) duration = c.getLong(durCol); } catch (Exception ignored) {}
+
+                android.net.Uri uri = ContentUris.withAppendedId(table, id);
+                String uriStr = uri.toString();
+
+                // برچسب فارسی تمیز - بدون نام فایل انگلیسی درهم
+                String persianLabel = kindLabel + " " + (count + 1);
+
                 JSONObject o = new JSONObject();
-                o.put("name", (name != null && !name.isEmpty()) ? name : "فایل رسانه‌ای");
-                o.put("path", uri.toString());
-                o.put("sizeMb", Math.round(size / 1048576.0));
-                o.put("sizeText", formatSizeFa(size));
-                o.put("note", "برای حذف از برنامه مدیریت فایل خود اندروید استفاده کنید");
+                o.put("name", persianLabel);
+                o.put("persianLabel", persianLabel);
+                o.put("kind", isVideo ? "video" : "image");
+                // originalName را برای دیباگ نگه می‌داریم ولی UI نشان نمی‌دهد
+                String origName = "";
+                try { origName = c.getString(c.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)); } catch (Exception ignored) {}
+                o.put("originalName", origName != null ? origName : "");
+                o.put("path", uriStr);
+                o.put("contentUri", uriStr);
+                o.put("thumbUri", uriStr); // WebView می‌تواند content:// را با allowContentAccess نمایش دهد
+                o.put("sizeMb", Math.round(size / 1048576.0 * 10) / 10.0);
+                o.put("sizeText", formatSizeFaShort(size));
+                o.put("sizeBytes", size);
+                o.put("mime", mime != null ? mime : (isVideo ? "video/*" : "image/*"));
+                o.put("dateText", formatDateFa(dateMod));
+                o.put("dateEpoch", dateMod);
+                if (w > 0 && h > 0) {
+                    o.put("width", w);
+                    o.put("height", h);
+                    o.put("resolution", w + "×" + h);
+                }
+                if (isVideo && duration > 0) {
+                    o.put("durationMs", duration);
+                    o.put("durationText", formatDurationMs(duration));
+                }
+                // note فارسی شیک با جزئیات
+                StringBuilder noteSb = new StringBuilder();
+                noteSb.append(formatSizeFaShort(size));
+                if (w > 0 && h > 0) noteSb.append(" • ").append(w).append("×").append(h);
+                if (isVideo && duration > 0) noteSb.append(" • ").append(formatDurationMs(duration));
+                if (!formatDateFa(dateMod).isEmpty()) noteSb.append(" • ").append(formatDateFa(dateMod));
+                o.put("note", noteSb.toString());
                 o.put("action", "media");
                 o.put("_size", size);
                 out.add(o);
                 count++;
             }
         } catch (Exception e) {
-            Log.w(TAG, "media query failed", e);
+            Log.w(TAG, "media query failed kind=" + kindLabel, e);
         } finally {
             if (c != null) {
                 try { c.close(); } catch (Exception ignored) {}
@@ -651,20 +975,33 @@ public class WebBridge {
                 return res.toString();
             }
             long minBytes = Math.max(1, minMb) * 1024L * 1024L;
+            // ابتدا تصاویر و ویدیوها جداگانه با برچسب فارسی
+            List<JSONObject> images = queryLargeMediaList(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, minBytes, "تصویر", false);
+            List<JSONObject> videos = queryLargeMediaList(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI, minBytes, "ویدیو", true);
+
+            // ترکیب و مرتب‌سازی بر اساس حجم
             List<JSONObject> all = new ArrayList<>();
-            all.addAll(queryLargeMediaList(
-                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, minBytes));
-            all.addAll(queryLargeMediaList(
-                    android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, minBytes));
-            java.util.Collections.sort(all, new java.util.Comparator<JSONObject>() {
+            all.addAll(images);
+            all.addAll(videos);
+            Collections.sort(all, new Comparator<JSONObject>() {
                 @Override
                 public int compare(JSONObject a, JSONObject b) {
                     return Long.compare(b.optLong("_size", 0), a.optLong("_size", 0));
                 }
             });
+            // بازتعدادگذاری فارسی پس از مرتب‌سازی
+            int imgIdx = 1, vidIdx = 1;
+            for (JSONObject o : all) {
+                boolean isV = "video".equals(o.optString("kind"));
+                String newLabel = isV ? ("ویدیو " + vidIdx++) : ("تصویر " + imgIdx++);
+                o.put("name", newLabel);
+                o.put("persianLabel", newLabel);
+            }
             int n = 0;
             for (JSONObject o : all) {
-                if (n++ >= 30) break;
+                if (n++ >= 40) break;
                 o.remove("_size");
                 res.put(o);
             }
@@ -672,6 +1009,83 @@ public class WebBridge {
             Log.w(TAG, "getLargeMedia failed", e);
         }
         return res.toString();
+    }
+
+    /**
+     * تولید thumbnail بهینه به صورت Base64 برای نمایش سبک در WebView.
+     * maxSize: حداکثر عرض/ارتفاع پیکسل (پیش‌فرض 320)
+     */
+    @JavascriptInterface
+    public String getMediaThumbnail(String contentUri, int maxSize) {
+        if (contentUri == null || contentUri.isEmpty()) return "";
+        try {
+            int target = maxSize > 0 ? Math.min(maxSize, 512) : 320;
+            android.net.Uri uri = android.net.Uri.parse(contentUri);
+            Bitmap thumb = null;
+
+            // تلاش با loadThumbnail (API 29+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    thumb = ctx.getContentResolver().loadThumbnail(uri, new android.util.Size(target, target), null);
+                } catch (Exception ignored) {}
+            }
+            // fallback: MediaStore.Images.Thumbnails
+            if (thumb == null) {
+                try {
+                    // سعی با decode stream و downsample
+                    android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+                    opts.inJustDecodeBounds = true;
+                    try (java.io.InputStream is = ctx.getContentResolver().openInputStream(uri)) {
+                        android.graphics.BitmapFactory.decodeStream(is, null, opts);
+                    }
+                    int sample = 1;
+                    int maxDim = Math.max(opts.outWidth, opts.outHeight);
+                    while (maxDim / sample > target) sample *= 2;
+                    opts.inJustDecodeBounds = false;
+                    opts.inSampleSize = sample;
+                    try (java.io.InputStream is2 = ctx.getContentResolver().openInputStream(uri)) {
+                        thumb = android.graphics.BitmapFactory.decodeStream(is2, null, opts);
+                    }
+                    // اگر ویدیو باشد و تصویر نگرفتیم، از MediaMetadataRetriever
+                    if (thumb == null && contentUri.contains("video")) {
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        try {
+                            retriever.setDataSource(ctx, uri);
+                            Bitmap frame = retriever.getFrameAtTime(0);
+                            if (frame != null) {
+                                float scale = Math.min((float) target / frame.getWidth(), (float) target / frame.getHeight());
+                                if (scale < 1) {
+                                    thumb = Bitmap.createScaledBitmap(frame, Math.round(frame.getWidth() * scale), Math.round(frame.getHeight() * scale), true);
+                                    frame.recycle();
+                                } else thumb = frame;
+                            }
+                        } catch (Exception ignored2) {}
+                        try { retriever.release(); } catch (Exception ignored2) {}
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (thumb == null) return "";
+
+            // resize اگر لازم
+            if (thumb.getWidth() > target || thumb.getHeight() > target) {
+                float scale = Math.min((float) target / thumb.getWidth(), (float) target / thumb.getHeight());
+                Bitmap scaled = Bitmap.createScaledBitmap(thumb, Math.round(thumb.getWidth() * scale), Math.round(thumb.getHeight() * scale), true);
+                if (scaled != thumb) {
+                    try { thumb.recycle(); } catch (Exception ignored) {}
+                    thumb = scaled;
+                }
+            }
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            thumb.compress(Bitmap.CompressFormat.JPEG, 75, bos);
+            String b64 = Base64.encodeToString(bos.toByteArray(), Base64.NO_WRAP);
+            try { thumb.recycle(); } catch (Exception ignored) {}
+            return "data:image/jpeg;base64," + b64;
+        } catch (Exception e) {
+            Log.w(TAG, "getMediaThumbnail failed", e);
+            return "";
+        }
     }
 
     // ================== کش خود برنامه + آزادسازی امن ==================
@@ -843,5 +1257,43 @@ public class WebBridge {
             o.put("sdk", Build.VERSION.SDK_INT);
         } catch (Exception ignored) {}
         return o.toString();
+    }
+
+    // ================== تست استرس نیتیو (۱۰ هزار تکرار) ==================
+    @JavascriptInterface
+    public String stressTestNative(int iterations) {
+        JSONObject res = new JSONObject();
+        try {
+            int n = Math.max(100, Math.min(iterations, 20000));
+            long t0 = SystemClock.elapsedRealtime();
+            int ok = 0, fail = 0;
+            for (int i = 0; i < n; i++) {
+                try {
+                    // تست clamp
+                    int c1 = MonitorPrefs.clamp(i % 200, 0, 100);
+                    if (c1 < 0 || c1 > 100) fail++; else ok++;
+                    // تست percentOf با Intent ساختگی
+                    Intent fake = new Intent();
+                    fake.putExtra("level", i % 101);
+                    fake.putExtra("scale", 100);
+                    int p = AlertEngine.percentOf(fake);
+                    if (p < 0 || p > 100) fail++; else ok++;
+                    // تست tempOf
+                    fake.putExtra("temperature", 300 + (i % 200));
+                    double tmp = AlertEngine.tempOf(fake);
+                    if (tmp < 0 && i % 200 > 10) fail++; else ok++;
+                } catch (Exception e) { fail++; }
+            }
+            long dt = SystemClock.elapsedRealtime() - t0;
+            res.put("ok", true);
+            res.put("iterations", n);
+            res.put("passed", ok);
+            res.put("failed", fail);
+            res.put("durationMs", dt);
+            res.put("opsPerSec", dt > 0 ? Math.round((ok + fail) * 1000.0 / dt) : 0);
+        } catch (Exception e) {
+            try { res.put("ok", false); } catch (Exception ignored) {}
+        }
+        return res.toString();
     }
 }
