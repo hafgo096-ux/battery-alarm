@@ -196,6 +196,7 @@ public class SysInfoBridge {
             double cpuTemp = readCpuTemperature();
             o.put("temperature", cpuTemp);
             o.put("temperatureAvailable", cpuTemp > 0);
+            o.put("temperatureSource", lastThermalSource);
 
             cpuCache = o.toString();
             cpuCacheAt = now;
@@ -210,29 +211,49 @@ public class SysInfoBridge {
      * در بسیاری از دستگاه‌ها thermal_zone0 مربوط به باتری یا بدنه است؛
      * بنابراین همه zoneها را می‌خوانیم و از field نوع (type) هر zone،
      * zone مربوط به CPU/SOC را انتخاب می‌کنیم (با امتیازدهی).
-     * مقدار برگشتی: درجه سانتی‌گراد (double) یا -1 در صورت عدم دسترسی.
+     * مقدار برگشتی: درجه سانتی‌گراد (double با یک رقم اعشار) یا -1 در صورت عدم دسترسی.
+     * باگ‌فیکس ۱.۰.۴: دقت اعشار (42500 ⇒ 42.5 نه 42) + بررسی zoneهای بیشتر (۰ تا ۳۱)
+     * + ثبت نوع سنسور انتخاب‌شده برای شفافیت در UI.
      */
-    private long readCpuTemperature() {
+    private String lastThermalSource = "";
+
+    private double readCpuTemperature() {
+        lastThermalSource = "";
         long bestVal = -1;
         int bestScore = -1;
+        String bestType = "";
         long fallback0 = -1;
-        for (int z = 0; z <= 15; z++) {
+        int missingStreak = 0;
+        for (int z = 0; z <= 31; z++) {
             String raw = readFirstLine("/sys/class/thermal/thermal_zone" + z + "/temp");
+            if (raw == null || raw.isEmpty()) {
+                // جلوگیری از هزینه اضافی: اگر چند zone پشت سر هم نبودند، بقیه را نخوان
+                if (++missingStreak >= 4) break;
+                continue;
+            }
+            missingStreak = 0;
             long v = 0;
             try { v = Long.parseLong(raw.replaceAll("[^0-9]", "")); } catch (Exception ignored) {}
             if (v <= 0) continue;
-            if (z == 0) fallback0 = v;
+            if (z == 0 && fallback0 <= 0) fallback0 = v;
             String type = readFirstLine("/sys/class/thermal/thermal_zone" + z + "/type");
             int score = thermalTypeScore(type);
             if (score > bestScore) {
                 bestScore = score;
                 bestVal = v;
+                bestType = type != null ? type : "";
             }
         }
-        if (bestScore < 0) bestVal = fallback0;
+        if (bestScore < 0) {
+            bestVal = fallback0;
+            bestType = "thermal_zone0";
+        }
         if (bestVal <= 0) return -1;
-        // سنسورها معمولاً میلی‌درجه گزارش می‌دهند (42500 = 42.5°)؛ برخی درجه (42).
-        return bestVal > 1000 ? bestVal / 1000 : bestVal;
+        lastThermalSource = bestType;
+        // سنسورها معمولاً میلی‌درجه گزارش می‌دهند (42500 = 42.5°)؛ برخی دسی‌درجه (425 = 42.5) و برخی درجه (42).
+        if (bestVal > 1000) return Math.round(bestVal / 100.0) / 10.0;
+        if (bestVal > 150) return bestVal / 10.0;
+        return bestVal;
     }
 
     private int thermalTypeScore(String type) {

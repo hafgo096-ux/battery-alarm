@@ -1009,6 +1009,52 @@
     }
     .file-intel-stat b { color: #a5b4fc; }
 
+    /* ===== 1.0.4 - کتابخانه آموزش‌های هوش فایل ===== */
+    .file-intel-trainings { margin-top: 12px; }
+    .training-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .training-title {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.76rem; font-weight: 800; color: #e2e8f0;
+    }
+    .training-title .ic { color: #c084fc; display: flex; }
+    .training-count {
+      font-size: 0.62rem; font-weight: 700; color: #c084fc;
+      background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25);
+      padding: 2px 9px; border-radius: 99px;
+    }
+    .training-cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .training-cat-chip {
+      font-size: 0.63rem; font-weight: 700; color: #cbd5e1;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 11px; border-radius: 99px; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .training-cat-chip.active {
+      color: #f5f3ff; background: rgba(168,85,247,0.22); border-color: rgba(168,85,247,0.5);
+    }
+    .training-list { display: flex; flex-direction: column; gap: 6px; }
+    .training-card {
+      display: flex; gap: 9px; align-items: flex-start;
+      padding: 9px 11px; border-radius: 11px;
+      background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.08);
+    }
+    .training-card-icon {
+      width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(168,85,247,0.14); color: #c084fc;
+    }
+    .training-card-text {
+      font-size: 0.67rem; color: #cbd5e1; line-height: 1.85; flex: 1;
+    }
+    .training-card-tag {
+      display: inline-block; font-size: 0.56rem; font-weight: 800;
+      color: #a5b4fc; background: rgba(99,102,241,0.12);
+      border-radius: 6px; padding: 1px 7px; margin-left: 6px; vertical-align: middle;
+    }
+
     /* ===== 1.0.3 - نکات هوش بات در بنر ===== */
     .bot-tip {
       margin-top: 8px; padding: 6px 10px;
@@ -1495,6 +1541,8 @@
       </div>
       <div class="file-intel-tip" id="fileIntelTip">💡 در حال تحلیل…</div>
       <div class="file-intel-stats" id="fileIntelStats"></div>
+      <!-- 1.0.4 - کتابخانه آموزش‌های واقعی و کاربردی هوش فایل -->
+      <div class="file-intel-trainings" id="fileIntelTrainings"></div>
     </div>
     <div class="scanner-tabs">
       <button class="scanner-tab-pill active" data-cat="risky" onclick="switchFileCategory('risky')"><span class="ic ic-stroke" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/></svg></span> برنامه‌های پرخطر</button>
@@ -2161,13 +2209,24 @@
 
       const src = soundMap[type] || (audioBase + 'fa_battery_85.mp3');
       const audio = new Audio(src);
-      audio.play().then(() => {
-        showToast(`پخش صدای فارسی: ${type} 🔊`);
-      }).catch(() => {
-        // 3. Web Audio Tone fallback
+      // نکته سازگاری: در WebViewهای قدیمی play() ممکن است Promise برنگرداند ⇒ بدون then/catch امن
+      try {
+        const p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            showToast(`پخش صدای فارسی: ${type} 🔊`);
+          }).catch(() => {
+            // 3. Web Audio Tone fallback
+            playEmergencyTone(type === 'siren' ? 880 : 540);
+            showToast('پخش بیزر هشدار اضطراری (Tone) 📢');
+          });
+        } else {
+          showToast(`پخش صدای فارسی: ${type} 🔊`);
+        }
+      } catch (e) {
         playEmergencyTone(type === 'siren' ? 880 : 540);
         showToast('پخش بیزر هشدار اضطراری (Tone) 📢');
-      });
+      }
     }
 
     function playEmergencyTone(freq) {
@@ -2750,31 +2809,59 @@
         { rule: 'fc-1', text: 'کش برنامه‌ها فایل‌های موقتی (تصاویر، ویدیوها و داده‌های میانی) هستند که خود برنامه دوباره می‌سازد؛ پاک کردن کش، حساب و پیام‌های شما را حذف نمی‌کند.' },
         { rule: 'fc-2', text: 'تلگرام و واتس‌اپ معمولاً بزرگ‌ترین کش‌ها را دارند (گاهی ده‌ها گیگابایت). کش هر برنامه را می‌توان از: تنظیمات اندروید > برنامه‌ها > (برنامه) > حافظه > پاک کردن کش، آزاد کرد.' },
         { rule: 'fc-3', text: 'اندروید اجازه نمی‌دهد برنامه‌ای کشِ برنامه‌های دیگر را مستقیم پاک کند؛ این کار فقط از تنظیمات خود اندروید انجام می‌شود (سیاست امنیتی سیستم).' },
-        { rule: 'fc-4', text: 'نیازی به پاکسازی مکرر کش نیست؛ سیستم خودکار آن را مدیریت می‌کند. فقط وقتی فضا کم شده، کش برنامه‌های پرمصرف را خالی کنید.' }
+        { rule: 'fc-4', text: 'نیازی به پاکسازی مکرر کش نیست؛ سیستم خودکار آن را مدیریت می‌کند. فقط وقتی فضا کم شده، کش برنامه‌های پرمصرف را خالی کنید.' },
+        { rule: 'fc-5', text: 'کش مرورگرها (کروم، فایرفاکس و…) می‌تواند چند گیگابایت شود؛ از تنظیمات خود مرورگر: حریم خصوصی > حذف داده‌های مرور، قابل پاکسازی است.' },
+        { rule: 'fc-6', text: 'برنامه‌های ویرایش عکس و ویدیو (مثل CapCut، Lightroom، اسنپ‌سیت) کش‌های موقت بزرگی می‌سازند که بعد از اتمام پروژه قابل حذف‌اند.' },
+        { rule: 'fc-7', text: 'اگر کش یک برنامه بعد از پاکسازی فوراً پر شد، ریشه مشکل در خود برنامه است؛ حذف و نصب دوباره (بدون بازگردانی داده) آخرین راه‌حل است.' }
       ],
       media: [
         { rule: 'fm-1', text: 'ویدیوها بزرگ‌ترین مصرف‌کننده حافظه‌اند: یک ویدیوی ۱۰۸۰p تقریباً ۱ تا ۲ گیگابایت در ساعت اشغال می‌کند.' },
         { rule: 'fm-2', text: 'محتوای دانلودشده در تلگرام و واتس‌اپ در پوشه‌ی Media داخل آن برنامه ذخیره می‌شود و جدا از کش است؛ از تنظیمات خود آن پیام‌رسان قابل مدیریت است.' },
         { rule: 'fm-3', text: 'ویدیوهای قدیمی را می‌توانید به کامپیوتر یا فضای ابری منتقل کنید یا با یک ویرایشگر ویدیو فشرده کنید تا حافظه آزاد شود.' },
-        { rule: 'fm-4', text: 'تصاویر بالای ۱۰ مگابایت معمولاً رزولوشن بسیار بالایی دارند؛ برای اشتراک در شبکه‌های اجتماعی در هر صورت فشرده می‌شوند.' }
+        { rule: 'fm-4', text: 'تصاویر بالای ۱۰ مگابایت معمولاً رزولوشن بسیار بالایی دارند؛ برای اشتراک در شبکه‌های اجتماعی در هر صورت فشرده می‌شوند.' },
+        { rule: 'fm-5', text: 'اسکرین‌شات‌ها معمولاً فراموش می‌شوند و ماهانه صدها مگابایت می‌شوند؛ هر چند وقت یک‌بار پوشه Pictures/Screenshots را مرور کنید.' },
+        { rule: 'fm-6', text: 'پوشه DCIM/.thumbnails کش تصاویر گالری است و حذف آن بی‌خطر است؛ اندروید در صورت نیاز دوباره می‌سازدش.' },
+        { rule: 'fm-7', text: 'ویدیوهای 4K چند برابر 1080p حجم دارند؛ ضبط 4K فقط وقتی واقعاً لازم است استفاده شود و بعد از انتقال به فضای ابری حذف شود.' },
+        { rule: 'fm-8', text: 'فایل‌های «ارسال‌شده» (Sent) در واتس‌اپ و تلگرام نسخه تکراری رسانه‌ها را نگه می‌دارند؛ این پوشه‌ها امن‌ترین گزینه برای آزادسازی فضا هستند.' },
+        { rule: 'fm-9', text: 'ویس‌ها و ضبط‌های صفحه (Screen recordings) به‌مرور چند گیگ می‌شوند؛ در پوشه‌های Music/Recordings و Movies/Screen recordings قابل بررسی‌اند.' }
       ],
       storage: [
         { rule: 'fs-1', text: 'وقتی حافظه داخلی بیش از ۹۰٪ پر باشد، سرعت سیستم افت می‌کند؛ همیشه ۱۰ تا ۵٪ فضای خالی نگه دارید.' },
         { rule: 'fs-2', text: 'فایل‌های نصب‌شده (APK) که دیگر لازم ندارید، هرکدام چند صد مگابایت هستند و حذفشان بی‌خطر است.' },
         { rule: 'fs-3', text: 'حافظه داخلی اندروید همان فضای /data و /storage است؛ اگر SD کارت یا حافظه USB دارید، به‌عنوان حجم جداگانه گزارش می‌شود.' },
-        { rule: 'fs-4', text: 'ری‌استارت دوره‌ای (هفته‌ای یک‌بار) به پاک شدن فایل‌های موقت سیستمی و آزادسازی رم کمک می‌کند.' }
+        { rule: 'fs-4', text: 'ری‌استارت دوره‌ای (هفته‌ای یک‌بار) به پاک شدن فایل‌های موقت سیستمی و آزادسازی رم کمک می‌کند.' },
+        { rule: 'fs-5', text: 'پوشه‌ی Download معمولاً بزرگ‌ترین پوشه فراموش‌شده است؛ فایل‌های ZIP و APK و ویدیوهای دانلودشده بعد از استفاده قابل حذف‌اند.' },
+        { rule: 'fs-6', text: 'نقشه‌های آفلاین Google Maps می‌توانند چند گیگ شوند؛ از تنظیمات Maps > نقشه‌های آفلاین قابل مدیریت‌اند.' },
+        { rule: 'fs-7', text: 'انتقال برنامه‌ها به SD کارت (در دستگاه‌هایی که پشتیبانی می‌کنند) حافظه داخلی را آزاد می‌کند اما اجرای برنامه کندتر می‌شود؛ فقط برای برنامه‌های سنگین و کم‌مصرف.' },
+        { rule: 'fs-8', text: 'بعد از حذف فایل‌های حجیم، چند دقیقه صبر کنید یا دستگاه را ری‌استارت کنید تا فهرست رسانه (MediaStore) اندروید به‌روز شود و فضای آزاد درست نمایش داده شود.' }
       ],
       permissions: [
         { rule: 'fp-1', text: 'درخواست مجوز در manifest برنامه ≠ دسترسی واقعی؛ دسترسی فقط پس از اجازه‌ی شما در تنظیمات اندروید فعال می‌شود. این اپ فقط مجوزهای واقعاً اعطا شده را گزارش می‌دهد.' },
         { rule: 'fp-2', text: 'برای پیام‌رسان‌هایی مثل تلگرام، داشتن دسترسی به حافظه رسانه‌ای طبیعی و مورد انتظار است (برای ذخیره عکس و ویدیو)؛ این یعنی برنامه خطرناک نیست، فقط به رسانه‌ها دسترسی دارد.' },
         { rule: 'fp-3', text: 'هر چند ماه یک‌بار: تنظیمات > برنامه‌ها > (برنامه) > مجوزها را باز کنید و مجوزهایی که استفاده نمی‌کنید (مکان، میکروفون، پیامک) را بازگردانید.' },
-        { rule: 'fp-4', text: 'ترکیب «نمایش روی دیگر برنامه‌ها» (Overlay) + دسترسی به پیامک، نشانه‌ی برنامه‌های خطرناک است؛ این سطح را فقط به برنامه‌های مورد اعتماد بدهید.' }
+        { rule: 'fp-4', text: 'ترکیب «نمایش روی دیگر برنامه‌ها» (Overlay) + دسترسی به پیامک، نشانه‌ی برنامه‌های خطرناک است؛ این سطح را فقط به برنامه‌های مورد اعتماد بدهید.' },
+        { rule: 'fp-5', text: 'در اندروید ۱۳+ دسترسی حافظه به سه مجوز جدا (تصاویر، ویدیوها، صداها) تفکیک شده؛ فقط همان‌چه واقعاً لازم است را فعال نگه دارید.' },
+        { rule: 'fp-6', text: 'دسترسی «همه فایل‌ها» (All files access) فقط برای فایل‌منیجرها و پشتیبان‌گیرها لازم است؛ به برنامه‌های دیگر این سطح را ندهید.' }
       ],
       general: [
         { rule: 'fg-1', text: 'این برنامه هرگز بدون اجازه‌ی شما فایلِ برنامه‌های دیگر را حذف نمی‌کند؛ همه عملیات از طریق تنظیمات خود اندروید انجام می‌شود.' },
         { rule: 'fg-2', text: 'اگر فایلی در برنامه فایل‌ها نیست، ممکن است در پوشه‌ی خصوصی همان برنامه (اندروید ۱۱+) باشد؛ در آن صورت از تنظیمات خود آن برنامه مدیریتش کنید.' },
-        { rule: 'fg-3', text: '«پاک کردن داده» (Data) با «پاک کردن کش» (Cache) فرق دارد؛ پاک کردن داده، شما را از برنامه خارج می‌کند و تنظیماتش را می‌پرمایند — با احتیاط استفاده کنید.' }
+        { rule: 'fg-3', text: '«پاک کردن داده» (Data) با «پاک کردن کش» (Cache) فرق دارد؛ پاک کردن داده، شما را از برنامه خارج می‌کند و تنظیماتش را می‌پرمایند — با احتیاط استفاده کنید.' },
+        { rule: 'fg-4', text: 'مطمئن‌ترین راه آزادسازی حافظه، حذف برنامه‌هایی است که چند ماه استفاده نکرده‌اید (تنظیمات > برنامه‌ها > مرتب‌سازی بر اساس آخرین استفاده).' },
+        { rule: 'fg-5', text: 'در Google Photos با فعال‌سازی «پشتیبان‌گیری با کیفیت صرفه‌جو» (Storage saver)، نسخه ابری حافظه گوشی را اشغال نمی‌کند و می‌توان نسخه‌های محلی را حذف کرد.' }
       ]
+    };
+    // برچسب فارسی دسته‌ها برای کتابخانه آموزش‌ها
+    const FILE_TRAINING_CATS = [
+      { key: 'all', label: 'همه' },
+      { key: 'cache', label: 'کش برنامه‌ها' },
+      { key: 'media', label: 'رسانه و ویدیو' },
+      { key: 'storage', label: 'حافظه داخلی' },
+      { key: 'permissions', label: 'مجوزها' },
+      { key: 'general', label: 'مدیریت کلی' }
+    ];
+    const FILE_TRAINING_ICONS = {
+      cache: 'broom', media: 'film', storage: 'storage', permissions: 'shield', general: 'bulb'
     };
     let fileIntelScan = { riskyCount: 0, cacheTotalMb: 0, cacheTopName: '', largeCount: 0, storagePct: -1 };
 
@@ -2813,6 +2900,61 @@
         if (fileIntelScan.storagePct >= 0) parts.push('<span class="file-intel-stat">مصرف حافظه واقعی: <b>' + toFaDigits(fileIntelScan.storagePct) + '٪</b></span>');
         statsEl.innerHTML = parts.join('');
       }
+      renderFileIntelTrainings();
+    }
+
+    // ===== 1.0.4 - کتابخانه آموزش‌های هوش فایل (همه قوانین، قابل مرور با دسته‌بندی) =====
+    // نمایش تدریجی: ابتدا ۶ آموزش + دکمه «مشاهده همه» تا DOM سبک بماند
+    let fileIntelTrainingCat = 'all';
+    let fileIntelTrainingsExpanded = false;
+    const TRAINING_COLLAPSED_LIMIT = 6;
+    function setTrainingCat(cat) {
+      fileIntelTrainingCat = cat || 'all';
+      renderFileIntelTrainings();
+    }
+    function toggleTrainingLib() {
+      fileIntelTrainingsExpanded = !fileIntelTrainingsExpanded;
+      renderFileIntelTrainings();
+    }
+    function renderFileIntelTrainings() {
+      const root = document.getElementById('fileIntelTrainings');
+      if (!root) return;
+      const total = fileIntelAllRules().length;
+      let chips = '';
+      FILE_TRAINING_CATS.forEach(function (c) {
+        chips += '<button class="training-cat-chip' + (fileIntelTrainingCat === c.key ? ' active' : '') +
+          '" onclick="setTrainingCat(\'' + c.key + '\')">' + c.label + '</button>';
+      });
+      // گردآوری آموزش‌های دسته انتخاب‌شده
+      const list = [];
+      for (const cat in FILE_KNOWLEDGE_BASE) {
+        if (fileIntelTrainingCat !== 'all' && fileIntelTrainingCat !== cat) continue;
+        FILE_KNOWLEDGE_BASE[cat].forEach(function (r) {
+          list.push({ cat: cat, text: r.text });
+        });
+      }
+      const shown = fileIntelTrainingsExpanded ? list : list.slice(0, TRAINING_COLLAPSED_LIMIT);
+      let cards = '';
+      shown.forEach(function (r) {
+        const icon = svgIcon(FILE_TRAINING_ICONS[r.cat] || 'bulb', 13);
+        const catLabel = (FILE_TRAINING_CATS.find(function (x) { return x.key === r.cat; }) || {}).label || r.cat;
+        cards += '<div class="training-card">' +
+          '<div class="training-card-icon">' + icon + '</div>' +
+          '<div class="training-card-text"><span class="training-card-tag">' + catLabel + '</span>' +
+          escapeHtml(r.text) + '</div></div>';
+      });
+      const moreBtn = list.length > TRAINING_COLLAPSED_LIMIT
+        ? '<button class="training-cat-chip active" style="width:100%; text-align:center; padding:7px;" onclick="toggleTrainingLib()">' +
+          (fileIntelTrainingsExpanded ? 'نمایش کمتر ▲' : ('مشاهده همه ' + toFaDigits(list.length) + ' آموزش ▼')) + '</button>'
+        : '';
+      root.innerHTML =
+        '<div class="training-head">' +
+          '<div class="training-title">' + svgIcon('layers', 15) + '<span>کتابخانه آموزش‌های کاربردی</span></div>' +
+          '<span class="training-count">' + toFaDigits(total) + ' آموزش واقعی</span>' +
+        '</div>' +
+        '<div class="training-cats">' + chips + '</div>' +
+        '<div class="training-list">' + cards + '</div>' +
+        (moreBtn ? '<div style="margin-top:8px;">' + moreBtn + '</div>' : '');
     }
     let tipsTimer = null;
     function startTipsTimer() {
@@ -3071,6 +3213,19 @@
     const VP_VOL_SVG = SVG_ICONS.volume;
     const VP_MUTE_SVG = SVG_ICONS.mute;
     function setVpPlayIcon(playing) { const ic = document.getElementById('vpPlayIcon'); if (ic) ic.innerHTML = playing ? VP_PAUSE_SVG : VP_PLAY_SVG; }
+    // سازگاری WebView قدیمی: play()/exitFullscreen() ممکن است Promise برنگردانند
+    function safePlay(el) {
+      try {
+        const p = el && el.play ? el.play() : null;
+        if (p && typeof p.catch === 'function') p.catch(function () {});
+      } catch (e) {}
+    }
+    function safeExitFullscreen() {
+      try {
+        const p = document.exitFullscreen ? document.exitFullscreen() : null;
+        if (p && typeof p.catch === 'function') p.catch(function () {});
+      } catch (e) {}
+    }
     function setVpMuteIcon(muted) { const ic = document.getElementById('vpMuteIcon'); if (ic) ic.innerHTML = muted ? VP_MUTE_SVG : VP_VOL_SVG; }
 
     // ======================= هوش فایل 1.0.3 - گالری حرفه‌ای با آیکون SVG + پراکسی پخش ویدیو =======================
@@ -3476,7 +3631,7 @@
       setupVideoEvents();
       updateVPTime();
       video.onloadedmetadata = updateVPTime;
-      setTimeout(function(){ video.play().catch(function(){}); }, 150);
+      setTimeout(function(){ safePlay(video); }, 150);
     }
     function vpClearError() {
       const ov = document.getElementById('videoOverlay');
@@ -3549,7 +3704,7 @@
     function toggleVideoPlay(){
       const v = document.getElementById('vpVideo');
       if (!v) return;
-      if (v.paused) v.play().catch(function(){}); else v.pause();
+      if (v.paused) safePlay(v); else v.pause();
     }
     function toggleVideoMute(){
       const v = document.getElementById('vpVideo');
@@ -3560,8 +3715,14 @@
     function toggleVideoFullscreen(){
       const v = document.getElementById('vpVideo');
       if (!v) return;
-      if (document.fullscreenElement) document.exitFullscreen().catch(function(){});
-      else (v.requestFullscreen || v.webkitRequestFullscreen || function(){}).call(v);
+      if (document.fullscreenElement) { safeExitFullscreen(); return; }
+      try {
+        const fn = v.requestFullscreen || v.webkitRequestFullscreen;
+        if (fn) {
+          const p = fn.call(v);
+          if (p && typeof p.catch === 'function') p.catch(function () {});
+        }
+      } catch (e) {}
     }
     function seekVideo(e){
       const bar = document.getElementById('vpProgressBar');
@@ -3939,15 +4100,15 @@
           return suiteAssert(typeof st.mode === 'string' && st.mode.length > 0, st.mode);
         });
       });
-      add('POWER', 'نام نسخه روی 1.0.3 است', function () {
+      add('POWER', 'نام نسخه روی 1.0.4 است', function () {
         const st = nativeMonitorState();
         if (!st || !st.versionName) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionName === '1.0.3', st.versionName);
+        return suiteAssert(st.versionName === '1.0.4', st.versionName);
       });
-      add('POWER', 'کد نسخه روی ۴ است', function () {
+      add('POWER', 'کد نسخه روی ۵ است', function () {
         const st = nativeMonitorState();
         if (!st || st.versionCode === undefined) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionCode === 4, String(st.versionCode));
+        return suiteAssert(st.versionCode === 5, String(st.versionCode));
       });
       add('POWER', 'شمارنده هشدارها عددی و غیرمنفی است', function () {
         const st = nativeMonitorState();
@@ -4453,9 +4614,9 @@
         const heavy = (src.match(/setInterval/g)||[]).length;
         return suiteAssert(heavy <= 5, 'intervals=' + heavy);
       });
-      add('RAM', 'سبکی اپ: حجم index.html زیر 250KB است', function(){
+      add('RAM', 'سبکی اپ: حجم index.html زیر 320KB است (با کتابخانه آموزش‌ها)', function(){
         const len = document.documentElement.innerHTML.length;
-        return suiteAssert(len < 250*1024, len + ' chars');
+        return suiteAssert(len < 320*1024, len + ' chars');
       });
       add('STRESS', '10K تست سرعت: settingsJson خواندن', function(){
         if (!native) return { skip: true, reason: 'بدون نیتیو' };

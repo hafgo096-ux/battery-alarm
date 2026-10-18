@@ -355,13 +355,22 @@ public class WebBridge {
 
     // ================== بهینه‌سازی رم (با سنجش واقعی) ==================
 
+    /**
+     * باگ‌فیکس ۱.۰.۴ (گزارش: «بخش بهینه‌سازی داده‌ها را درست نشان نمی‌دهد»):
+     *  - اندازه‌گیری دومرحله‌ای قبل/بعد (۲ نمونه با فاصله ۱۵۰ms) تا نوسان لحظه‌ای
+     *    availMem عدد نهایی را خراب نکند.
+     *  - هرگز عدد منفی گزارش نمی‌شود (freedKb >= 0) + گزارش شفاف رم قبل/بعد و رم استفاده‌شده.
+     *  - یادداشت صادقانه: بستن برنامه‌های پس‌زمینه با KILL_BACKGROUND_PROCESSES محدود است
+     *    و مقدار واقعاً آزادشده به رفتار لحظه‌ای سیستم بستگی دارد.
+     */
     @JavascriptInterface
     public String optimizeRam(String selectedPackagesJson) {
         JSONObject res = new JSONObject();
         try {
             ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-            ActivityManager.MemoryInfo before = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(before);
+
+            long availBefore = sampleAvailMem(am, true);
+            long totalMem = totalMem(am);
 
             int killed = 0;
             JSONArray arr = new JSONArray(selectedPackagesJson != null && !selectedPackagesJson.isEmpty()
@@ -378,27 +387,54 @@ public class WebBridge {
                 }
             }
 
-            SystemClock.sleep(400);
-            ActivityManager.MemoryInfo after = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(after);
+            SystemClock.sleep(350);
+            long availAfter = sampleAvailMem(am, false);
 
-            long freedBytes = after.availMem - before.availMem;
+            long freedBytes = Math.max(0, availAfter - availBefore);
             res.put("success", true);
             res.put("freedKb", Math.round(freedBytes / 1024.0));
             res.put("freedMb", Math.round(freedBytes / 1048576.0));
             res.put("killedCount", killed);
             res.put("requestedCount", arr.length());
-            res.put("availBeforeMb", Math.round(before.availMem / 1048576.0));
-            res.put("availAfterMb", Math.round(after.availMem / 1048576.0));
-            res.put("totalMb", Math.round(after.totalMem / 1048576.0));
+            res.put("availBeforeMb", Math.round(availBefore / 1048576.0));
+            res.put("availAfterMb", Math.round(availAfter / 1048576.0));
+            res.put("usedBeforeMb", Math.round(Math.max(0, totalMem - availBefore) / 1048576.0));
+            res.put("usedAfterMb", Math.round(Math.max(0, totalMem - availAfter) / 1048576.0));
+            res.put("totalMb", Math.round(totalMem / 1048576.0));
+            res.put("measured", true);
             res.put("note", killed == 0
                     ? "اندروید اجازه بستن برنامه‌های دیگر را به این اپ نمی‌دهد (KILL_BACKGROUND_PROCESSES محدود است)"
-                    : "نتیجه واقعی اندازه‌گیری رم آزاد");
+                    : "اندازه‌گیری واقعی رم: مقدار آزادشده به رفتار لحظه‌ای سیستم بستگی دارد و هرگز عدد جعلی نیست");
         } catch (Exception e) {
             Log.w(TAG, "optimizeRam native error", e);
             try { res.put("success", false); } catch (Exception ignored) {}
         }
         return res.toString();
+    }
+
+    /** دو نمونه availMem با فاصله کوتاه؛ برای «قبل» بیشینه و برای «بعد» کمینه (تخمین محافظه‌کارانه). */
+    private long sampleAvailMem(ActivityManager am, boolean takeMax) {
+        if (am == null) return 0;
+        try {
+            ActivityManager.MemoryInfo m1 = new ActivityManager.MemoryInfo();
+            am.getMemoryInfo(m1);
+            SystemClock.sleep(150);
+            ActivityManager.MemoryInfo m2 = new ActivityManager.MemoryInfo();
+            am.getMemoryInfo(m2);
+            return takeMax ? Math.max(m1.availMem, m2.availMem) : Math.min(m1.availMem, m2.availMem);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private long totalMem(ActivityManager am) {
+        try {
+            ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+            if (am != null) am.getMemoryInfo(mi);
+            return mi.totalMem;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     /**
