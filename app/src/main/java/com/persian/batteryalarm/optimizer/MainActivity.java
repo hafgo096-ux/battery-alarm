@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.AssetFileDescriptor;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.FileDescriptor;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -30,6 +29,7 @@ import android.webkit.WebViewClient;
 import androidx.webkit.WebViewAssetLoader;
 
 import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
