@@ -35,13 +35,23 @@ jobs:
           else
             {
               echo "## 🔥 CI build failure (run ${{ github.run_id }})"
+              echo "### What went wrong"
               echo '```'
-              grep -nE "error:|error |FAILURE|Exception|\.java:[0-9]+|What went wrong" -A 3 -B 1 /tmp/build.log | tail -80 || true
+              grep -n "What went wrong" -A 25 /tmp/build.log | head -60 || true
               echo '```'
-              echo "### آخر لاگ"
+              echo "### compile errors (اولین ۴۰ مورد)"
               echo '```'
-              tail -50 /tmp/build.log
+              grep -nE "error:|\.java:[0-9]+:[0-9]+" /tmp/build.log | head -40 || true
               echo '```'
+              echo "### Caused by"
+              echo '```'
+              grep -n "Caused by" -A 2 /tmp/build.log | head -40 || true
+              echo '```'
+              echo "### خطوط ۱۰۰ تا ۲۰۰ لاگ"
+              echo '```'
+              sed -n '100,200p' /tmp/build.log || true
+              echo '```'
+              echo "log lines: $(wc -l < /tmp/build.log)"
             } > /tmp/body.md
             gh issue create --title "CI build log (run ${{ github.run_id }})" --body-file /tmp/body.md || true
             exit 1
