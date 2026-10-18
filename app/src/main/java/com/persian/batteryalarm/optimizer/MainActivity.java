@@ -29,7 +29,6 @@ import android.webkit.WebViewClient;
 import androidx.webkit.WebViewAssetLoader;
 
 import java.io.FileInputStream;
-import java.io.FileDescriptor;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -213,22 +212,21 @@ public class MainActivity extends Activity {
 
             InputStream stream = null;
             try (AssetFileDescriptor afd = cr.openAssetFileDescriptor(mediaUri, "r")) {
-                if (afd == null) {
-                    stream = cr.openInputStream(mediaUri);
-                    if (stream != null && fStart > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
-                } else {
-                    FileDescriptor dup = afd.getFileDescriptor().dup();
-                    FileInputStream fis = new FileInputStream(dup);
+                if (afd != null) {
+                    // کپی مستقل فایل‌دیسکریپتور تا پس از بسته‌شدن afd استریم زنده بماند
+                    // (ParcelFileDescriptor با finalizer خودش آزاد می‌شود)
+                    FileInputStream fis = new FileInputStream(
+                            android.os.ParcelFileDescriptor.dup(afd.getFileDescriptor()).getFileDescriptor());
                     stream = new SkippedLimitedInputStream(fis, fStart, fLimit);
                 }
             } catch (Exception e) {
-                if (stream == null) {
-                    try { stream = cr.openInputStream(mediaUri); } catch (Exception ignored) {}
-                    if (stream == null) return mediaError(404, "cannot open media");
-                    if (fStart > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
-                }
+                Log.w(TAG, "openAssetFileDescriptor failed", e);
             }
-            if (stream == null) return mediaError(404, "cannot open media");
+            if (stream == null) {
+                try { stream = cr.openInputStream(mediaUri); } catch (Exception ignored) {}
+                if (stream == null) return mediaError(404, "cannot open media");
+                if (fStart > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
+            }
 
             WebResourceResponse r = new WebResourceResponse(mime, isMedia ? "" : "utf-8", stream);
             Map<String, String> respHeaders = new java.util.HashMap<>();
