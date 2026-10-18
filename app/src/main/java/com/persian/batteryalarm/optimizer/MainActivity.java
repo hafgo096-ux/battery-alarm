@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setAllowFileAccess(true);            // فقط برای مسیر پشتیبان (fallback)
-        settings.setAllowContentAccess(false);
+        settings.setAllowContentAccess(true);           // برای نمایش thumbnail تصاویر/ویدیوها (content://)
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
