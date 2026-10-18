@@ -115,3 +115,22 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Close CI build log issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          NUMS=$(gh issue list --state open --json number,title -q '.[] | select(.title | startswith("CI build log")) | .number')
+          echo "found: [$NUMS]"
+          ERRLOG=/tmp/close_err.log
+          : > "$ERRLOG"
+          for n in $NUMS; do
+            gh issue close "$n" --reason completed > "$ERRLOG" 2>&1
+            echo "close $n exit=$?"
+            if [ -s "$ERRLOG" ]; then
+              { echo "close issue $n failed:"; echo '```'; cat "$ERRLOG"; echo '```'; } > /tmp/body.md
+              gh issue create --title "cleanup-failed (run ${{ github.run_id }})" --body-file /tmp/body.md || true
+              : > "$ERRLOG"
+            fi
+          done
