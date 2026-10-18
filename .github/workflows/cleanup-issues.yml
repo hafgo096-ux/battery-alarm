@@ -16,7 +16,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for n in $(gh issue list --state open --search "CI build log in:title" --json number -q '.[].number'); do
-            gh issue close "$n" --comment "بیلد موفق شد و نسخه منتشر شد؛ این گزارش عیب‌یابی بسته می‌شود." || true
-          done
-          echo "done"
+          gh issue list --state open --json number,title \
+            -q '.[] | select(.title | startswith("CI build log")) | .number' \
+            | while read -r n; do
+                [ -z "$n" ] && continue
+                gh issue close "$n" --comment "بیلد موفق شد و نسخه منتشر شد؛ این گزارش عیب‌یابی بسته می‌شود." || true
+              done
+          echo "remaining open: $(gh issue list --state open --json number -q 'length')"
