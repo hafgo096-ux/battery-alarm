@@ -8,7 +8,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AssetFileDescriptor;
+import android.content.res.AssetFileDescriptor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -166,7 +166,7 @@ public class MainActivity extends Activity {
 
             // طول کل فایله (برای Content-Length و محاسبه Range)
             long total = -1;
-            try (AssetFileDescriptor probe = cr.openFileDescriptor(mediaUri, "r")) {
+            try (AssetFileDescriptor probe = cr.openAssetFileDescriptor(mediaUri, "r")) {
                 if (probe != null) total = probe.getLength();
             } catch (Exception ignored) {}
 
@@ -212,7 +212,7 @@ public class MainActivity extends Activity {
                     : (partial && total > 0 ? (total - rangeStart) : -1);
 
             InputStream stream = null;
-            try (AssetFileDescriptor afd = cr.openFileDescriptor(mediaUri, "r")) {
+            try (AssetFileDescriptor afd = cr.openAssetFileDescriptor(mediaUri, "r")) {
                 if (afd == null) {
                     stream = cr.openInputStream(mediaUri);
                     if (stream != null && fStart > 0) stream = new SkippedLimitedInputStream(stream, fStart, fLimit);
@@ -231,14 +231,15 @@ public class MainActivity extends Activity {
             if (stream == null) return mediaError(404, "cannot open media");
 
             WebResourceResponse r = new WebResourceResponse(mime, isMedia ? "" : "utf-8", stream);
+            Map<String, String> respHeaders = new java.util.HashMap<>();
             if (partial) {
                 r.setStatusCodeAndReasonPhrase(206, "Partial Content");
                 long end = (rangeEnd > 0) ? rangeEnd : (total > 0 ? total - 1 : -1);
-                r.addHeader("Content-Range", "bytes " + fStart + "-" + end + (total > 0 ? "/" + total : "/-"));
-            } else if (total > 0) {
-                r.addHeader("Content-Length", String.valueOf(total));
+                respHeaders.put("Content-Range", "bytes " + fStart + "-" + end + (total > 0 ? "/" + total : "/-"));
             }
-            r.addHeader("Accept-Ranges", "bytes");
+            if (total > 0) respHeaders.put("Content-Length", String.valueOf(total));
+            respHeaders.put("Accept-Ranges", "bytes");
+            r.setResponseHeaders(respHeaders);
             return r;
         } catch (Exception e) {
             Log.w(TAG, "media proxy failed", e);
