@@ -15,18 +15,27 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * پل اطلاعات سخت‌افزار (نسخه ۱.۰.۱ - سبک و صادق).
+ * پل اطلاعات سخت‌افزار (نسخه ۱.۰.۳ - داده واقعی و کامل).
  *
- * اصلاحات:
- *  - کش‌گذاری نتایج (CPU ۱.۵ ثانیه، رم ۱.۲ ثانیه، حافظه ۴ ثانیه) تا هر فراخوانی
- *    سبب خواندن مکرر فایل‌های /proc و مصرف بی‌دلیل CPU/باتری نشود.
- *  - حذف کامل داده‌های ساختگی (اعداد تصادفی برای لود هسته‌ها و مقادیر پیش‌فرض دروغین).
- *    در صورت عدم دسترسی، مقدار -1 و «unknown» برگردانده می‌شود تا UI «—» نشان دهد.
+ * اصلاحات ۱.۰.۳ (باگ‌های گزارش‌شده «هیچ داده‌ای نشان داده نمی‌شود»):
+ *  - دمای پردازنده: اسکن همه thermal zones و انتخاب zone مربوط به CPU/SOC بر اساس
+ *    field type (قبلاً فقط zone0 که در بسیاری از دستگاه‌ها باتری/بدنه است).
+ *  - فرکانس: fallback به scaling_max_freq + گزارش فرکانس برای همه هسته‌ها حتی
+ *    وقتی دلتای /proc/stat هنوز در دسترس نیست (قبل از این فرکانس تا ابد «—» می‌ماند).
+ *  - بار کل: fallback به /proc/loadavg برای اولین نمونه‌برداری (به‌جای «—»).
+ *  - حافظه داخلی: بررسی چند کاندید (دیتا/ایموله/فایل‌های خارجی) و گزارش
+ *    بزرگ‌ترین ظرفیت = حافظه واقعی کاربر + حجم‌های ثانویه (SD/USB).
+ *  - رم: خواندن MemFree/MemAvailable از /proc/meminfo + فیل‌بک MemTotal.
+ *
+ * اصول قدیمی:
+ *  - کش‌گذاری نتایج (CPU ۱.۵ ثانیه، رم ۱.۲ ثانیه، حافظه ۴ ثانیه).
+ *  - بدون داده ساختگی؛ در صورت عدم دسترسی -1 و «unknown» (UI: «—»).
  */
 public class SysInfoBridge {
 
@@ -105,14 +114,16 @@ public class SysInfoBridge {
             o.put("abi", Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "unknown");
 
             long[][] cur = readCpuJiffies();
+            int[] usagePerCore = new int[Math.max(cores, cur != null ? cur.length : 0)];
+            for (int i = 0; i < usagePerCore.length; i++) usagePerCore[i] = -1;
             int avgUsage = -1;
-            JSONArray coresArr = new JSONArray();
+            boolean jiffiesValid = false;
 
             if (cur != null && cur.length > 0 && lastJiffies != null
                     && lastJiffies.length == cur.length && (now - lastJiffiesTime) > 400) {
                 double totalUsage = 0;
                 int valid = 0;
-                for (int i = 0; i < cur.length; i++) {
+                for (int i = 0; i < cur.length && i < usagePerCore.length; i++) {
                     long[] a = lastJiffies[i];
                     long[] b = cur[i];
                     long idleA = a.length > 4 ? a[3] + a[4] : 0;
@@ -126,33 +137,65 @@ public class SysInfoBridge {
                     double usage = (1.0 - (double) idleD / totD) * 100.0;
                     if (usage < 0) usage = 0;
                     if (usage > 100) usage = 100;
-                    JSONObject c = new JSONObject();
-                    c.put("core", i);
-                    c.put("usage", Math.round(usage));
-                    c.put("curFreq", readCpuFreq(i, "scaling_cur_freq"));
-                    c.put("maxFreq", readCpuFreq(i, "cpuinfo_max_freq"));
-                    coresArr.put(c);
+                    usagePerCore[i] = (int) Math.round(usage);
                     totalUsage += usage;
                     valid++;
                 }
-                if (valid > 0) avgUsage = (int) Math.round(totalUsage / valid);
+                if (valid > 0) {
+                    avgUsage = (int) Math.round(totalUsage / valid);
+                    jiffiesValid = true;
+                }
             }
             if (cur != null) {
                 lastJiffies = cur;
                 lastJiffiesTime = now;
             }
 
+            // باگ‌فیکس ۱.۰.۳: فرکانس برای همه هسته‌ها همیشه گزارش می‌شود (حتی بدون
+            // دلتای jiffies) تا «فرکانس کاری» در اولین خواندن هم خالی نماند.
+            JSONArray coresArr = new JSONArray();
+            long curFreqMax = -1;
+            long maxFreqMax = -1;
+            for (int i = 0; i < usagePerCore.length; i++) {
+                long f = readCpuFreq(i, "scaling_cur_freq");
+                long mx = readCpuFreq(i, "cpuinfo_max_freq", "scaling_max_freq");
+                if (f > curFreqMax) curFreqMax = f;
+                if (mx > maxFreqMax) maxFreqMax = mx;
+                JSONObject c = new JSONObject();
+                c.put("core", i);
+                c.put("usage", usagePerCore[i]);
+                c.put("curFreq", f);
+                c.put("maxFreq", mx);
+                coresArr.put(c);
+            }
+
+            // باگ‌فیکس ۱.۰.۳: تا زمانی که دلتای /proc/stat آماده نیست (نمونه اول)،
+            // از /proc/loadavg تخمین صادقانه می‌گیریم تا «بار کل» خالی نماند.
+            String usageSource = "jiffies";
+            String loadavg = readFirstLine("/proc/loadavg");
+            if (avgUsage < 0) {
+                try {
+                    double load1 = Double.parseDouble(loadavg.split("\\s+")[0]);
+                    if (load1 > 0 && cores > 0) {
+                        double est = load1 / cores * 100.0;
+                        avgUsage = (int) Math.round(Math.min(100.0, Math.max(0.0, est)));
+                        usageSource = "loadavg-estimate";
+                    }
+                } catch (Exception ignored) {}
+            }
+
             o.put("perCore", coresArr);
             o.put("avgUsage", avgUsage);
             o.put("avgUsageAvailable", avgUsage >= 0);
-
-            String loadavg = readFirstLine("/proc/loadavg");
+            o.put("usageSource", usageSource);
             o.put("loadavg", loadavg.isEmpty() ? "نامشخص" : loadavg);
+            o.put("curFreqMHz", curFreqMax);
+            o.put("maxFreqMHz", maxFreqMax);
 
-            String temp = readFirstLine("/sys/class/thermal/thermal_zone0/temp");
-            long t = 0;
-            try { t = Long.parseLong(temp.replaceAll("[^0-9]", "")); } catch (Exception ignored) {}
-            o.put("temperature", t > 0 ? (t > 1000 ? t / 1000.0 : t) : -1);
+            // باگ‌فیکس ۱.۰.۳: دمای واقعی CPU از اسکن thermal zones (نه فقط zone0)
+            double cpuTemp = readCpuTemperature();
+            o.put("temperature", cpuTemp);
+            o.put("temperatureAvailable", cpuTemp > 0);
 
             cpuCache = o.toString();
             cpuCacheAt = now;
@@ -160,6 +203,50 @@ public class SysInfoBridge {
             Log.w(TAG, "getCpuInfo failed", e);
         }
         return o.toString();
+    }
+
+    /**
+     * دمای واقعی واحد مرکزی پردازنده.
+     * در بسیاری از دستگاه‌ها thermal_zone0 مربوط به باتری یا بدنه است؛
+     * بنابراین همه zoneها را می‌خوانیم و از field نوع (type) هر zone،
+     * zone مربوط به CPU/SOC را انتخاب می‌کنیم (با امتیازدهی).
+     * مقدار برگشتی: درجه سانتی‌گراد (double) یا -1 در صورت عدم دسترسی.
+     */
+    private long readCpuTemperature() {
+        long bestVal = -1;
+        int bestScore = -1;
+        long fallback0 = -1;
+        for (int z = 0; z <= 15; z++) {
+            String raw = readFirstLine("/sys/class/thermal/thermal_zone" + z + "/temp");
+            long v = 0;
+            try { v = Long.parseLong(raw.replaceAll("[^0-9]", "")); } catch (Exception ignored) {}
+            if (v <= 0) continue;
+            if (z == 0) fallback0 = v;
+            String type = readFirstLine("/sys/class/thermal/thermal_zone" + z + "/type");
+            int score = thermalTypeScore(type);
+            if (score > bestScore) {
+                bestScore = score;
+                bestVal = v;
+            }
+        }
+        if (bestScore < 0) bestVal = fallback0;
+        if (bestVal <= 0) return -1;
+        // سنسورها معمولاً میلی‌درجه گزارش می‌دهند (42500 = 42.5°)؛ برخی درجه (42).
+        return bestVal > 1000 ? bestVal / 1000 : bestVal;
+    }
+
+    private int thermalTypeScore(String type) {
+        if (type == null) return -1;
+        String t = type.trim().toLowerCase(java.util.Locale.US);
+        if (t.isEmpty()) return -1;
+        if (t.contains("cpu-thermal") || t.contains("cpu_thermal")) return 100;
+        if (t.contains("soc") || t.contains("xusr")) return 90;
+        if (t.contains("cpu")) return 80;
+        if (t.contains("tsens")) return 60;
+        // سنسورهایی که ربطی به CPU ندارند - امتیاز منفی
+        if (t.contains("battery") || t.contains("batt") || t.contains("skin")
+                || t.contains("gpu") || t.contains("charge") || t.contains("nv")) return -1;
+        return 40; // type ناشناخته ولی مقدار معتبر - پایین‌ترین اولویت
     }
 
     private long[][] readCpuJiffies() {
@@ -189,17 +276,28 @@ public class SysInfoBridge {
         }
     }
 
-    private long readCpuFreq(int core, String key) {
-        try {
-            String v = readFirstLine("/sys/devices/system/cpu/cpu" + core + "/cpufreq/" + key);
-            if (v.isEmpty()) return -1;
-            return Long.parseLong(v.trim()) / 1000;
-        } catch (Exception e) {
-            return -1;
+    /**
+     * فرکانس هسته به مگاهرتز (مقدار raw در sysfs بر حسب کیلوهرتز است).
+     * باگ‌فیکس ۱.۰.۳: پشتیبانی از چند کلید با fallback (در برخی دستگاه‌ها
+     * cpuinfo_max_freq وجود ندارد و فقط scaling_max_freq هست).
+     */
+    private long readCpuFreq(int core, String... keys) {
+        for (String key : keys) {
+            try {
+                String v = readFirstLine("/sys/devices/system/cpu/cpu" + core + "/cpufreq/" + key);
+                if (v == null || v.isEmpty()) continue;
+                long hz = Long.parseLong(v.trim());
+                if (hz > 0) return hz / 1000; // kHz -> MHz
+            } catch (Exception ignored) {}
         }
+        return -1;
     }
 
     // ================= RAM =================
+    // باگ‌فیکس ۱.۰.۳:
+    //  - فیل‌بک به /proc/meminfo در صورتی که ActivityManager عدد صفر برگرداند
+    //  - گزارش دقیق MemFree و MemAvailable جدا از هم (قبل‌تر فقط cached بود)
+    //  - افزونه usedReal = مصرف واقعی بدون کش (برای نوار رنگی و افسانه‌ها)
     @JavascriptInterface
     public String getMemoryInfo() {
         long now = SystemClock.elapsedRealtime();
@@ -212,17 +310,30 @@ public class SysInfoBridge {
 
             long total = mi.totalMem;
             long avail = mi.availMem;
+            if (total <= 0) total = readMeminfoValue("MemTotal");
+            if (avail <= 0) avail = readMeminfoValue("MemAvailable");
+            if (avail <= 0) avail = readMeminfoValue("MemFree");
+
             long used = Math.max(0, total - avail);
             int usedPct = total > 0 ? (int) Math.round((double) used / total * 100) : -1;
+
+            long cached = readMeminfoValue("Cached") + readMeminfoValue("Buffers");
+            long memFree = readMeminfoValue("MemFree");
+            long memAvailable = readMeminfoValue("MemAvailable");
+            if (memAvailable <= 0) memAvailable = avail;
+            long usedReal = Math.max(0, used - cached);
 
             o.put("total", total);
             o.put("avail", avail);
             o.put("used", used);
+            o.put("usedReal", usedReal);
             o.put("usedPct", usedPct);
             o.put("lowMemory", mi.lowMemory);
             o.put("threshold", mi.threshold);
-            o.put("cached", readMeminfoValue("Cached") + readMeminfoValue("Buffers"));
-            o.put("source", "ActivityManager.MemoryInfo");
+            o.put("cached", cached);
+            o.put("memFree", memFree);
+            o.put("memAvailable", memAvailable);
+            o.put("source", "ActivityManager.MemoryInfo + /proc/meminfo");
 
             memCache = o.toString();
             memCacheAt = now;
@@ -246,20 +357,89 @@ public class SysInfoBridge {
     }
 
     // ================= Storage =================
+    // باگ‌فیکس ۱.۰.۳ (گزارش: «حافظه واقعی رو نشون نمیده»):
+    // قبلاً فقط پارتیشن /data اندازه‌گیری می‌شد که در برخی دستگاه‌ها با ظرفیتی
+    // که کاربر در تنظیمات اندروید می‌بیند یکی نیست. حالا چند کاندید بررسی می‌شود:
+    //   /data ، /storage/emulated/0 ، Directory خارجی کاربر ، فایل‌های خارجی اپ
+    // و بزرگ‌ترین ظرفیت به‌عنوان «حافظه داخلی واقعی» گزارش می‌شود. هر پارتیشن
+    // کاملاً مجزا (مثلاً SD کارت/USB، تفاوت بیش از ۱ گیگ) هم به‌عنوان حجم
+    // ثانویه در آرایه volumes جداگانه اعلام می‌شود.
     @JavascriptInterface
     public String getStorageInfo() {
         long now = SystemClock.elapsedRealtime();
         if (storageCache != null && (now - storageCacheAt) < STORAGE_TTL) return storageCache;
         JSONObject o = new JSONObject();
         try {
-            StatFs sf = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-            long total = sf.getTotalBytes();
-            long avail = sf.getAvailableBytes();
-            long used = Math.max(0, total - avail);
-            o.put("total", total);
-            o.put("avail", avail);
+            List<String[]> paths = new ArrayList<>();
+            try { paths.add(new String[]{Environment.getDataDirectory().getAbsolutePath(), "data"}); } catch (Exception ignored) {}
+            paths.add(new String[]{"/storage/emulated/0", "emulated"});
+            try { paths.add(new String[]{Environment.getExternalStorageDirectory().getAbsolutePath(), "external"}); } catch (Exception ignored) {}
+            try {
+                File ext = ctx.getExternalFilesDir(null);
+                if (ext != null) paths.add(new String[]{ext.getAbsolutePath(), "app-external"});
+            } catch (Exception ignored) {}
+
+            JSONArray vols = new JSONArray();
+            long bestTotal = -1;
+            long bestAvail = -1;
+            String bestPath = "";
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (String[] p : paths) {
+                try {
+                    File file = new File(p[0]);
+                    if (!file.exists()) continue;
+                    String canonical = file.getCanonicalPath();
+                    if (!seen.add(canonical)) continue;
+                    StatFs sf = new StatFs(canonical);
+                    long total = sf.getTotalBytes();
+                    if (total <= 0) continue;
+                    long avail = sf.getAvailableBytes();
+                    if (total > bestTotal) {
+                        bestTotal = total;
+                        bestAvail = avail;
+                        bestPath = p[1];
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (bestTotal <= 0) {
+                o.put("total", 0);
+                o.put("avail", 0);
+                o.put("used", 0);
+                o.put("usedPct", -1);
+                o.put("source", "unknown");
+                storageCache = o.toString();
+                storageCacheAt = now;
+                return storageCache;
+            }
+
+            long used = Math.max(0, bestTotal - bestAvail);
+            o.put("total", bestTotal);
+            o.put("avail", bestAvail);
             o.put("used", used);
-            o.put("usedPct", total > 0 ? (int) Math.round((double) used / total * 100) : -1);
+            o.put("usedPct", (int) Math.round((double) used / bestTotal * 100));
+            o.put("source", bestPath);
+
+            // حجم‌های ثانویه (SD/USB یا پارتیشن مجزا) — فقط اگر واقعاً متفاوت باشند
+            try {
+                File ext = ctx.getExternalFilesDir(null);
+                if (ext != null) {
+                    String canonical = ext.getCanonicalPath();
+                    StatFs sf = new StatFs(canonical);
+                    long t = sf.getTotalBytes();
+                    if (t > 0 && Math.abs(t - bestTotal) > 1073741824L) {
+                        JSONObject v = new JSONObject();
+                        v.put("total", t);
+                        v.put("avail", sf.getAvailableBytes());
+                        v.put("used", Math.max(0, t - sf.getAvailableBytes()));
+                        v.put("usedPct", (int) Math.round((double) v.optLong("used") / t * 100));
+                        v.put("label", "حافظه خارجی");
+                        vols.put(v);
+                    }
+                }
+            } catch (Exception ignored) {}
+            o.put("volumes", vols);
+
             storageCache = o.toString();
             storageCacheAt = now;
         } catch (Exception e) {
