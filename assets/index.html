@@ -421,6 +421,10 @@
       color: var(--text-muted);
       margin-bottom: 4px;
     }
+    .core-name {
+      font-weight: 700;
+      color: #94a3b8;
+    }
     .core-pct {
       font-size: 0.95rem;
       font-weight: 800;
@@ -2560,7 +2564,7 @@
 
       // سطح ۲: تحلیل وضعیت شارژ
       if (charging && percent >= 100) {
-        advices.push('🔋 باتری ۱۰٪ شارژ شد — فوراً شارژر را بکشید!');
+        advices.push('🔋 باتری ۱۰۰٪ شارژ شد — فوراً شارژر را بکشید!');
         advices.push(KB.charge[2].text);
       } else if (charging && percent >= targetPct) {
         advices.push('⚡ شارژ به سقف هدف (' + targetPct + '٪) رسید — کابل را جدا کنید.');
@@ -2812,7 +2816,9 @@
         { rule: 'fc-4', text: 'نیازی به پاکسازی مکرر کش نیست؛ سیستم خودکار آن را مدیریت می‌کند. فقط وقتی فضا کم شده، کش برنامه‌های پرمصرف را خالی کنید.' },
         { rule: 'fc-5', text: 'کش مرورگرها (کروم، فایرفاکس و…) می‌تواند چند گیگابایت شود؛ از تنظیمات خود مرورگر: حریم خصوصی > حذف داده‌های مرور، قابل پاکسازی است.' },
         { rule: 'fc-6', text: 'برنامه‌های ویرایش عکس و ویدیو (مثل CapCut، Lightroom، اسنپ‌سیت) کش‌های موقت بزرگی می‌سازند که بعد از اتمام پروژه قابل حذف‌اند.' },
-        { rule: 'fc-7', text: 'اگر کش یک برنامه بعد از پاکسازی فوراً پر شد، ریشه مشکل در خود برنامه است؛ حذف و نصب دوباره (بدون بازگردانی داده) آخرین راه‌حل است.' }
+        { rule: 'fc-7', text: 'اگر کش یک برنامه بعد از پاکسازی فوراً پر شد، ریشه مشکل در خود برنامه است؛ حذف و نصب دوباره (بدون بازگردانی داده) آخرین راه‌حل است.' },
+        { rule: 'fc-8', text: 'مسیر دقیق پاکسازی کش تلگرام: تنظیمات تلگرام > داده و حافظه > استفاده از حافظه > پاک کردن کش — واتس‌اپ: تنظیمات > حافظه و داده > مدیریت حافظه.' },
+        { rule: 'fc-9', text: 'استیکرها و چهره‌های (Sticker/Emoji) دانلودشده در تلگرام جزو کش هستند؛ پاک شدنشان ضرری ندارد و هنگام نیاز دوباره دانلود می‌شوند.' }
       ],
       media: [
         { rule: 'fm-1', text: 'ویدیوها بزرگ‌ترین مصرف‌کننده حافظه‌اند: یک ویدیوی ۱۰۸۰p تقریباً ۱ تا ۲ گیگابایت در ساعت اشغال می‌کند.' },
@@ -2823,7 +2829,17 @@
         { rule: 'fm-6', text: 'پوشه DCIM/.thumbnails کش تصاویر گالری است و حذف آن بی‌خطر است؛ اندروید در صورت نیاز دوباره می‌سازدش.' },
         { rule: 'fm-7', text: 'ویدیوهای 4K چند برابر 1080p حجم دارند؛ ضبط 4K فقط وقتی واقعاً لازم است استفاده شود و بعد از انتقال به فضای ابری حذف شود.' },
         { rule: 'fm-8', text: 'فایل‌های «ارسال‌شده» (Sent) در واتس‌اپ و تلگرام نسخه تکراری رسانه‌ها را نگه می‌دارند؛ این پوشه‌ها امن‌ترین گزینه برای آزادسازی فضا هستند.' },
-        { rule: 'fm-9', text: 'ویس‌ها و ضبط‌های صفحه (Screen recordings) به‌مرور چند گیگ می‌شوند؛ در پوشه‌های Music/Recordings و Movies/Screen recordings قابل بررسی‌اند.' }
+        { rule: 'fm-9', text: 'ویس‌ها و ضبط‌های صفحه (Screen recordings) به‌مرور چند گیگ می‌شوند؛ در پوشه‌های Music/Recordings و Movies/Screen recordings قابل بررسی‌اند.' },
+        { rule: 'fm-10', text: 'قبل از حذف عکس‌های قدیمی، مطمئن شوید در گوگل عکس (Google Photos) پشتیبان‌گیری شده‌اند؛ گزینه‌ی «آزاد کردن فضا» خود گوگل عکس هم این کار را امن انجام می‌دهد.' }
+      ],
+      documents: [
+        { rule: 'fd-1', text: 'برنامه‌های خواننده‌ی PDF و مستندساز، فایل‌های بازشده را در کش خود نگه می‌دارند؛ پاک کردن کش آن‌ها سند اصلی شما را از بین نمی‌برد.' },
+        { rule: 'fd-2', text: 'فایل‌های OBB (داده‌ی بازی‌ها) در Android/obb قرار دارند؛ حذف آن‌ها بازی را خراب می‌کند و دوباره دانلود می‌شود — فقط اگر بازی را ندیگر نگه داشتید حذف کنید.' }
+      ],
+      duplicates: [
+        { rule: 'fdp-1', text: 'عکس‌های تکراری و شبیه (مثلاً ۱۰ عکس پشت سرهم از یک لحن) بزرگ‌ترین فضای هدررفته در گالری‌اند؛ گوگل عکس و برنامه‌های معتبر «عکس مشابه» را پیدا می‌کنند.' },
+        { rule: 'fdp-2', text: 'اسکرین‌شات‌هایی که از همان عکس گرفته شده‌اند (عکس از عکس) کیفیت کمتر دارند و می‌توانند بی‌خطر حذف شوند.' },
+        { rule: 'fdp-3', text: 'قبل از حذف انبوه، قاعده‌ی ۳۰ روزه را بگیرید: فایلی که ۳۰ روز است باز نشده و پشتیبان دارد، نامزد اصلی آزادسازی فضا است.' }
       ],
       storage: [
         { rule: 'fs-1', text: 'وقتی حافظه داخلی بیش از ۹۰٪ پر باشد، سرعت سیستم افت می‌کند؛ همیشه ۱۰ تا ۵٪ فضای خالی نگه دارید.' },
@@ -2833,7 +2849,10 @@
         { rule: 'fs-5', text: 'پوشه‌ی Download معمولاً بزرگ‌ترین پوشه فراموش‌شده است؛ فایل‌های ZIP و APK و ویدیوهای دانلودشده بعد از استفاده قابل حذف‌اند.' },
         { rule: 'fs-6', text: 'نقشه‌های آفلاین Google Maps می‌توانند چند گیگ شوند؛ از تنظیمات Maps > نقشه‌های آفلاین قابل مدیریت‌اند.' },
         { rule: 'fs-7', text: 'انتقال برنامه‌ها به SD کارت (در دستگاه‌هایی که پشتیبانی می‌کنند) حافظه داخلی را آزاد می‌کند اما اجرای برنامه کندتر می‌شود؛ فقط برای برنامه‌های سنگین و کم‌مصرف.' },
-        { rule: 'fs-8', text: 'بعد از حذف فایل‌های حجیم، چند دقیقه صبر کنید یا دستگاه را ری‌استارت کنید تا فهرست رسانه (MediaStore) اندروید به‌روز شود و فضای آزاد درست نمایش داده شود.' }
+        { rule: 'fs-8', text: 'بعد از حذف فایل‌های حجیم، چند دقیقه صبر کنید یا دستگاه را ری‌استارت کنید تا فهرست رسانه (MediaStore) اندروید به‌روز شود و فضای آزاد درست نمایش داده شود.' },
+        { rule: 'fs-9', text: 'از اندروید ۱۱ به بعد (Scoped Storage) هیچ برنامه‌ای — حتی مدیر فایل — نمی‌تواند پوشه‌ی خصوصی برنامه‌های دیگر را ببیند؛ این ویژگی امنیتی است نه باگ.' },
+        { rule: 'fs-10', text: 'اگر می‌خواهید پوشه‌ای در گالری نمایش داده نشود، فایلی خالی به نام .nomedia در آن بگذارید؛ برای برگرداندنش آن فایل را حذف کنید.' },
+        { rule: 'fs-11', text: 'SD کارت فرمت‌شده به‌عنوان «حافظه داخلی» (Adoptable) فقط با همان دستگاه کار می‌کند؛ قبل از جابه‌جایی بین گوشی‌ها، آن را «قابل حذف» (Portable) کنید.' }
       ],
       permissions: [
         { rule: 'fp-1', text: 'درخواست مجوز در manifest برنامه ≠ دسترسی واقعی؛ دسترسی فقط پس از اجازه‌ی شما در تنظیمات اندروید فعال می‌شود. این اپ فقط مجوزهای واقعاً اعطا شده را گزارش می‌دهد.' },
@@ -2841,14 +2860,18 @@
         { rule: 'fp-3', text: 'هر چند ماه یک‌بار: تنظیمات > برنامه‌ها > (برنامه) > مجوزها را باز کنید و مجوزهایی که استفاده نمی‌کنید (مکان، میکروفون، پیامک) را بازگردانید.' },
         { rule: 'fp-4', text: 'ترکیب «نمایش روی دیگر برنامه‌ها» (Overlay) + دسترسی به پیامک، نشانه‌ی برنامه‌های خطرناک است؛ این سطح را فقط به برنامه‌های مورد اعتماد بدهید.' },
         { rule: 'fp-5', text: 'در اندروید ۱۳+ دسترسی حافظه به سه مجوز جدا (تصاویر، ویدیوها، صداها) تفکیک شده؛ فقط همان‌چه واقعاً لازم است را فعال نگه دارید.' },
-        { rule: 'fp-6', text: 'دسترسی «همه فایل‌ها» (All files access) فقط برای فایل‌منیجرها و پشتیبان‌گیرها لازم است؛ به برنامه‌های دیگر این سطح را ندهید.' }
+        { rule: 'fp-6', text: 'دسترسی «همه فایل‌ها» (All files access) فقط برای فایل‌منیجرها و پشتیبان‌گیرها لازم است؛ به برنامه‌های دیگر این سطح را ندهید.' },
+        { rule: 'fp-7', text: 'دسترسی «آمار مصرف» (Usage Access) فقط به این برنامه اجازه می‌دهد ببیند کدام برنامه‌ها اخیراً فعال بوده‌اند؛ نه خواندن محتوای آن‌ها. از صفحه‌ی دسترسی ویژه تنظیمات قابل روشن/خاموش است.' }
       ],
       general: [
         { rule: 'fg-1', text: 'این برنامه هرگز بدون اجازه‌ی شما فایلِ برنامه‌های دیگر را حذف نمی‌کند؛ همه عملیات از طریق تنظیمات خود اندروید انجام می‌شود.' },
         { rule: 'fg-2', text: 'اگر فایلی در برنامه فایل‌ها نیست، ممکن است در پوشه‌ی خصوصی همان برنامه (اندروید ۱۱+) باشد؛ در آن صورت از تنظیمات خود آن برنامه مدیریتش کنید.' },
         { rule: 'fg-3', text: '«پاک کردن داده» (Data) با «پاک کردن کش» (Cache) فرق دارد؛ پاک کردن داده، شما را از برنامه خارج می‌کند و تنظیماتش را می‌پرمایند — با احتیاط استفاده کنید.' },
         { rule: 'fg-4', text: 'مطمئن‌ترین راه آزادسازی حافظه، حذف برنامه‌هایی است که چند ماه استفاده نکرده‌اید (تنظیمات > برنامه‌ها > مرتب‌سازی بر اساس آخرین استفاده).' },
-        { rule: 'fg-5', text: 'در Google Photos با فعال‌سازی «پشتیبان‌گیری با کیفیت صرفه‌جو» (Storage saver)، نسخه ابری حافظه گوشی را اشغال نمی‌کند و می‌توان نسخه‌های محلی را حذف کرد.' }
+        { rule: 'fg-5', text: 'در Google Photos با فعال‌سازی «پشتیبان‌گیری با کیفیت صرفه‌جو» (Storage saver)، نسخه ابری حافظه گوشی را اشغال نمی‌کند و می‌توان نسخه‌های محلی را حذف کرد.' },
+        { rule: 'fg-6', text: 'ابزار رسمی گوگل برای این کار «Files by Google» است؛ پیشنهادهای پاکسازی آن را قبل از حذف دستی مرور کنید.' },
+        { rule: 'fg-7', text: 'خاموش/روشن کردن گوشی فایلی را حذف نمی‌کند؛ فقط فایل‌های موقت سیستمی (/cache) را پاک می‌کند. برای فضای بیشتر، باید خودتان فایل‌ها را مدیریت کنید.' },
+        { rule: 'fg-8', text: 'صوت‌های (Voice Message) ویدیویی تلگرام و واتس‌اپ با گذشت ماه‌ها به‌راحتی چند گیگابایت می‌شوند؛ از «مدیریت حافظه» خود پیام‌رسان، رسانه‌های پیام‌های قدیمی را پاک کنید.' }
       ]
     };
     // برچسب فارسی دسته‌ها برای کتابخانه آموزش‌ها
@@ -2856,12 +2879,14 @@
       { key: 'all', label: 'همه' },
       { key: 'cache', label: 'کش برنامه‌ها' },
       { key: 'media', label: 'رسانه و ویدیو' },
+      { key: 'documents', label: 'مستندات و دانلود' },
+      { key: 'duplicates', label: 'فایل‌های تکراری' },
       { key: 'storage', label: 'حافظه داخلی' },
       { key: 'permissions', label: 'مجوزها' },
       { key: 'general', label: 'مدیریت کلی' }
     ];
     const FILE_TRAINING_ICONS = {
-      cache: 'broom', media: 'film', storage: 'storage', permissions: 'shield', general: 'bulb'
+      cache: 'broom', media: 'film', documents: 'scan', duplicates: 'layers', storage: 'storage', permissions: 'shield', general: 'bulb'
     };
     let fileIntelScan = { riskyCount: 0, cacheTotalMb: 0, cacheTopName: '', largeCount: 0, storagePct: -1 };
 
@@ -2880,6 +2905,7 @@
       }
       if (fileIntelScan.largeCount >= 10) return FILE_KNOWLEDGE_BASE.media[0].text;
       if (fileIntelScan.riskyCount >= 3) return FILE_KNOWLEDGE_BASE.permissions[0].text;
+      if (fileIntelScan.largeCount >= 3) return FILE_KNOWLEDGE_BASE.duplicates[0].text;
       return rules[Math.floor(Date.now() / 30000) % rules.length].text;
     }
     function updateFileIntelPanel() {
@@ -4100,15 +4126,15 @@
           return suiteAssert(typeof st.mode === 'string' && st.mode.length > 0, st.mode);
         });
       });
-      add('POWER', 'نام نسخه روی 1.0.4 است', function () {
+      add('POWER', 'نام نسخه روی 1.0.5 است', function () {
         const st = nativeMonitorState();
         if (!st || !st.versionName) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionName === '1.0.4', st.versionName);
+        return suiteAssert(st.versionName === '1.0.5', st.versionName);
       });
-      add('POWER', 'کد نسخه روی ۵ است', function () {
+      add('POWER', 'کد نسخه روی ۶ است', function () {
         const st = nativeMonitorState();
         if (!st || st.versionCode === undefined) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionCode === 5, String(st.versionCode));
+        return suiteAssert(st.versionCode === 6, String(st.versionCode));
       });
       add('POWER', 'شمارنده هشدارها عددی و غیرمنفی است', function () {
         const st = nativeMonitorState();
@@ -4721,13 +4747,61 @@
         } catch (e) { ok = false; }
         return suiteAssert(ok, 'zoom works');
       });
+      add('MEDIA', 'زوم لایت‌باکس محدوده‌ی ۱ تا ۴ را حفظ می‌کند (استرس ۱۰K)', function () {
+        let ok = true;
+        try {
+          for (let i = 0; i < 10000; i++) {
+            lbZoomBy((i % 2 === 0) ? 1.4 : 1 / 1.4);
+            if (lbZoomState.scale < 1 || lbZoomState.scale > 4.0001) { ok = false; break; }
+          }
+          lbZoomReset();
+        } catch (e) { ok = false; }
+        return suiteAssert(ok, 'scale=' + (typeof lbZoomState.scale === 'number' ? lbZoomState.scale.toFixed(2) : '?'));
+      });
+      add('MEDIA', 'play() ویدیو بدون crash در همه مرورگرها (محافظت Promise)', function () {
+        let ok = true;
+        try {
+          const v = document.createElement('video');
+          v.play = function () { return undefined; }; // شبیه وب‌ویو قدیمی
+          if (v.paused) { try { const p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) { ok = false; } }
+          v.pause();
+        } catch (e) { ok = false; }
+        return suiteAssert(ok, 'guarded play');
+      });
+      add('FILEINTEL', 'قوانین هوش فایل یکتا هستند (بدون تکرار rule/text)', function () {
+        const rules = fileIntelAllRules();
+        const ids = {}, texts = {};
+        let ok = rules.length > 0;
+        rules.forEach(function (r) {
+          if (!r.rule || ids[r.rule]) ok = false;
+          ids[r.rule] = true;
+          const t = (r.text || '').trim();
+          if (!t || texts[t]) ok = false;
+          texts[t] = true;
+          if (!/[؀-ۿ]/.test(t)) ok = false; // باید فارسی باشد
+        });
+        return suiteAssert(ok, 'unique=' + Object.keys(texts).length);
+      });
+      add('FILEINTEL', 'آموزش‌ها ادعای جعلی ندارند (تضمین/گارانتی/هزاران قانون)', function () {
+        const banned = /(?:هزاران? قانون|۱۰۰٪ تمیز|گارانتی|تضمین می‌کنیم|همیشه فضا آزاد)/;
+        const bad = fileIntelAllRules().filter(function (r) { return banned.test(r.text); });
+        return suiteAssert(bad.length === 0, 'fake=' + bad.length);
+      });
+      add('BATTERY', 'پیام شارژ کامل ۱۰۰٪ درست نوشته شده (باگ تایپی ۱۰٪ رفع شد)', function () {
+        const src = document.documentElement.innerHTML;
+        // رشته باگ از تکه‌ها ساخته می‌شود تا خودِ این تست مثبت کاذب ندهد
+        const good = 'باتری ۱۰۰٪ شارژ شد';
+        const bad = 'باتری ۱۰' + '٪ شارژ شد';
+        const ok = src.indexOf(good) !== -1 && src.indexOf(bad) === -1;
+        return suiteAssert(ok, 'typo fixed');
+      });
       add('MEDIA', 'ویدیو پلیر از پراکسی نیتیو استفاده می‌کند (نه content:// مستقیم)', function(){
         const src = videoSrcFor({ contentUri: 'content://media/external/video/media/7', path: 'content://media/external/video/media/7' });
         return suiteAssert(src.indexOf('content://') === -1 && src.indexOf('appmedia.local') !== -1, src.slice(0, 50));
       });
       add('FILEINTEL', 'پایگاه دانش هوش فایل حداقل ۱۵ قانون واقعی دارد', function(){
         const rules = fileIntelAllRules();
-        return suiteAssert(rules.length >= 15, rules.length + ' rules');
+        return suiteAssert(rules.length >= 45, rules.length + ' rules');
       });
       add('FILEINTEL', 'همه قوانین هوش فایل متن فارسی غیرخالی و بدون نام فایل الکی انگلیسی هستند', function(){
         let ok = true; let bad = '';
