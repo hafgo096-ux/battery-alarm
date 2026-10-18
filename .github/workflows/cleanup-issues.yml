@@ -1,0 +1,20 @@
+name: Cleanup diagnostic issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close old CI build log issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --state open --search "CI build log in:title" --json number -q '.[].number'); do
+            gh issue close "$n" --comment "بیلد موفق شد و نسخه منتشر شد؛ این گزارش عیب‌یابی بسته می‌شود." || true
+          done
+          echo "done"
