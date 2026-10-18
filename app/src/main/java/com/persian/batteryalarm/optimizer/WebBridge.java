@@ -34,19 +34,30 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * پل ارتباطی جاوااسکریپت ↔ اندروید نیتیو (نسخه ۱.۰.۲ - اصلاح جامع).
+ * پل ارتباطی جاوااسکریپت ↔ اندروید نیتیو (نسخه ۱.۰.۳ - داده واقعی در همه بخش‌ها).
  *
- * تغییرات اصلی ۱.۰.۲:
- *  - getRiskyApps: اصلاح باگ بحرانی "تلگرام به مکان دسترسی دارد" - اکنون فقط مجوزهای
- *    واقعاً اعطا شده (GRANTED) بررسی می‌شود، نه مجوزهای درخواستی manifest.
- *    قبلاً هر برنامه‌ای که در manifest مکان را درخواست کرده بود (مثل تلگرام برای
- *    اشتراک مکان اختیاری) به اشتباه "پرخطر" نشان داده می‌شد.
- *  - getAppIcon / getAppIconBatch: آیکون واقعی برنامه‌ها با Base64 برای نمایش زیبا
- *  - getLargeMedia: بازنویسی کامل - برچسب فارسی "تصویر ۱/۲" و "ویدیو ۱/۲"،
- *    نمایش ابعاد، مدت‌زمان ویدیو، تاریخ، و thumbUri برای لایت‌باکس
- *  - getMediaThumbnail: تولید thumbnail بهینه برای نمایش سبک
- *  - getRunningProcesses: لیست پردازش‌های واقعی با مصرف رم برای بهینه‌سازی صادقانه
- *  - بهینه‌سازی مصرف باتری: کش، محدودیت تعداد، TTL
+ * اصلاحات ۱.۰.۳:
+ *  - getRiskyApps: مجوزهای حافظه/رسانه (READ_MEDIA_IMAGES و READ_MEDIA_VIDEO و
+ *    READ_EXTERNAL_STORAGE) هم حساس محاسبه می‌شوند ⇒ برنامه‌ای که کاربر به آن
+ *    حافظه داده (مثل تلگرام)
+ *    با سطح «پایین» و دلیل دقیق نمایش داده می‌شود؛ سطح‌بندی ۴ مرحله‌ای صادقانه.
+ *  - getAppCaches: بررسی قبلی Access «آمار مصرف» (AppOps) + کارت راهنمای فارسی
+ *    به‌جای SecurityException بی‌صدا + نمایش کل داده برنامه در کنار کش.
+ *  - getRunningProcesses: بازنویسی با داده‌ی واقعی — از اندروید ۸ به بعد
+ *    getRunningAppProcesses فقط خود اپ را برمی‌گرداند و هیچ API عمومی‌ای برای
+ *    رمِ مصرفی برنامه‌های دیگر وجود ندارد؛ پس برنامه‌های اخیراً فعال
+ *    (UsageStatsManager) با حجم واقعی کد+داده/کش (StorageStatsManager) و
+ *    زمان واقعی آخرین فعالیت گزارش می‌شوند و بدون دسترسی، کارت اعطای دسترسی
+ *    نمایش داده می‌شود.
+ *  - freeOwnMemory: مقدار آزادسازی‌شده از اندازه واقعی فایل‌های کش (قبل/بعد)
+ *    به‌جای نوسان availMem سیستم.
+ *
+ * تغییرات ۱.۰.۲ (حفظ‌شده):
+ *  - getRiskyApps: فقط مجوزهای واقعاً اعطا شده (GRANTED) بررسی می‌شود.
+ *  - getAppIcon / getAppIconBatch: آیکون واقعی برنامه‌ها با Base64
+ *  - getLargeMedia: برچسب فارسی "تصویر ۱/۲" و "ویدیو ۱/۲" + ابعاد/مدت/تاریخ
+ *  - getMediaThumbnail: thumbnail بهینه (loadThumbnail / MediaMetadataRetriever)
+ *  - کش، محدودیت تعداد، TTL
  */
 public class WebBridge {
 
@@ -391,8 +402,19 @@ public class WebBridge {
     }
 
     /**
-     * لیست پردازش‌های جاری با مصرف واقعی رم (PSS) - برای بهینه‌سازی شفاف.
-     * فقط اطلاعات خواندنی؛ بستن فقط با اجازه کاربر و killBackgroundProcesses.
+     * لیست برنامه‌های اخیراً فعال با داده‌ی واقعی.
+     *
+     * باگ‌فیکس ۱.۰.۳ (گزارش: «پردازش‌های فعال هیچ داده‌ای نشان نمی‌دهد»):
+     * از اندروید ۸ به بعد، ActivityManager.getRunningAppProcesses() فقط پردازش‌های
+     * خودِ برنامه‌ی فراخواننده را برمی‌گرداند ⇒ لیست همیشه خالی می‌شد. ضمناً
+     * اندروید هیچ API عمومی‌ای برای خواندن «رم مصرفی» برنامه‌های دیگر نمی‌دهد
+     * (getProcessStats هم API سیستم است و در SDK عمومی وجود ندارد) — پس به‌جای
+     * عدد جعلی، داده‌ی واقعی زیر را گزارش می‌کنیم:
+     *   - برنامه‌های فعال/اخیر: UsageStatsManager.queryUsageStats (دسترسی «آمار مصرف»)
+     *   - حجم واقعی کد+داده و کش هر برنامه: StorageStatsManager (همان دسترسی)
+     *   - وضعیت: بر اساس زمان واقعی آخرین فعالیت (فعال/اخیر/پس‌زمینه)
+     * مصرف رم کل سیستم هم‌چنان دقیق از ActivityManager.MemoryInfo در کارت
+     * «پایش حافظه رم» نمایش داده می‌شود (آن عدد واقعی و قابل‌اتکاست).
      */
     @JavascriptInterface
     public String getRunningProcesses() {
@@ -401,59 +423,111 @@ public class WebBridge {
 
         JSONArray res = new JSONArray();
         try {
-            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-            PackageManager pm = ctx.getPackageManager();
-            if (am == null) return res.toString();
-
-            List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
-            if (procs == null || procs.isEmpty()) return res.toString();
-
-            // جمع‌آوری pids برای getProcessMemoryInfo
-            int[] pids = new int[Math.min(procs.size(), 25)];
-            List<ActivityManager.RunningAppProcessInfo> limited = procs.subList(0, Math.min(procs.size(), 25));
-            for (int i = 0; i < limited.size(); i++) pids[i] = limited.get(i).pid;
-            android.os.Debug.MemoryInfo[] mems = am.getProcessMemoryInfo(pids);
-
             List<JSONObject> tmp = new ArrayList<>();
-            for (int i = 0; i < limited.size(); i++) {
-                ActivityManager.RunningAppProcessInfo pi = limited.get(i);
-                if (pi.pkgList == null || pi.pkgList.length == 0) continue;
-                String pkg = pi.pkgList[0];
-                if (pkg.equals(ctx.getPackageName())) continue;
-                // فقط پردازش‌های کاربر، نه سیستم
-                try {
-                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
-                    String label = ai.loadLabel(pm).toString();
-                    long pssKb = (mems != null && i < mems.length && mems[i] != null) ? mems[i].getTotalPss() : 0;
+            boolean gotData = false;
 
-                    JSONObject o = new JSONObject();
-                    o.put("name", label);
-                    o.put("pkg", pkg);
-                    o.put("procName", pi.processName);
-                    o.put("pssKb", pssKb);
-                    o.put("pssMb", Math.round(pssKb / 1024.0 * 10) / 10.0);
-                    o.put("sizeText", pssKb >= 1024 ? String.format(java.util.Locale.US, "%.1f MB", pssKb / 1024.0) : pssKb + " KB");
-                    o.put("importance", pi.importance);
-                    String impText = "پس‌زمینه";
-                    if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) impText = "فعال";
-                    else if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE) impText = "قابل مشاهده";
-                    o.put("statusText", impText);
-                    o.put("note", impText + " • " + (pssKb >= 1024 ? String.format(java.util.Locale.US, "%.1f مگابایت", pssKb / 1024.0) : pssKb + " کیلوبایت"));
-                    o.put("action", "ramkill");
-                    o.put("path", pkg);
-                    o.put("_pss", pssKb);
-                    tmp.add(o);
-                } catch (Exception ignored) {}
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && hasUsageAccess()) {
+                try {
+                    android.app.usage.UsageStatsManager usm =
+                            (android.app.usage.UsageStatsManager) ctx.getSystemService(Context.USAGE_STATS_SERVICE);
+                    android.app.usage.StorageStatsManager ssm =
+                            (android.app.usage.StorageStatsManager) ctx.getSystemService(Context.STORAGE_STATS_SERVICE);
+                    PackageManager pm = ctx.getPackageManager();
+                    if (usm != null && ssm != null) {
+                        long nowMs = System.currentTimeMillis();
+                        List<android.app.usage.UsageStats> stats = usm.queryUsageStats(
+                                android.app.usage.UsageStatsManager.INTERVAL_BEST,
+                                nowMs - 86400000L, nowMs);
+                        if (stats != null) {
+                            for (android.app.usage.UsageStats us : stats) {
+                                String pkg = us.getPackageName();
+                                if (pkg == null || pkg.isEmpty() || pkg.equals(ctx.getPackageName())) continue;
+                                try {
+                                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                                            && (ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) continue;
+                                    long lastUsed = us.getLastTimeUsed();
+                                    if (lastUsed <= 0 || lastUsed > nowMs) continue;
+                                    long totalBytes = 0;
+                                    long cacheBytes = 0;
+                                    try {
+                                        android.app.usage.StorageStats ss = ssm.queryStatsForPackage(
+                                                android.os.storage.StorageManager.UUID_DEFAULT,
+                                                pkg, android.os.Process.myUserHandle());
+                                        if (ss != null) {
+                                            totalBytes = ss.getAppBytes() + ss.getDataBytes();
+                                            cacheBytes = ss.getCacheBytes();
+                                        }
+                                    } catch (Exception ignored) {}
+                                    long since = nowMs - lastUsed;
+                                    String statusText = since <= 60000L ? "فعال"
+                                            : (since <= 900000L ? "اخیر" : "پس‌زمینه");
+                                    JSONObject o = buildProcessJson(ai, pm, pkg, totalBytes, cacheBytes, statusText);
+                                    o.put("_sort", lastUsed);
+                                    tmp.add(o);
+                                    gotData = true;
+                                } catch (Exception ignored) {}
+                            }
+                        }
+                    }
+                } catch (SecurityException se) {
+                    Log.w(TAG, "usage stats SecurityException - access revoked mid-scan", se);
+                }
             }
-            // مرتب‌سازی بر اساس مصرف رم (نزولی)
+
+            if (!gotData) {
+                // فیل‌بک اندروید ۷: getRunningAppProcesses در آن نسخه کامل کار می‌کند
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+                    PackageManager pm = ctx.getPackageManager();
+                    if (am != null) {
+                        List<ActivityManager.RunningAppProcessInfo> procs = am.getRunningAppProcesses();
+                        if (procs != null && !procs.isEmpty()) {
+                            int[] pids = new int[Math.min(procs.size(), 25)];
+                            List<ActivityManager.RunningAppProcessInfo> limited = procs.subList(0, Math.min(procs.size(), 25));
+                            for (int i = 0; i < limited.size(); i++) pids[i] = limited.get(i).pid;
+                            android.os.Debug.MemoryInfo[] mems = am.getProcessMemoryInfo(pids);
+                            for (int i = 0; i < limited.size(); i++) {
+                                ActivityManager.RunningAppProcessInfo pi = limited.get(i);
+                                if (pi.pkgList == null || pi.pkgList.length == 0) continue;
+                                String pkg = pi.pkgList[0];
+                                if (pkg.equals(ctx.getPackageName())) continue;
+                                try {
+                                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
+                                    long pssKb = (mems != null && i < mems.length && mems[i] != null) ? mems[i].getTotalPss() : 0;
+                                    String impText = "پس‌زمینه";
+                                    if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) impText = "فعال";
+                                    else if (pi.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE) impText = "قابل مشاهده";
+                                    JSONObject o = buildProcessJson(ai, pm, pkg, pssKb * 1024L, 0, impText);
+                                    o.put("_sort", pssKb);
+                                    tmp.add(o);
+                                    gotData = true;
+                                } catch (Exception ignored) {}
+                            }
+                        }
+                    }
+                }
+                if (tmp.isEmpty()) {
+                    JSONObject grant = new JSONObject();
+                    grant.put("name", "برای دیدن لیست برنامه‌های فعال، دسترسی «آمار مصرف» لازم است");
+                    grant.put("note", "از اندروید ۸ به بعد، سیستم فقط پردازش‌های خودِ اپ را نشان می‌دهد؛ با این دسترسی، برنامه‌های اخیراً فعال با حجم واقعی داده/کش گزارش می‌شوند");
+                    grant.put("action", "grant");
+                    res.put(grant);
+                    runningCache = res.toString();
+                    runningCacheAt = now;
+                    return runningCache;
+                }
+            }
+
+            // مرتب‌سازی نزولی (جدیدترین فعالیت یا بیشترین مصرف در فیل‌بک)
             Collections.sort(tmp, new Comparator<JSONObject>() {
                 @Override public int compare(JSONObject a, JSONObject b) {
-                    return Long.compare(b.optLong("_pss", 0), a.optLong("_pss", 0));
+                    return Long.compare(b.optLong("_sort", 0), a.optLong("_sort", 0));
                 }
             });
             for (JSONObject o : tmp) {
-                o.remove("_pss");
+                o.remove("_sort");
                 res.put(o);
                 if (res.length() >= 20) break;
             }
@@ -463,6 +537,28 @@ public class WebBridge {
             Log.w(TAG, "getRunningProcesses failed", e);
         }
         return res.toString();
+    }
+
+    private JSONObject buildProcessJson(ApplicationInfo ai, PackageManager pm, String pkg,
+                                        long totalBytes, long cacheBytes, String statusText) throws Exception {
+        JSONObject o = new JSONObject();
+        o.put("name", ai.loadLabel(pm).toString());
+        o.put("pkg", pkg);
+        o.put("procName", pkg);
+        String sizeText = totalBytes > 0 ? formatSizeFa(totalBytes) : "—";
+        o.put("sizeText", sizeText);
+        o.put("statusText", statusText);
+        StringBuilder noteSb = new StringBuilder(statusText);
+        if (totalBytes > 0) {
+            noteSb.append(" • حجم واقعی (کد+داده): ").append(formatSizeFaShort(totalBytes));
+            if (cacheBytes > 0) noteSb.append(" • کش: ").append(formatSizeFaShort(cacheBytes));
+        } else {
+            noteSb.append(" • حجم در دسترس نیست");
+        }
+        o.put("note", noteSb.toString());
+        o.put("action", "ramkill");
+        o.put("path", pkg);
+        return o;
     }
 
     // ================== حذف فایل با گزارش صادقانه ==================
@@ -569,15 +665,48 @@ public class WebBridge {
         return res.toString();
     }
 
-    // ================== شناسایی برنامه‌های پرخطر (اصلاح‌شده: فقط مجوزهای GRANTED) ==================
+    // ================== دسترسی «آمار مصرف» (PACKAGE_USAGE_STATS) ==================
+    /**
+     * باگ‌فیکس ۱.۰.۳: StorageStatsManager (کش برنامه‌ها) و
+     * UsageStatsManager.getProcessStats (پردازش‌های فعال) هر دو فقط با دسترسی
+     * «Usage Access» کار می‌کنند. این متد یک‌بار آن را بررسی می‌کند تا به‌جای
+     * SecurityException بی‌صدا، کارت راهنمای فارسی + دکمه اعطای دسترسی نشان دهیم.
+     */
+    private boolean hasUsageAccess() {
+        try {
+            android.app.AppOpsManager appOps =
+                    (android.app.AppOpsManager) ctx.getSystemService(Context.APP_OPS_SERVICE);
+            if (appOps == null) return false;
+            int mode = appOps.checkOpNoThrow(
+                    android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    android.os.Process.myUid(), ctx.getPackageName());
+            return mode == android.app.AppOpsManager.MODE_ALLOWED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ================== شناسایی برنامه‌های پرخطر (فقط مجوزهای GRANTED + سطح‌بندی ۴ مرحله‌ای) ==================
     /**
      * باگ ۱.۰.۱: از requestedPermissions استفاده می‌شد که همه مجوزهای manifest را
      * برمی‌گرداند حتی اگر کاربر آن‌ها را نداده باشد. مثلاً تلگرام ACCESS_FINE_LOCATION
      * را در manifest دارد (برای اشتراک‌گذاری اختیاری مکان) ولی تا کاربر تأیید نکند
      * GRANTED نیست. با این حال نسخه قبل تلگرام را "پرخطر" نشان می‌داد.
      *
-     * اصلاح ۱.۰.۲: فقط مجوزهایی که (requestedPermissionsFlags & GRANTED) == GRANTED هستند
-     * بررسی می‌شوند. برای اندروید <23 همه مجوزها در نصب اعطا می‌شوند (درست است).
+     * اصلاح ۱.۰.۲: فقط مجوزهایی که (requestedPermissionsFlags & GRANTED) == GRANTED
+     * بررسی می‌شوند.
+     *
+     * باگ‌فیکس ۱.۰.۳ (گزارش: «من به تلگرام حافظه‌ام را دادم ولی اینجا نشان نمی‌دهد»):
+     *  - دسته «حافظه رسانه‌ای/دستگاه» (READ_MEDIA_*, READ/WRITE_EXTERNAL_STORAGE)
+     *    هم مجوز حساس است؛ کاربری که به برنامه‌ای دسترسی حافظه داده، باید آن را
+     *    با سطح «پایین» ببیند — داده واقعی، نه پنهان.
+     *  - سطح‌بندی ۴ مرحله‌ای صادقانه:
+     *      بسیار بالا = ترکیب‌های بحرانی (SMS+مکان، SMS+Overlay، ...)
+     *      بالا       = ۳+ مجوز حساس فعال
+     *      متوسط      = ۲ مجوز حساس فعال
+     *      پایین      = ۱ مجوز حساس فعال (مثلاً فقط حافظه)
+     *    همه برنامه‌های دارای حداقل یک مجوز GRANTED حساس نشان داده می‌شوند،
+     *    مرتب‌شده بر اساس سطح و تعداد.
      */
 
     private boolean isGranted(String[] perms, int[] flags, String needle) {
@@ -602,8 +731,7 @@ public class WebBridge {
         if ((now - riskyAppsCacheAt) < RISKY_APPS_TTL_MS && !"[]".equals(riskyAppsCache)) {
             return riskyAppsCache;
         }
-        JSONArray high = new JSONArray();
-        JSONArray medium = new JSONArray();
+        List<JSONObject> all = new ArrayList<>();
         try {
             PackageManager pm = ctx.getPackageManager();
             List<PackageInfo> pkgs = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
@@ -624,6 +752,13 @@ public class WebBridge {
                 boolean hasMic = isGranted(reqPerms, reqFlags, "RECORD_AUDIO");
                 boolean hasContacts = isGranted(reqPerms, reqFlags, "READ_CONTACTS");
                 boolean hasCallLog = isGranted(reqPerms, reqFlags, "READ_CALL_LOG");
+                // باگ‌فیکس ۱.۰.۳: مجوزهای حافظه/رسانه هم مجوز حساس شناخته‌شده است
+                boolean hasStorage = isGranted(reqPerms, reqFlags, "READ_MEDIA_IMAGES")
+                        || isGranted(reqPerms, reqFlags, "READ_MEDIA_VIDEO")
+                        || isGranted(reqPerms, reqFlags, "READ_MEDIA_AUDIO")
+                        || isGranted(reqPerms, reqFlags, "READ_EXTERNAL_STORAGE")
+                        || isGranted(reqPerms, reqFlags, "WRITE_EXTERNAL_STORAGE")
+                        || isGranted(reqPerms, reqFlags, "ACCESS_MEDIA_LOCATION");
 
                 int sensitive = 0;
                 if (hasSms) sensitive++;
@@ -633,13 +768,18 @@ public class WebBridge {
                 if (hasMic) sensitive++;
                 if (hasContacts) sensitive++;
                 if (hasCallLog) sensitive++;
+                if (hasStorage) sensitive++;
 
-                // منطق سطح‌بندی: فقط با ترکیب‌های واقعاً خطرناک
+                if (sensitive == 0) continue; // هیچ مجوز حساس فعالی ندارد - پنهان
+
+                // منطق سطح‌بندی ۴ مرحله‌ای صادقانه
                 boolean critical = (hasSms && hasLoc) || (hasOverlay && hasSms)
                         || (hasCam && hasLoc && hasSms) || (hasSms && hasCallLog && hasContacts);
-
-                // حداقل ۲ مجوز حساس اعطا شده یا یک ترکیب بحرانی
-                if (!critical && sensitive < 2) continue;
+                int level; // 3=بسیار بالا  2=بالا  1=متوسط  0=پایین
+                if (critical) level = 3;
+                else if (sensitive >= 3) level = 2;
+                else if (sensitive >= 2) level = 1;
+                else level = 0;
 
                 List<String> parts = new ArrayList<>();
                 if (hasSms) parts.add("پیامک‌ها");
@@ -649,10 +789,11 @@ public class WebBridge {
                 if (hasContacts) parts.add("مخاطبان");
                 if (hasCallLog) parts.add("سوابق تماس");
                 if (hasOverlay) parts.add("پنجره شناور");
+                if (hasStorage) parts.add("حافظه رسانه‌ای");
 
                 StringBuilder sb = new StringBuilder();
                 if (parts.isEmpty()) continue;
-                // ساخت جمله فارسی دقیق: "دسترسی به X و Y (اعطا شده)"
+                // ساخت جمله فارسی دقیق: "دسترسی فعال به X و Y"
                 sb.append("دسترسی فعال به ");
                 for (int i = 0; i < parts.size(); i++) {
                     if (i > 0) {
@@ -664,9 +805,7 @@ public class WebBridge {
                 if (critical) sb.append(" — ترکیب حساس");
 
                 String reason = sb.toString();
-                String danger = critical
-                        ? ((hasSms && hasLoc && hasOverlay) ? "بسیار بالا" : "بالا")
-                        : "متوسط";
+                String danger = level == 3 ? "بسیار بالا" : (level == 2 ? "بالا" : (level == 1 ? "متوسط" : "پایین"));
 
                 JSONObject app = new JSONObject();
                 String label = pi.packageName;
@@ -678,6 +817,7 @@ public class WebBridge {
                 app.put("riskReason", reason);
                 app.put("note", reason);
                 app.put("dangerLevel", danger);
+                app.put("riskLevel", level);
                 app.put("sizeText", "خطر: " + danger);
                 app.put("action", "appinfo");
                 app.put("path", pi.packageName);
@@ -691,19 +831,26 @@ public class WebBridge {
                 if (hasContacts) grantedList.put("CONTACTS");
                 if (hasCallLog) grantedList.put("CALL_LOG");
                 if (hasOverlay) grantedList.put("OVERLAY");
+                if (hasStorage) grantedList.put("STORAGE");
                 app.put("grantedPerms", grantedList);
                 app.put("grantedCount", sensitive);
-                (critical ? high : medium).put(app);
+                all.add(app);
             }
         } catch (Exception e) {
             Log.w(TAG, "risky apps scan error", e);
         }
+        // مرتب‌سازی: سطح خطر نزولی، سپس تعداد مجوزهای حساس نزولی
+        Collections.sort(all, new Comparator<JSONObject>() {
+            @Override
+            public int compare(JSONObject a, JSONObject b) {
+                int lv = Integer.compare(b.optInt("riskLevel", 0), a.optInt("riskLevel", 0));
+                if (lv != 0) return lv;
+                return Integer.compare(b.optInt("grantedCount", 0), a.optInt("grantedCount", 0));
+            }
+        });
         JSONArray res = new JSONArray();
-        for (int i = 0; i < high.length() && res.length() < 40; i++) {
-            try { res.put(high.get(i)); } catch (Exception ignored) {}
-        }
-        for (int i = 0; i < medium.length() && res.length() < 40; i++) {
-            try { res.put(medium.get(i)); } catch (Exception ignored) {}
+        for (int i = 0; i < all.size() && res.length() < 40; i++) {
+            try { res.put(all.get(i)); } catch (Exception ignored) {}
         }
         riskyAppsCache = res.toString();
         riskyAppsCacheAt = now;
@@ -742,49 +889,67 @@ public class WebBridge {
                 res.put(info);
                 return res.toString();
             }
+            // باگ‌فیکس ۱.۰.۳: بررسی دسترسی Usage Access قبل از هر query
+            // (قبلاً بدون دسترسی، SecurityException بی‌صدا خورده و لیست خالی/غلط برمی‌گشت)
+            if (!hasUsageAccess()) {
+                JSONObject grant = new JSONObject();
+                grant.put("name", "برای مشاهده کش واقعی برنامه‌ها، دسترسی «آمار مصرف» لازم است");
+                grant.put("note", "روی دکمه زیر بزنید، در صفحه بازشده این برنامه را در لیست روشن کنید و برگردید");
+                grant.put("action", "grant");
+                res.put(grant);
+                return res.toString();
+            }
             android.app.usage.StorageStatsManager ssm =
                     (android.app.usage.StorageStatsManager) ctx.getSystemService(Context.STORAGE_STATS_SERVICE);
-            if (ssm == null) return res.toString();
+            if (ssm == null) {
+                JSONObject info = new JSONObject();
+                info.put("name", "سرویس آمار حافظه در این دستگاه در دسترس نیست");
+                info.put("note", "StorageStatsManager روی این دستگاه پشتیبانی نمی‌شود");
+                info.put("action", "none");
+                res.put(info);
+                return res.toString();
+            }
             java.util.UUID uuid = android.os.storage.StorageManager.UUID_DEFAULT;
             PackageManager pm = ctx.getPackageManager();
             List<PackageInfo> pkgs = pm.getInstalledPackages(0);
 
             List<JSONObject> found = new ArrayList<>();
-            boolean blocked = false;
             for (PackageInfo pi : pkgs) {
                 if (pi.packageName.equals(ctx.getPackageName())) continue;
                 try {
                     android.app.usage.StorageStats stats = ssm.queryStatsForPackage(
                             uuid, pi.packageName, android.os.Process.myUserHandle());
+                    if (stats == null) continue;
                     long cache = stats.getCacheBytes();
                     if (cache >= 512L * 1024L) {
                         String label = pi.packageName;
                         try {
                             if (pi.applicationInfo != null) label = pi.applicationInfo.loadLabel(pm).toString();
                         } catch (Exception ignored) {}
+                        long total = stats.getAppBytes() + stats.getDataBytes();
                         JSONObject o = new JSONObject();
                         o.put("name", label);
                         o.put("pkg", pi.packageName);
                         o.put("sizeMb", Math.round(cache / 1048576.0));
                         o.put("sizeText", formatSizeFa(cache));
-                        o.put("note", "کش موقت — برای پاکسازی از تنظیمات اندروید اقدام کنید");
+                        o.put("totalText", formatSizeFa(total));
+                        o.put("note", "کش موقت: " + formatSizeFaShort(cache) + " (کل داده برنامه: "
+                                + formatSizeFaShort(total) + ") — پاکسازی فقط از تنظیمات اندروید");
                         o.put("action", "appinfo");
                         o.put("path", pi.packageName);
                         o.put("_cache", cache);
                         found.add(o);
                     }
                 } catch (SecurityException se) {
-                    blocked = true;
-                    break;
+                    // دسترسی در میانه‌ی اسکن از بین رفته (مثلاً کاربر خاموش کرده)
+                    Log.w(TAG, "StorageStats SecurityException for " + pi.packageName, se);
+                    JSONObject grant = new JSONObject();
+                    grant.put("name", "دسترسی «آمار مصرف» لازم است");
+                    grant.put("note", "برای مشاهده کش واقعی برنامه‌ها، دسترسی «آمار مصرف» را فعال کنید");
+                    grant.put("action", "grant");
+                    res.put(grant);
+                    return res.toString();
                 } catch (Exception ignored) {}
-            }
-            if (blocked && found.isEmpty()) {
-                JSONObject grant = new JSONObject();
-                grant.put("name", "برای مشاهده کش برنامه‌ها دسترسی لازم است");
-                grant.put("note", "روی دکمه زیر بزنید، این برنامه را در لیست روشن کنید و برگردید");
-                grant.put("action", "grant");
-                res.put(grant);
-                return res.toString();
             }
             Collections.sort(found, new Comparator<JSONObject>() {
                 @Override
@@ -1144,29 +1309,49 @@ public class WebBridge {
         return res.toString();
     }
 
+    // باگ‌فیکس ۱.۰.۳ (گزارش: «بخش بهینه‌سازی داده‌ها را درست نشان نمی‌دهد»):
+    // قبلاً freedMb از تفاضل availMem قبل/بعد حساب می‌شد؛ availMem شامل کش
+    // قابل‌بازیابی سیستم است و لحظه‌به‌لحظه نوسان دارد ⇒ عدد غیرواقعی
+    // (گاهی منفی!) گزارش می‌شد. حالا فقط اندازه واقعی فایل‌های کش پاک‌شده
+    // (تفاضل اندازه واقعی دایرکتوری کش قبل/بعد) گزارش می‌شود.
     @JavascriptInterface
     public String freeOwnMemory() {
         JSONObject res = new JSONObject();
         try {
-            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-            ActivityManager.MemoryInfo before = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(before);
-
-            long cleared = deleteChildren(ctx.getCacheDir());
+            // اندازه واقعی کش قبل از پاکسازی
+            long cacheBytesBefore = dirSize(ctx.getCacheDir());
             File extCache = ctx.getExternalCacheDir();
+            if (extCache != null) cacheBytesBefore += dirSize(extCache);
+
+            // پاکسازی واقعی فایل‌های کش
+            long cleared = deleteChildren(ctx.getCacheDir());
             if (extCache != null) cleared += deleteChildren(extCache);
             try { Runtime.getRuntime().gc(); } catch (Exception ignored) {}
-            SystemClock.sleep(300);
+            SystemClock.sleep(200);
 
-            ActivityManager.MemoryInfo after = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(after);
-            long freedBytes = after.availMem - before.availMem;
+            // اندازه واقعی کش بعد از پاکسازی (باید صفر یا نزدیک صفر باشد)
+            long cacheBytesAfter = dirSize(ctx.getCacheDir());
+            if (extCache != null) cacheBytesAfter += dirSize(extCache);
+
+            long actualFreed = cacheBytesBefore - cacheBytesAfter;
+            if (actualFreed < 0) actualFreed = 0;
+
+            // رم آزاد سیستم فقط جهت اطلاع (نه به‌عنوان «مقدار آزادسازی‌شده»)
+            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+            if (am != null) am.getMemoryInfo(memInfo);
 
             res.put("ok", true);
-            res.put("freedMb", Math.round(freedBytes / 1048576.0));
+            res.put("freedMb", Math.round(actualFreed / 1048576.0));
+            res.put("freedKb", Math.round(actualFreed / 1024.0));
             res.put("cacheClearedMb", Math.round(cleared / 1048576.0));
             res.put("cacheClearedKb", Math.round(cleared / 1024.0));
-            res.put("availAfterMb", Math.round(after.availMem / 1048576.0));
+            res.put("cacheBeforeKb", Math.round(cacheBytesBefore / 1024.0));
+            res.put("cacheAfterKb", Math.round(cacheBytesAfter / 1024.0));
+            res.put("availAfterMb", Math.round(memInfo.availMem / 1048576.0));
+            res.put("note", cleared > 0
+                    ? "کش با موفقیت پاک شد"
+                    : "کش قبلاً خالی بوده یا قابل پاکسازی نبود");
         } catch (Exception e) {
             Log.w(TAG, "freeOwnMemory failed", e);
             try { res.put("ok", false); } catch (Exception ignored) {}

@@ -923,6 +923,99 @@
       padding: 2px 8px; border-radius: 99px; font-size: 0.64rem; font-weight: 700; margin-top: 6px;
     }
 
+    /* ===== 1.0.3 - آیکون‌های SVG حرفه‌ای ===== */
+    .ic { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ic svg { display: block; width: 100%; height: 100%; }
+    .ic-stroke svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ic-fill svg { fill: currentColor; stroke: none; }
+
+    /* ===== 1.0.3 - ارتقاء کارت‌های رسانه (حرفه‌ای‌تر) ===== */
+    .media-card { position: relative; overflow: hidden; }
+    .media-card::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 16px;
+    }
+    .media-thumb-wrap { position: relative; background: linear-gradient(135deg, #0d1526 0%, #101c33 60%, #0d1526 100%); }
+    .media-play-overlay {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(15,23,42,0.72); backdrop-filter: blur(6px);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; z-index: 2; transition: transform 0.2s, background 0.2s;
+    }
+    .media-card:hover .media-play-overlay { transform: translate(-50%, -50%) scale(1.1); background: rgba(239,68,68,0.85); }
+    .media-thumb-wrap img { position: relative; z-index: 1; }
+    .media-icon-chip {
+      position: absolute; top: 8px; left: 8px; z-index: 2;
+      width: 26px; height: 26px; border-radius: 8px;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .media-icon-chip.video { color: #fca5a5; }
+    .media-icon-chip.image { color: #67e8f9; }
+
+    /* ===== 1.0.3 - نوار زوم لایت‌باکس ===== */
+    .lb-zoombar {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 6px; z-index: 6;
+      background: rgba(2,6,17,0.78); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 99px;
+      padding: 5px 10px;
+    }
+    .lb-zoom-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      color: #e2e8f0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .lb-zoom-btn:active { background: rgba(56,189,248,0.3); }
+    .lb-zoom-chip {
+      font-size: 0.66rem; font-weight: 800; color: #7dd3fc;
+      min-width: 44px; text-align: center;
+    }
+    .lb-zoom-hint {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      background: rgba(2,6,17,0.7); border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8; font-size: 0.62rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 99px; z-index: 6; pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    /* ===== 1.0.3 - پنل هوش فایل ===== */
+    .file-intel-card {
+      background: linear-gradient(135deg, rgba(168,85,247,0.10), rgba(6,182,212,0.07));
+      border: 1px solid rgba(168,85,247,0.28);
+    }
+    .file-intel-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(168,85,247,0.18); color: #c084fc;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .file-intel-tip {
+      margin-top: 10px; padding: 8px 12px;
+      background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.22);
+      border-radius: 10px; font-size: 0.7rem; color: #d8b4fe; line-height: 1.8;
+      min-height: 1.4em;
+    }
+    .file-intel-stats {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .file-intel-stat {
+      font-size: 0.64rem; font-weight: 700; color: #e2e8f0;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      padding: 3px 10px; border-radius: 99px;
+    }
+    .file-intel-stat b { color: #a5b4fc; }
+
+    /* ===== 1.0.3 - نکات هوش بات در بنر ===== */
+    .bot-tip {
+      margin-top: 8px; padding: 6px 10px;
+      background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.22);
+      border-radius: 10px; font-size: 0.68rem; color: #67e8f9; line-height: 1.7;
+    }
+
     /* آیکون اپ در کارت‌های فایل */
     .file-item-with-icon {
       display: flex; gap: 12px; align-items: flex-start;
@@ -974,8 +1067,10 @@
     .lightbox-stage img {
       max-width: 100%; max-height: 100%; object-fit: contain;
       border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      transition: transform 0.2s;
-      touch-action: pinch-zoom;
+      transition: transform 0.18s ease-out;
+      transform-origin: center center;
+      will-change: transform;
+      touch-action: none;
     }
     .lightbox-nav {
       position: absolute; top: 50%; transform: translateY(-50%);
@@ -1125,10 +1220,11 @@
       <div class="ai-banner">
         <div class="ai-banner-icon">💡</div>
         <div>
-          <div class="ai-banner-title">تحلیلگر هوشمند AI Battery Doctor</div>
-          <div class="ai-banner-text normal" id="aiBatteryAdviceText">
+          <div class="ai-banner-title">🤖 تحلیلگر هوشمند AI Battery Doctor <span id="aiBannerRules" style="font-size:0.68rem; color:#67e8f9;">(— قانون دانشی)</span></div>
+          <div class="ai-banner-text normal" id="aiBatteryAdviceText" style="white-space: pre-line; line-height: 1.8;">
             باتری در شرایط دمایی و ولتاژ مطلوب قرار دارد. حفاظت شارژ هوشمند فعال است.
           </div>
+          <div class="bot-tip" id="aiBotTipText">💡 در حال بارگذاری نکات هوشمند…</div>
         </div>
       </div>
     </div>
@@ -1350,6 +1446,7 @@
           <span>رم آزاد: <b id="ramFreeText">—</b></span>
         </div>
       </div>
+      <div id="ramDetailText" style="margin-top:6px; font-size:0.62rem; color:var(--text-muted); line-height:1.7;"></div>
 
       <button class="btn-action-primary" style="margin-top: 14px; width: 100%;" onclick="switchNavTab('ram')">
         <span>⚡</span>
@@ -1381,16 +1478,29 @@
         <div id="romBarFill" style="width: 49%; background: #06b6d4;"></div>
         <div style="width: 51%; background: rgba(255,255,255,0.08);"></div>
       </div>
+      <div style="font-size:0.62rem; color:var(--text-muted); margin-top:2px;">منبع اندازه‌گیری حافظه واقعی: <b id="romSourceText" style="color:#67e8f9;">—</b></div>
     </div>
   </main>
 
   <!-- ==================== TAB 3: هوش فایل ==================== -->
   <main id="tab-files" class="tab-page" style="display: none;">
+    <!-- 1.0.3 - پنل هوش فایل: پایگاه دانش واقعی + تحلیل زمینه‌ای زنده -->
+    <div class="app-card file-intel-card">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="file-intel-icon" id="fileIntelIcon"></div>
+        <div>
+          <h3 style="font-size:0.9rem; font-weight:800;">هوش فایل — تحلیلگر هوشمند فایل‌ها</h3>
+          <p style="font-size:0.68rem; color:var(--text-muted); line-height:1.6;"><b id="fileIntelRules" style="color:#c084fc;">—</b> قانون دانشی واقعی • تحلیل زنده بر اساس اسکن دستگاه • بدون توصیه‌ی الکی</p>
+        </div>
+      </div>
+      <div class="file-intel-tip" id="fileIntelTip">💡 در حال تحلیل…</div>
+      <div class="file-intel-stats" id="fileIntelStats"></div>
+    </div>
     <div class="scanner-tabs">
-      <button class="scanner-tab-pill active" data-cat="risky" onclick="switchFileCategory('risky')">برنامه‌های پرخطر</button>
-      <button class="scanner-tab-pill" data-cat="cache" onclick="switchFileCategory('cache')">کش واقعی برنامه‌ها</button>
-      <button class="scanner-tab-pill" data-cat="large" onclick="switchFileCategory('large')">فایل‌های حجیم رسانه‌ای</button>
-      <button class="scanner-tab-pill" data-cat="own" onclick="switchFileCategory('own')">کش خود برنامه</button>
+      <button class="scanner-tab-pill active" data-cat="risky" onclick="switchFileCategory('risky')"><span class="ic ic-stroke" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/></svg></span> برنامه‌های پرخطر</button>
+      <button class="scanner-tab-pill" data-cat="cache" onclick="switchFileCategory('cache')"><span class="ic ic-stroke" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span> کش واقعی برنامه‌ها</button>
+      <button class="scanner-tab-pill" data-cat="large" onclick="switchFileCategory('large')"><span class="ic ic-stroke" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span> فایل‌های حجیم رسانه‌ای</button>
+      <button class="scanner-tab-pill" data-cat="own" onclick="switchFileCategory('own')"><span class="ic ic-stroke" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M19 3l-7.5 7.5M14 4l6 6M3 21c0-4 2-7.5 6-9l3 3c-1.5 4-5 6-9 6z"/></svg></span> کش خود برنامه</button>
     </div>
 
     <!-- Category Action Bar -->
@@ -1435,7 +1545,7 @@
           <button class="btn-action-secondary" style="padding:6px 12px; font-size:0.7rem;" onclick="refreshRamProcs()">🔄 بروزرسانی</button>
         </div>
         <p style="font-size:0.68rem; color:var(--text-muted); line-height:1.7; margin-top:4px;">
-          لیست برنامه‌های در حال اجرا با مصرف واقعی رم (PSS). بستن فقط برای پردازش‌های پس‌زمینه مجاز است و اندروید ممکن است اجازه ندهد — نتیجه صادقانه گزارش می‌شود. هیچ فشاری به گوشی وارد نمی‌شود.
+          لیست برنامه‌های اخیراً فعال با حجم واقعی کد/داده/کش (StorageStats) و زمان واقعی آخرین فعالیت. اندروید اجازه خواندن رمِ مصرفی برنامه‌های دیگر را به هیچ برنامه‌ای نمی‌دهد؛ به‌جای عدد جعلی، این داده‌ی واقعی را می‌بینید. مصرف رم کل سیستم در کارت «پایش حافظه رم» دقیق و واقعی است. بستن برنامه‌ها ممکن است توسط سیستم محدود شود — نتیجه صادقانه گزارش می‌شود.
         </p>
         <div id="ramProcsContainer" style="margin-top:12px;">
           <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.74rem;">برای مشاهده لیست، وارد این تب شوید یا روی بروزرسانی بزنید</div>
@@ -1852,9 +1962,23 @@
       <button class="lightbox-close" onclick="closeLightbox()">✕</button>
     </div>
     <div class="lightbox-stage" id="lbStage" onclick="if(event.target===this)closeLightbox()">
+      <div class="lb-zoom-hint" id="lbZoomHint">لمس دوبله یا پینچ برای زوم</div>
       <button class="lightbox-nav prev" onclick="lightboxNav(-1)">‹</button>
       <img id="lbImage" src="" alt="" style="display:none" />
       <button class="lightbox-nav next" onclick="lightboxNav(1)">›</button>
+      <!-- 1.0.3 - نوار زوم حرفه‌ای (دکمه‌ای + پینچ + دابل‌تپ + اسکرول) -->
+      <div class="lb-zoombar" id="lbZoomBar">
+        <button class="lb-zoom-btn" id="lbZoomOutBtn" title="کوچک‌نمایی" onclick="event.stopPropagation(); lbZoomBy(1/1.4)">
+          <span class="ic ic-stroke" style="width:15px;height:15px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></span>
+        </button>
+        <span class="lb-zoom-chip" id="lbZoomChip">۱۰۰٪</span>
+        <button class="lb-zoom-btn" id="lbZoomInBtn" title="بزرگ‌نمایی" onclick="event.stopPropagation(); lbZoomBy(1.4)">
+          <span class="ic ic-stroke" style="width:15px;height:15px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></span>
+        </button>
+        <button class="lb-zoom-btn" id="lbZoomResetBtn" title="بازگشت به اندازه واقعی" onclick="event.stopPropagation(); lbZoomReset()">
+          <span class="ic ic-stroke" style="width:15px;height:15px;"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span>
+        </button>
+      </div>
     </div>
     <div class="lightbox-footer" id="lbFooter"></div>
   </div>
@@ -1880,13 +2004,23 @@
         </div>
         <div class="video-btn-row">
           <div class="video-btn-group">
-            <button class="video-btn" onclick="toggleVideoMute()" id="vpMuteBtn">🔊</button>
-            <button class="video-btn" onclick="toggleVideoFullscreen()">⛶</button>
+            <button class="video-btn" onclick="toggleVideoMute()" id="vpMuteBtn" title="بی‌صدا">
+              <span class="ic" id="vpMuteIcon" style="width:17px;height:17px;"><svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" opacity=".7"/></svg></span>
+            </button>
+            <button class="video-btn" onclick="toggleVideoFullscreen()" title="تمام‌صفحه">
+              <span class="ic ic-stroke" style="width:16px;height:16px;"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></span>
+            </button>
           </div>
-          <button class="video-btn play" id="vpPlayBtn" onclick="toggleVideoPlay()">▶</button>
+          <button class="video-btn play" id="vpPlayBtn" onclick="toggleVideoPlay()" title="پخش/توقف">
+            <span class="ic" id="vpPlayIcon" style="width:20px;height:20px;"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          </button>
           <div class="video-btn-group">
-            <button class="video-btn" onclick="seekVideoRel(-10)">⏪</button>
-            <button class="video-btn" onclick="seekVideoRel(10)">⏩</button>
+            <button class="video-btn" onclick="seekVideoRel(-10)" title="۱۰ ثانیه عقب">
+              <span class="ic" style="width:16px;height:16px;"><svg viewBox="0 0 24 24"><path d="M11 12L21 6v12L11 12zM3 12l10-6v12L3 12z"/></svg></span>
+            </button>
+            <button class="video-btn" onclick="seekVideoRel(10)" title="۱۰ ثانیه جلو">
+              <span class="ic" style="width:16px;height:16px;"><svg viewBox="0 0 24 24"><path d="M13 12L3 18V6l10 6zM21 12L11 18V6l10 6z"/></svg></span>
+            </button>
           </div>
         </div>
       </div>
@@ -2345,14 +2479,67 @@
       el.innerHTML = '<span class="live-dot"></span>' + text + ' • به‌روزرسانی ' + hh + ':' + mm + ':' + ss;
     }
 
+    // 1.0.3: موتور تحلیل چندسطحی — وضعیت فوری، حرارت، شارژ، تخلیه و دانش لیتیوم-یون
     function buildBatteryAdvice(percent, charging, tempC, targetPct) {
-      if (tempC >= 42) return 'دمای باتری بالاتر از حد ایمن است (' + tempC.toFixed(1) + '°C). شارژر را جدا کنید و دستگاه را خنک نمایید.';
-      if (tempC >= 38) return 'دمای باتری کمی بالاست (' + tempC.toFixed(1) + '°C). از شارژ سریع در این حالت پرهیز کنید.';
-      if (percent < 0) return 'در حال خواندن اطلاعات واقعی باتری از سیستم…';
-      if (percent <= 20 && !charging) return 'شارژ باتری کمتر از ۲۰٪ است؛ برای جلوگیری از تخلیه عمیق دستگاه را به شارژر متصل کنید.';
-      if (charging && percent >= targetPct) return 'شارژ به سقف هدف (' + targetPct + '٪) رسید؛ برای طول عمر باتری کابل را جدا کنید.';
-      if (charging) return 'دستگاه در حال شارژ است و کنترل دما و ولتاژ فعال است.';
-      return 'باتری در حال مصرف است و در محدوده امن قرار دارد.';
+      if (percent < 0) return '⏳ در حال خواندن اطلاعات واقعی باتری از سیستم…';
+      const KB = BOT_KNOWLEDGE_BASE;
+      const advices = [];
+
+      // سطح ۱: تحلیل حرارتی (اولویت بحرانی)
+      if (tempC >= 45) {
+        advices.push('🔴 خطر: دمای باتری ' + tempC.toFixed(1) + '°C — فوراً شارژر را جدا کنید و گوشی را خاموش نمایید!');
+        advices.push(KB.thermal[1].text);
+      } else if (tempC >= 42) {
+        advices.push('🔶 هشدار: دمای باتری بالاتر از حد ایمن (' + tempC.toFixed(1) + '°C). شارژر را جدا کنید و دستگاه را خنک نمایید.');
+        advices.push(KB.thermal[0].text);
+      } else if (tempC >= 38 && charging) {
+        advices.push('🟡 دمای باتری هنگام شارژ ' + tempC.toFixed(1) + '°C — کمی بالاست؛ از شارژ سریع پرهیز کنید.');
+        advices.push(KB.thermal[3].text);
+      } else if (tempC >= 0 && tempC < 38) {
+        advices.push('✅ دمای باتری مطلوب (' + tempC.toFixed(1) + '°C) — شرایط حرارتی عالی.');
+      }
+
+      // سطح ۲: تحلیل وضعیت شارژ
+      if (charging && percent >= 100) {
+        advices.push('🔋 باتری ۱۰٪ شارژ شد — فوراً شارژر را بکشید!');
+        advices.push(KB.charge[2].text);
+      } else if (charging && percent >= targetPct) {
+        advices.push('⚡ شارژ به سقف هدف (' + targetPct + '٪) رسید — کابل را جدا کنید.');
+        advices.push(KB.charge[0].text);
+      } else if (charging && percent >= 80) {
+        advices.push('⚡ شارژ بالای ۸۰٪ — سرعت شارژ کم می‌شود؛ اگر عجله ندارید جدا کنید.');
+      } else if (charging) {
+        advices.push('⚡ در حال شارژ (' + percent + '٪) — پایش دما و ولتاژ فعال است.');
+      }
+
+      // سطح ۳: تحلیل تخلیه
+      if (!charging && percent <= 5) {
+        advices.push('🔴 بحرانی: باتری فقط ' + percent + '٪ — فوراً شارژ کنید!');
+        advices.push(KB.charge[3].text);
+      } else if (!charging && percent <= 15) {
+        advices.push('🔶 شارژ کم (' + percent + '٪) — حالت ذخیره‌ی نیرو را فعال کنید.');
+        advices.push(KB.batterySaving[4].text);
+      } else if (!charging && percent <= 20) {
+        advices.push('⚠️ باتری کمتر از ۲۰٪ — برای جلوگیری از تخلیه‌ی عمیق، دستگاه را به شارژر متصل کنید.');
+        advices.push(KB.charge[0].text);
+      }
+
+      // سطح ۴: توصیه‌ی زمینه‌ای (قانون ۴۰-۸۰)
+      if (percent >= 40 && percent <= 60 && !charging) {
+        advices.push(KB.charge[6].text);
+      }
+
+      if (advices.length === 0) {
+        advices.push(charging
+          ? '⚡ شارژ در محدوده‌ی امن — سیستم حفاظتی فعال است.'
+          : '✅ باتری در محدوده‌ی امن و در حال مصرف عادی.');
+      }
+
+      // ذخیره‌ی تاریخچه (حداکثر ۱۰۰ توصیه برای تحلیل الگو)
+      batteryAdviceHistory.push({ at: Date.now(), percent: percent, charging: charging, temp: tempC });
+      if (batteryAdviceHistory.length > 100) batteryAdviceHistory = batteryAdviceHistory.slice(-50);
+
+      return advices.join('\n\n');
     }
 
     function nativeMonitorState() {
@@ -2464,66 +2651,262 @@
       }).join('');
     }
 
+    // باگ‌فیکس ۱.۰.۳: متریک‌های سخت‌افزار به سه تابع خالص و قابل‌تست تفکیک شدند.
+    function applyCpuInfoToDom(cpu) {
+      if (!cpu) return;
+      const model = document.getElementById('cpuModelText');
+      if (model) model.textContent = (cpu.model && cpu.model !== 'نامشخص') ? (cpu.model + ' (' + toFaDigits(cpu.cores || 0) + ' هسته)') : 'نامشخص';
+      const coresEl = document.getElementById('cpuCoresText');
+      if (coresEl) coresEl.textContent = (cpu.cores > 0 ? toFaDigits(cpu.cores) : '—');
+      const archEl = document.getElementById('cpuArchText');
+      if (archEl) archEl.textContent = (cpu.abi && cpu.abi !== 'unknown') ? cpu.abi : '—';
+      const avg = document.getElementById('cpuAvgUsageText');
+      if (avg) avg.textContent = (cpu.avgUsage >= 0 ? toFaDigits(cpu.avgUsage) : '—');
+      const bar = document.getElementById('cpuAvgUsageBar');
+      if (bar && cpu.avgUsage >= 0) bar.style.width = Math.max(2, Math.min(100, cpu.avgUsage)) + '%';
+      // دمای پردازنده: نیتیو از اسکن thermal zones مقدار واقعی می‌دهد (1.0.3)
+      const temp = document.getElementById('cpuTempText');
+      if (temp) temp.textContent = (cpu.temperature > 0 ? toFaDigits(cpu.temperature.toFixed(1)) : '—');
+      // فرکانس کاری: از maxFreqMHz سطح بالا (1.0.3) با fallback به perCore
+      const freq = document.getElementById('cpuFreqText');
+      if (freq) {
+        let max = (typeof cpu.maxFreqMHz === 'number' && cpu.maxFreqMHz > 0) ? cpu.maxFreqMHz : -1;
+        if (max < 0) (cpu.perCore || []).forEach(function (c) { if (c.maxFreq > max) max = c.maxFreq; });
+        // نیتیو فرکانس را به مگاهرتز برمی‌گرداند → برای گیگاهرتز بر ۱۰۰ تقسیم می‌شود
+        freq.textContent = max > 0 ? toFaDigits((max / 1000).toFixed(2)) : '—';
+      }
+      renderCoresGrid(cpu.perCore);
+    }
+
+    function applyMemInfoToDom(mem) {
+      if (!mem || mem.total <= 0) return;
+      const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+      const cached = mem.cached || 0;
+      const usedReal = (mem.usedReal !== undefined) ? mem.usedReal : Math.max(0, mem.used - cached);
+      set('ramPctText', toFaDigits(mem.usedPct) + '%');
+      set('ramUsedText', formatBytes(usedReal));
+      set('ramCacheText', formatBytes(cached));
+      set('ramFreeText', formatBytes(mem.avail));
+      set('ramTotalSubText', 'ظرفیت فیزیکی کل: ' + formatBytes(mem.total) + ' • بروزرسانی ' + shortTime());
+      const cachePct = Math.round((cached / mem.total) * 100);
+      const barUsed = document.getElementById('ramBarUsed');
+      const barCache = document.getElementById('ramBarCache');
+      const barFree = document.getElementById('ramBarFree');
+      if (barUsed) barUsed.style.width = Math.max(0, mem.usedPct - cachePct) + '%';
+      if (barCache) barCache.style.width = Math.min(100, Math.max(0, cachePct)) + '%';
+      if (barFree) barFree.style.width = Math.max(2, 100 - Math.max(0, mem.usedPct)) + '%';
+      // باگ‌فیکس 1.0.3: جزئیات دقیق MemFree/MemAvailable از /proc/meminfo
+      const det = document.getElementById('ramDetailText');
+      if (det) {
+        const mf = (mem.memFree > 0 ? formatBytes(mem.memFree) : '—');
+        const ma = (mem.memAvailable > 0 ? formatBytes(mem.memAvailable) : formatBytes(mem.avail));
+        det.textContent = 'MemFree: ' + mf + ' • MemAvailable: ' + ma + ' • منبع: ' + (mem.source || 'ActivityManager.MemoryInfo');
+      }
+    }
+
+    function applyStorageInfoToDom(st) {
+      if (!st || st.total <= 0) return;
+      const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
+      set('romUsedVal', formatBytes(st.used));
+      set('romFreeVal', formatBytes(st.avail));
+      set('romTotalSubText', 'ظرفیت واقعی: ' + formatBytes(st.total) + ' • ' + toFaDigits(st.usedPct) + '٪ مصرف • بروزرسانی ' + shortTime());
+      const fill = document.getElementById('romBarFill');
+      if (fill) fill.style.width = Math.max(2, Math.min(100, st.usedPct)) + '%';
+      // باگ‌فیکس 1.0.3: نمایش منبع اندازه‌گیری (حافظه واقعی دستگاه)
+      const src = document.getElementById('romSourceText');
+      if (src) {
+        const srcLabel = st.source === 'emulated' ? '/storage/emulated/0' : (st.source === 'data' ? '/data' : (st.source || '—'));
+        const extra = (st.volumes && st.volumes.length) ? ' + ' + toFaDigits(st.volumes.length) + ' حافظه جداگانه' : '';
+        src.textContent = srcLabel + extra;
+      }
+    }
+
     function refreshHardwareFromNative() {
       const cpu = sysJson('getCpuInfo');
-      if (cpu) {
-        const model = document.getElementById('cpuModelText');
-        if (model) model.textContent = (cpu.model && cpu.model !== 'نامشخص') ? (cpu.model + ' (' + cpu.cores + ' هسته)') : 'نامشخص';
-        const coresEl = document.getElementById('cpuCoresText');
-        if (coresEl) coresEl.textContent = (cpu.cores > 0 ? toFaDigits(cpu.cores) : '—');
-        const archEl = document.getElementById('cpuArchText');
-        if (archEl) archEl.textContent = (cpu.abi && cpu.abi !== 'unknown') ? cpu.abi : '—';
-        const avg = document.getElementById('cpuAvgUsageText');
-        if (avg) avg.textContent = (cpu.avgUsage >= 0 ? cpu.avgUsage : '—');
-        const bar = document.getElementById('cpuAvgUsageBar');
-        if (bar && cpu.avgUsage >= 0) bar.style.width = cpu.avgUsage + '%';
-        const temp = document.getElementById('cpuTempText');
-        if (temp) temp.textContent = (cpu.temperature > 0 ? cpu.temperature.toFixed(1) : '—');
-        const freq = document.getElementById('cpuFreqText');
-        if (freq) {
-          let max = -1;
-          (cpu.perCore || []).forEach(function (c) { if (c.maxFreq > max) max = c.maxFreq; });
-          // نیتیو فرکانس را به مگاهرتز برمی‌گرداند → برای گیگاهرتز بر ۱۰۰۰ تقسیم می‌شود
-          freq.textContent = max > 0 ? (max / 1000).toFixed(2) : '—';
-        }
-        renderCoresGrid(cpu.perCore);
-      } else {
+      if (cpu) applyCpuInfoToDom(cpu);
+      else {
         const model = document.getElementById('cpuModelText');
         if (model) model.textContent = 'نامشخص';
       }
 
       const mem = sysJson('getMemoryInfo');
-      if (mem && mem.total > 0) {
-        const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
-        set('ramPctText', toFaDigits(mem.usedPct) + '%');
-        set('ramUsedText', formatBytes(mem.used));
-        set('ramFreeText', formatBytes(mem.avail));
-        set('ramCacheText', formatBytes(mem.cached));
-        set('ramTotalSubText', 'ظرفیت فیزیکی کل: ' + formatBytes(mem.total) + ' • بروزرسانی ' + shortTime());
-        const barUsed = document.getElementById('ramBarUsed');
-        const barCache = document.getElementById('ramBarCache');
-        const barFree = document.getElementById('ramBarFree');
-        const cachePct = mem.total > 0 ? Math.round((mem.cached / mem.total) * 100) : 0;
-        if (barUsed) barUsed.style.width = Math.max(0, mem.usedPct - cachePct) + '%';
-        if (barCache) barCache.style.width = Math.min(100, cachePct) + '%';
-        if (barFree) barFree.style.width = Math.max(2, 100 - Math.max(0, mem.usedPct)) + '%';
-      }
+      if (mem && mem.total > 0) applyMemInfoToDom(mem);
 
       const st = sysJson('getStorageInfo');
-      if (st && st.total > 0) {
-        const set = function (id, text) { const el = document.getElementById(id); if (el) el.textContent = text; };
-        set('romUsedVal', formatBytes(st.used));
-        set('romFreeVal', formatBytes(st.avail));
-        set('romTotalSubText', 'ظرفیت دیسک کل: ' + formatBytes(st.total) + ' • بروزرسانی ' + shortTime());
-        const fill = document.getElementById('romBarFill');
-        if (fill) fill.style.width = Math.max(2, st.usedPct) + '%';
-      }
+      if (st && st.total > 0) applyStorageInfoToDom(st);
 
       const dev = sysJson('getDeviceInfo');
       if (dev) {
         const el = document.getElementById('deviceModelText');
         if (el) el.textContent = (dev.manufacturer || '') + ' ' + (dev.model || '') + ' • Android ' + (dev.android || '?');
       }
+    }
+
+    // ======================= 1.0.3 - پایگاه دانش هوش فایل (آموزش‌های واقعی) =======================
+    // هر قانون یک نکته‌ی واقعی، قابل‌استناد و کاربردی درباره‌ی مدیریت فایل/حافظه در اندروید است.
+    // تعداد قوانین صادقانه محاسبه و نمایش داده می‌شود (نه ادعای «هزاران قانون الکی»).
+    const FILE_KNOWLEDGE_BASE = {
+      cache: [
+        { rule: 'fc-1', text: 'کش برنامه‌ها فایل‌های موقتی (تصاویر، ویدیوها و داده‌های میانی) هستند که خود برنامه دوباره می‌سازد؛ پاک کردن کش، حساب و پیام‌های شما را حذف نمی‌کند.' },
+        { rule: 'fc-2', text: 'تلگرام و واتس‌اپ معمولاً بزرگ‌ترین کش‌ها را دارند (گاهی ده‌ها گیگابایت). کش هر برنامه را می‌توان از: تنظیمات اندروید > برنامه‌ها > (برنامه) > حافظه > پاک کردن کش، آزاد کرد.' },
+        { rule: 'fc-3', text: 'اندروید اجازه نمی‌دهد برنامه‌ای کشِ برنامه‌های دیگر را مستقیم پاک کند؛ این کار فقط از تنظیمات خود اندروید انجام می‌شود (سیاست امنیتی سیستم).' },
+        { rule: 'fc-4', text: 'نیازی به پاکسازی مکرر کش نیست؛ سیستم خودکار آن را مدیریت می‌کند. فقط وقتی فضا کم شده، کش برنامه‌های پرمصرف را خالی کنید.' }
+      ],
+      media: [
+        { rule: 'fm-1', text: 'ویدیوها بزرگ‌ترین مصرف‌کننده حافظه‌اند: یک ویدیوی ۱۰۸۰p تقریباً ۱ تا ۲ گیگابایت در ساعت اشغال می‌کند.' },
+        { rule: 'fm-2', text: 'محتوای دانلودشده در تلگرام و واتس‌اپ در پوشه‌ی Media داخل آن برنامه ذخیره می‌شود و جدا از کش است؛ از تنظیمات خود آن پیام‌رسان قابل مدیریت است.' },
+        { rule: 'fm-3', text: 'ویدیوهای قدیمی را می‌توانید به کامپیوتر یا فضای ابری منتقل کنید یا با یک ویرایشگر ویدیو فشرده کنید تا حافظه آزاد شود.' },
+        { rule: 'fm-4', text: 'تصاویر بالای ۱۰ مگابایت معمولاً رزولوشن بسیار بالایی دارند؛ برای اشتراک در شبکه‌های اجتماعی در هر صورت فشرده می‌شوند.' }
+      ],
+      storage: [
+        { rule: 'fs-1', text: 'وقتی حافظه داخلی بیش از ۹۰٪ پر باشد، سرعت سیستم افت می‌کند؛ همیشه ۱۰ تا ۵٪ فضای خالی نگه دارید.' },
+        { rule: 'fs-2', text: 'فایل‌های نصب‌شده (APK) که دیگر لازم ندارید، هرکدام چند صد مگابایت هستند و حذفشان بی‌خطر است.' },
+        { rule: 'fs-3', text: 'حافظه داخلی اندروید همان فضای /data و /storage است؛ اگر SD کارت یا حافظه USB دارید، به‌عنوان حجم جداگانه گزارش می‌شود.' },
+        { rule: 'fs-4', text: 'ری‌استارت دوره‌ای (هفته‌ای یک‌بار) به پاک شدن فایل‌های موقت سیستمی و آزادسازی رم کمک می‌کند.' }
+      ],
+      permissions: [
+        { rule: 'fp-1', text: 'درخواست مجوز در manifest برنامه ≠ دسترسی واقعی؛ دسترسی فقط پس از اجازه‌ی شما در تنظیمات اندروید فعال می‌شود. این اپ فقط مجوزهای واقعاً اعطا شده را گزارش می‌دهد.' },
+        { rule: 'fp-2', text: 'برای پیام‌رسان‌هایی مثل تلگرام، داشتن دسترسی به حافظه رسانه‌ای طبیعی و مورد انتظار است (برای ذخیره عکس و ویدیو)؛ این یعنی برنامه خطرناک نیست، فقط به رسانه‌ها دسترسی دارد.' },
+        { rule: 'fp-3', text: 'هر چند ماه یک‌بار: تنظیمات > برنامه‌ها > (برنامه) > مجوزها را باز کنید و مجوزهایی که استفاده نمی‌کنید (مکان، میکروفون، پیامک) را بازگردانید.' },
+        { rule: 'fp-4', text: 'ترکیب «نمایش روی دیگر برنامه‌ها» (Overlay) + دسترسی به پیامک، نشانه‌ی برنامه‌های خطرناک است؛ این سطح را فقط به برنامه‌های مورد اعتماد بدهید.' }
+      ],
+      general: [
+        { rule: 'fg-1', text: 'این برنامه هرگز بدون اجازه‌ی شما فایلِ برنامه‌های دیگر را حذف نمی‌کند؛ همه عملیات از طریق تنظیمات خود اندروید انجام می‌شود.' },
+        { rule: 'fg-2', text: 'اگر فایلی در برنامه فایل‌ها نیست، ممکن است در پوشه‌ی خصوصی همان برنامه (اندروید ۱۱+) باشد؛ در آن صورت از تنظیمات خود آن برنامه مدیریتش کنید.' },
+        { rule: 'fg-3', text: '«پاک کردن داده» (Data) با «پاک کردن کش» (Cache) فرق دارد؛ پاک کردن داده، شما را از برنامه خارج می‌کند و تنظیماتش را می‌پرمایند — با احتیاط استفاده کنید.' }
+      ]
+    };
+    let fileIntelScan = { riskyCount: 0, cacheTotalMb: 0, cacheTopName: '', largeCount: 0, storagePct: -1 };
+
+    function fileIntelAllRules() {
+      const out = [];
+      for (const cat in FILE_KNOWLEDGE_BASE) FILE_KNOWLEDGE_BASE[cat].forEach(function (r) { out.push(r); });
+      return out;
+    }
+    function fileIntelContextTip() {
+      const rules = fileIntelAllRules();
+      if (!rules.length) return '';
+      // انتخاب زمینه‌ای بر اساس داده‌های اسکن واقعی اخیر (نه نکته‌ی الکی)
+      if (fileIntelScan.storagePct >= 90) return FILE_KNOWLEDGE_BASE.storage[0].text;
+      if (fileIntelScan.cacheTopName && fileIntelScan.cacheTotalMb >= 1024) {
+        return 'برنامه‌ی «' + fileIntelScan.cacheTopName + '» بزرگ‌ترین کش این دستگاه را دارد. ' + FILE_KNOWLEDGE_BASE.cache[0].text;
+      }
+      if (fileIntelScan.largeCount >= 10) return FILE_KNOWLEDGE_BASE.media[0].text;
+      if (fileIntelScan.riskyCount >= 3) return FILE_KNOWLEDGE_BASE.permissions[0].text;
+      return rules[Math.floor(Date.now() / 30000) % rules.length].text;
+    }
+    function updateFileIntelPanel() {
+      const rulesEl = document.getElementById('fileIntelRules');
+      if (rulesEl) rulesEl.textContent = toFaDigits(fileIntelAllRules().length);
+      const iconEl = document.getElementById('fileIntelIcon');
+      if (iconEl && !iconEl.innerHTML) iconEl.innerHTML = svgIcon('bulb', 22, 'ic-stroke');
+      const tipEl = document.getElementById('fileIntelTip');
+      if (tipEl) tipEl.textContent = '💡 ' + fileIntelContextTip();
+      const statsEl = document.getElementById('fileIntelStats');
+      if (statsEl) {
+        const st = sysJson('getStorageInfo');
+        if (st && st.usedPct >= 0) fileIntelScan.storagePct = st.usedPct;
+        const parts = [];
+        parts.push('<span class="file-intel-stat">مجوزهای حساس فعال: <b>' + toFaDigits(fileIntelScan.riskyCount) + '</b> برنامه</span>');
+        if (fileIntelScan.cacheTotalMb > 0) parts.push('<span class="file-intel-stat">مجموع کش شناسایی‌شده: <b>' + toFaDigits(Math.round(fileIntelScan.cacheTotalMb)) + ' مگ</b></span>');
+        if (fileIntelScan.largeCount > 0) parts.push('<span class="file-intel-stat">فایل حجیم رسانه‌ای: <b>' + toFaDigits(fileIntelScan.largeCount) + '</b></span>');
+        if (fileIntelScan.storagePct >= 0) parts.push('<span class="file-intel-stat">مصرف حافظه واقعی: <b>' + toFaDigits(fileIntelScan.storagePct) + '٪</b></span>');
+        statsEl.innerHTML = parts.join('');
+      }
+    }
+    let tipsTimer = null;
+    function startTipsTimer() {
+      if (tipsTimer) return;
+      // یک تایمر مشترک ۳۰ ثانیه‌ای برای نکات هوش فایل و هوش بات (سبک)
+      tipsTimer = setInterval(function () {
+        const ft = document.getElementById('fileIntelTip');
+        if (ft) ft.textContent = '💡 ' + fileIntelContextTip();
+        const bt = document.getElementById('aiBotTipText');
+        if (bt && typeof getBatteryBotTip === 'function') bt.textContent = '💡 ' + getBatteryBotTip();
+      }, 30000);
+    }
+
+    // ======================= 1.0.3 - پایگاه دانش هوش بات (AI Battery Doctor) =======================
+    // دانش واقعی لیتیوم-یون، حرارت، رم، دیسک، حریم خصوصی و مصرف باتری.
+    const BOT_KNOWLEDGE_BASE = {
+      charge: [
+        { rule: 'li-ion-1', text: 'باتری لیتیوم-یون بین ۲۰٪ تا ۸۰٪ بیشترین عمر چرخه‌ای را دارد. شارژ کامل ۱۰۰٪ و تخلیه کامل ۰٪، هر دو به سلول فشار می‌آورند.' },
+        { rule: 'li-ion-2', text: 'هر چرخه شارژ کامل حدود ۳۰۰ تا ۵۰۰ بار قبل از کاهش محسوس ظرفیت تکرار می‌شود؛ شارژهای کوتاه (مثلاً ۴۰→۷۰٪) فشار کمتری دارند.' },
+        { rule: 'li-ion-3', text: 'نگهداری باتری روی ۱۰۰٪ برای چند ساعت، ولتاژ سلول را بالا نگه می‌دارد و فرسودگی شیمیایی را تسریع می‌کند.' },
+        { rule: 'li-ion-4', text: 'شارژ شبانه اگر گوشی قابلیت شارژ تریکل هوشمند نداشته باشد، به‌مرور ظرفیت را کم می‌کند.' },
+        { rule: 'li-ion-5', text: 'شارژ سریع (Fast Charge) حرارت بیشتری تولید می‌کند؛ استفاده‌ی مداوم از شارژر سریع می‌تواند عمر باتری را تا ۲۰٪ کاهش دهد.' },
+        { rule: 'li-ion-6', text: 'شارژ وایرلس گرمای بیشتری نسبت به شارژ سیمی تولید می‌کند؛ در محیط گرم، شارژ سیمی ترجیح دارد.' },
+        { rule: 'li-ion-7', text: 'قانون ۴۰-۸۰: بهترین محدوده برای حداکثر عمر باتری. اگر همیشه ۱۰۰٪ نگه دارید، ظرفیت بعد از یک سال حدود ۱۵ تا ۲۰٪ کمتر می‌شود.' },
+        { rule: 'li-ion-8', text: 'برای نگهداری طولانی‌مدت، باتری را روی ۵۰٪ بگذارید و دستگاه را در جای خنک نگه دارید.' }
+      ],
+      thermal: [
+        { rule: 'thermal-1', text: 'دمای ایده‌آل باتری ۱۵ تا ۲۵ درجه است؛ بالای ۳۵° سرعت فرسودگی تقریباً ۲ برابر می‌شود.' },
+        { rule: 'thermal-2', text: 'دمای بالای ۴۰° برای بیش از ۱۰ دقیقه = آسیب دائمی به سلول؛ ظرفیت از دست‌رفته برنمی‌گردد.' },
+        { rule: 'thermal-3', text: 'سرمای شدید ظرفیت را موقتاً کم می‌کند اما با گرم شدن برمی‌گردد؛ شارژ در هوای خیلی سرد خطرناک‌تر است.' },
+        { rule: 'thermal-4', text: 'هنگام بازی یا GPS سنگین کاور گوشی را بردارید؛ هر ۱۰° افزایش دما سرعت واکنش‌های شیمیایی فرساینده را دو برابر می‌کند.' },
+        { rule: 'thermal-5', text: 'شارژ هم‌زمان با استفاده‌ی سنگین بدترین حالت حرارتی است؛ برای شارژ طولانی، دستگاه را در حالت پرواز یا خاموش بگذارید.' },
+        { rule: 'thermal-6', text: 'اگر گوشی هنگام شارژ داغ شد: شارژر را جدا کنید، کاور را بردارید و دستگاه را در سایه بگذارید.' }
+      ],
+      ram: [
+        { rule: 'ram-1', text: 'اندروید رم خالی را به‌عنوان کش نگه می‌دارد؛ رم «پر» با کش لزوماً بد نیست — سیستم خودش مدیریت می‌کند.' },
+        { rule: 'ram-2', text: 'Task Killerها معمولاً مصرف باتری را بیشتر می‌کنند چون سیستم مجبور می‌شود برنامه‌ها را از نو بارگذاری کند.' },
+        { rule: 'ram-3', text: 'فقط برنامه‌هایی که مشکل مصرف باتری یا دیتا دارند را از: تنظیمات > برنامه‌ها > محدودسازی پس‌زمینه، محدود کنید.' },
+        { rule: 'ram-4', text: 'کش هر برنامه با پاکسازی واقعی آزاد می‌شود؛ اندروید اجازه‌ی پاکسازی مستقیم کش برنامه‌های دیگر را نمی‌دهد.' },
+        { rule: 'ram-5', text: 'ویجت‌ها و والپیپر زنده رم اضافی مصرف می‌کنند؛ اگر گوشی کند شده، ویجت‌های غیرضروری را حذف کنید.' },
+        { rule: 'ram-6', text: 'برنامه‌هایی با دسترسی مکان در پس‌زمینه، GPS را فعال نگه می‌دارند و هم رم و هم باتری مصرف می‌کنند.' }
+      ],
+      disk: [
+        { rule: 'disk-1', text: 'حافظه‌ی داخلی بیش از ۹۰٪ پر = کندی سیستم؛ حداقل ۱۰ تا ۱۵٪ خالی نگه دارید.' },
+        { rule: 'disk-2', text: 'عکس و ویدیو بزرگ‌ترین مصرف‌کننده حافظه‌اند؛ فایل‌های بالای ۱۰ مگابایت را بررسی و مدیریت کنید.' },
+        { rule: 'disk-3', text: 'واتس‌اپ و تلگرام هرکدام می‌توانند ده‌ها گیگابایت محتوای رسانه‌ای ذخیره کنند؛ پوشه‌ی Media هر برنامه را بررسی کنید.' },
+        { rule: 'disk-4', text: 'APKهای نصب‌شده دیگر لازم نیستند؛ آن‌ها را با فایل‌منیجر حذف کنید.' },
+        { rule: 'disk-5', text: 'کش مرورگر Chrome می‌تواند چند گیگ باشد: تنظیمات Chrome > حریم خصوصی > پاک کردن داده‌های مرور.' },
+        { rule: 'disk-6', text: 'پوشه‌ی داده سیستم (Android) شامل لاگ و فایل‌های موقتی است؛ ری‌استارت هفتگی به پاکسازی کمک می‌کند.' }
+      ],
+      privacy: [
+        { rule: 'priv-1', text: 'برنامه‌ای که هم‌زمان مکان، پیامک و دوربین داشته باشد، بسیار مشکوک است؛ فقط در صورت نیاز واقعی نصبش کنید.' },
+        { rule: 'priv-2', text: 'مجوز «نمایش روی برنامه‌های دیگر» (Overlay) ابزار keyloggerهاست؛ فقط به برنامه‌های مورد اعتماد بدهید.' },
+        { rule: 'priv-3', text: 'در اندروید ۶+، درخواست در manifest برابر دسترسی فعال نیست؛ همیشه مجوزهای Runtime (واقعا اعطا شده) را بررسی کنید.' },
+        { rule: 'priv-4', text: 'برنامه‌های چراغ‌قوه، تم و والپیپر زنده اغلب مجوزهایی غیرضروری می‌خواهند؛ مراقب باشید.' },
+        { rule: 'priv-5', text: 'از Play Protect و گوگل‌پلی استفاده کنید؛ APK از منابع ناشناس ممکن است بدافزار داشته باشد.' },
+        { rule: 'priv-6', text: 'دسترسی به مخاطبان و سوابق تماس فقط به برنامه تماس و پیام‌رسان مورد اعتماد بدهید.' }
+      ],
+      batterySaving: [
+        { rule: 'save-1', text: 'نمایشگر بزرگ‌ترین مصرف‌کننده باتری است؛ روشنایی خودکار + تایمر خاموش ۳۰ ثانیه‌ای مصرف را تا ۴۰٪ کم می‌کند.' },
+        { rule: 'save-2', text: 'Dark Theme روی صفحه‌ی OLED تا ۶۰٪ مصرف نمایشگر را کم می‌کند؛ روی LCD اثرش کم‌تر است.' },
+        { rule: 'save-3', text: 'GPS، بلوتوث و NFC را وقتی استفاده نمی‌کنید خاموش نگه دارید و Location History را محدود کنید.' },
+        { rule: 'save-4', text: 'Sync خودکار در پس‌زمینه باتری می‌سوزاند؛ sync را دستی و هر ۳۰ دقیقه‌ای کنید.' },
+        { rule: 'save-5', text: 'برنامه‌های پرمصرف پس‌زمینه: تنظیمات > باتری > مصرف باتری را بررسی و محدود کنید.' },
+        { rule: 'save-6', text: 'نرخ نوسان ۱۲۰Hz باتری بیشتری مصرف می‌کند؛ در استفاده‌ی روزمره ۶۰Hz کافیه.' },
+        { rule: 'save-7', text: 'دسترسی 5G بیشتر از 4G مصرف دارد؛ در نقاط بدون پوشش قوی 5G، روی 4G بمانید.' },
+        { rule: 'save-8', text: 'ویبره بیشتر از زنگ، باتری مصرف می‌کند؛ هر جا ممکن است روی زنگ بگذارید.' }
+      ],
+      health: [
+        { rule: 'health-1', text: 'اگر ظرفیت باتری زیر ۸۰٪ اولیه افت کرد، زمان تعویض باتری است؛ معمولاً بعد از ۲ تا ۳ سال استفاده‌ی عادی.' },
+        { rule: 'health-2', text: 'علائم فرسودگی: زود خالی شدن، خاموشی ناگهانی، باد کردن بدنه‌ی باتری.' },
+        { rule: 'health-3', text: 'سلامت Good یعنی مقاومت داخلی سلول نرمال است؛ Overheat یا Dead یعنی آسیب جدی.' },
+        { rule: 'health-4', text: 'ولتاژ باتری سالم حدود ۳.۷ تا ۴.۲ ولت است؛ اگر زیر ۳.۳ ولت بیاید، سلول آسیب دیده.' },
+        { rule: 'health-5', text: 'لیتیوم-پلیمر سبک‌تر و انعطاف‌پذیرتر است اما به حرارت حساس‌تر از لیتیوم-یون کلاسیک است.' }
+      ],
+      general: [
+        { rule: 'gen-1', text: 'هر هفته یک‌بار گوشی را ری‌استارت کنید؛ رم، کش سیستمی و فایل‌های موقت پاک می‌شوند.' },
+        { rule: 'gen-2', text: 'آپدیت اندروید و برنامه‌ها معمولاً بهینه‌سازی‌های مصرف باتری دارند؛ همیشه به‌روز بمانید.' },
+        { rule: 'gen-3', text: 'از شارژر و کابل اصلی یا معتبر استفاده کنید؛ شارژر تقلبی ولتاژ نامنظم می‌دهد.' },
+        { rule: 'gen-4', text: 'اگر باتری باد کرد فوراً استفاده را متوقف کنید؛ باتری متورم خطرناک است.' },
+        { rule: 'gen-5', text: 'بیشتر «بهینه‌سازها» خودشان باتری بیشتری می‌سوزانند؛ این برنامه فقط داده‌ی واقعی نشان می‌دهد.' }
+      ]
+    };
+    let batteryAdviceHistory = [];
+    function batteryBotRulesCount() {
+      let n = 0;
+      for (const c in BOT_KNOWLEDGE_BASE) n += BOT_KNOWLEDGE_BASE[c].length;
+      return n;
+    }
+    function getBatteryBotTip() {
+      const all = [];
+      for (const c in BOT_KNOWLEDGE_BASE) BOT_KNOWLEDGE_BASE[c].forEach(function (r) { all.push(r.text); });
+      if (!all.length) return '';
+      return all[Math.floor(Date.now() / 30000) % all.length];
     }
 
     function refreshRiskyAppsFromNative() {
@@ -2545,14 +2928,12 @@
       refreshOwnStorageFromNative();
     }
 
+    // باگ‌فیکس ۱.۰.۳: قبل از این، این پلر فقط «لود» و هسته‌ها را به‌روزرسانی می‌کرد و
+    // دما/فرکانس بعد از خوانشِ اول برای همیشه «—» می‌ماندند. حالا همه متریک‌ها
+    // (دما + بار کل + فرکانس + هسته‌ها) هر ۴ ثانیه تازه می‌شوند.
     function updateCoreFluctuations() {
       const cpu = sysJson('getCpuInfo');
-      if (!cpu) return;
-      renderCoresGrid(cpu.perCore);
-      const avg = document.getElementById('cpuAvgUsageText');
-      if (avg) avg.textContent = (cpu.avgUsage >= 0 ? cpu.avgUsage : '—');
-      const bar = document.getElementById('cpuAvgUsageBar');
-      if (bar && cpu.avgUsage >= 0) bar.style.width = cpu.avgUsage + '%';
+      if (cpu) applyCpuInfoToDom(cpu);
     }
 
     // ======================= زمان‌بندی هوشمند بررسی‌ها (مصرف باتری کمینه) =======================
@@ -2659,7 +3040,40 @@
       showToast('زنگ هشدار متوقف شد ⏹️');
     }
 
-    // ======================= هوش فایل 1.0.2 - با آیکون زیبا و گالری حرفه‌ای + اصلاح باگ مکان تلگرام =======================
+    // ======================= 1.0.3 - سیستم آیکون SVG حرفه‌ای =======================
+    const SVG_ICONS = {
+      play:      '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+      pause:     '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+      volume:    '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" opacity=".7"/></svg>',
+      mute:      '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+      expand:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+      rewind:    '<svg viewBox="0 0 24 24"><path d="M11 12L21 6v12L11 12zM3 12l10-6v12L3 12z"/></svg>',
+      forward:   '<svg viewBox="0 0 24 24"><path d="M13 12L3 18V6l10 6zM21 12L11 18V6l10 6z"/></svg>',
+      film:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>',
+      photo:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 15l-5-5-9 9"/></svg>',
+      bulb:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.3 2.2h4.6c.2-.9.6-1.6 1.3-2.2A6 6 0 0 0 12 3z"/></svg>',
+      shield:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/></svg>',
+      scan:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M3 12h18"/></svg>',
+      layers:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+      broom:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3l-7.5 7.5M14 4l6 6M3 21c0-4 2-7.5 6-9l3 3c-1.5 4-5 6-9 6z"/></svg>',
+      cpu:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><rect x="10.5" y="10.5" width="3" height="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M7 2v3M17 2v3M7 19v3M17 19v3"/></svg>',
+      ram:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="1.5"/><path d="M6 17v3M10 17v3M14 17v3M18 17v3M6 7v10M10 7v10M14 7v10M18 7v10"/></svg>',
+      storage:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5V18.5c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5V5.5M4 12c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5"/></svg>',
+      zap:       '<svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>'
+    };
+    function svgIcon(name, sizePx, cls) {
+      const ic = SVG_ICONS[name];
+      if (!ic) return '';
+      return '<span class="ic ' + (cls || '') + '" style="width:' + (sizePx || 16) + 'px;height:' + (sizePx || 16) + 'px;">' + ic + '</span>';
+    }
+    const VP_PLAY_SVG = SVG_ICONS.play;
+    const VP_PAUSE_SVG = SVG_ICONS.pause;
+    const VP_VOL_SVG = SVG_ICONS.volume;
+    const VP_MUTE_SVG = SVG_ICONS.mute;
+    function setVpPlayIcon(playing) { const ic = document.getElementById('vpPlayIcon'); if (ic) ic.innerHTML = playing ? VP_PAUSE_SVG : VP_PLAY_SVG; }
+    function setVpMuteIcon(muted) { const ic = document.getElementById('vpMuteIcon'); if (ic) ic.innerHTML = muted ? VP_MUTE_SVG : VP_VOL_SVG; }
+
+    // ======================= هوش فایل 1.0.3 - گالری حرفه‌ای با آیکون SVG + پراکسی پخش ویدیو =======================
     let currentMediaItems = [];
     let appIconCache = {};
 
@@ -2742,6 +3156,23 @@
       if (currentFileCategory === 'large') currentMediaItems = items.filter(function(x){ return x.kind === 'image' || x.kind === 'video' || x.action === 'media'; });
       else currentMediaItems = [];
       if (countEl) countEl.textContent = items.length ? (toFaDigits(items.length) + ' مورد واقعی') : 'موردی یافت نشد';
+      // 1.0.3: ذخیره‌ی نتایج اسکن واقعی برای تحلیل زمینه‌ای «هوش فایل»
+      if (currentFileCategory === 'risky') {
+        fileIntelScan.riskyCount = items.filter(function (x) { return x && x.pkg; }).length;
+      } else if (currentFileCategory === 'cache') {
+        let mb = 0, topName = '', topMb = -1;
+        items.forEach(function (it) {
+          if (!it || it.action === 'grant' || it.action === 'none') return;
+          const m = it.sizeMb || 0;
+          mb += m;
+          if (m > topMb) { topMb = m; topName = it.name || ''; }
+        });
+        fileIntelScan.cacheTotalMb = mb;
+        fileIntelScan.cacheTopName = topName;
+      } else if (currentFileCategory === 'large') {
+        fileIntelScan.largeCount = currentMediaItems.length;
+      }
+      updateFileIntelPanel();
       if (!items.length) {
         container.innerHTML = '<div class="app-card" style="text-align:center; padding:26px;">' +
           '<div style="font-size:1.8rem;">✨</div><div style="font-size:0.86rem; font-weight:700;">موردی برای نمایش نیست</div>' +
@@ -2756,21 +3187,24 @@
             return;
           }
           const isVideo = item.kind === 'video';
-          const label = item.persianLabel || item.name || (isVideo ? 'ویدیو' : 'تصویر') + ' ' + (index+1);
+          const label = item.persianLabel || item.name || (isVideo ? 'ویدیو' : 'تصویر') + ' ' + (index + 1);
           const sizeText = item.sizeText || '';
           const meta = item.note || '';
           const thumbUri = item.thumbUri || item.contentUri || item.path || '';
-          const bgIcon = isVideo ? '🎬' : '🖼️';
           const badgeClass = isVideo ? 'video' : 'image';
           const badgeText = isVideo ? 'ویدیو' : 'تصویر';
+          const kindIcon = isVideo ? svgIcon('film', 13) : svgIcon('photo', 13);
+          // 1.0.3: آیکون‌های حرفه‌ای SVG + دکمه‌ی پخش روی ویدیو + badge آیکون‌دار
           html += '<div class="media-card" onclick="openMediaViewer(' + index + ')">' +
             '<div class="media-thumb-wrap" data-uri="' + escapeHtml(thumbUri) + '" data-idx="' + index + '">' +
-              '<div class="media-thumb-placeholder">' + bgIcon + '</div>' +
-              '<span class="media-badge ' + badgeClass + '">' + badgeText + '</span>' +
+              '<div class="media-thumb-placeholder">' + (isVideo ? svgIcon('film', 36) : svgIcon('photo', 36)) + '</div>' +
+              '<span class="media-icon-chip ' + badgeClass + '">' + kindIcon + '</span>' +
+              '<span class="media-badge ' + badgeClass + '">' + kindIcon + badgeText + '</span>' +
+              (isVideo ? '<div class="media-play-overlay">' + svgIcon('play', 20) + '</div>' : '') +
               (isVideo && item.durationText ? '<span class="media-duration">' + escapeHtml(item.durationText) + '</span>' : '') +
             '</div>' +
             '<div class="media-info">' +
-              '<div class="media-label">' + (isVideo ? '🎬 ' : '🖼️ ') + escapeHtml(label) + '</div>' +
+              '<div class="media-label">' + kindIcon + '<span>' + escapeHtml(label) + '</span></div>' +
               '<div class="media-meta">' + escapeHtml(meta) + '</div>' +
               '<span class="media-size-pill">' + escapeHtml(sizeText) + '</span>' +
             '</div></div>';
@@ -2844,6 +3278,19 @@
       });
     }
 
+    // ======================= 1.0.3 - پراکسی پخش ویدیو =======================
+    // باگ‌فیکس: موتور مدیای WebView در اندروید نمی‌تواند مستقیم از URI‌های
+    // content:// ویدیو پخش کند (به‌همین دلیل ویدیو پخش نمی‌شد). نیتیو (MainActivity)
+    // درخواست‌های https://appmedia.local را می‌گیرد و با HTTP Range (206) بایت‌ها
+    // را از ContentResolver استریم می‌کند ⇒ پخش + seek واقعی.
+    function mediaProxyUrl(uri) {
+      return 'https://appmedia.local/m?u=' + encodeURIComponent(uri);
+    }
+    function videoSrcFor(item) {
+      const src = (item && (item.contentUri || item.path)) || '';
+      return (src && src.indexOf('content://') === 0) ? mediaProxyUrl(src) : src;
+    }
+
     let lightboxIndex = 0;
     function openMediaViewer(index) {
       const item = currentMediaItems[index];
@@ -2851,10 +3298,101 @@
       if (item.kind === 'video') { openVideoPlayer(index); return; }
       openLightbox(index);
     }
+    // ======================= 1.0.3 - زوم حرفه‌ای لایت‌باکس =======================
+    // باگ‌فیکس: قبل از این، روی تصویر زدن فقط تصویر را نشان می‌داد ولی زوم نبود.
+    // حالا: دابل‌تپ/دابل‌کلیک، پینچ با دو انگشت، اسکرول (دسکتاپ) و دکمه‌های
+    // + / − / بازگشت — زوم ۱۰۰٪ تا ۴۰۰٪ با پن.
+    let lbZoomState = { scale: 1, tx: 0, ty: 0 };
+    function lbApplyTransform() {
+      const img = document.getElementById('lbImage');
+      if (!img) return;
+      img.style.transform = 'translate(' + lbZoomState.tx + 'px,' + lbZoomState.ty + 'px) scale(' + lbZoomState.scale + ')';
+      const chip = document.getElementById('lbZoomChip');
+      if (chip) chip.textContent = toFaDigits(Math.round(lbZoomState.scale * 100)) + '٪';
+    }
+    function lbZoomBy(factor, cx, cy) {
+      const stage = document.getElementById('lbStage');
+      if (!stage || !isFinite(factor) || factor <= 0) return;
+      const rect = stage.getBoundingClientRect();
+      const px = (cx === undefined ? rect.left + rect.width / 2 : cx) - (rect.left + rect.width / 2);
+      const py = (cy === undefined ? rect.top + rect.height / 2 : cy) - (rect.top + rect.height / 2);
+      const old = lbZoomState.scale;
+      const next = Math.max(1, Math.min(4, old * factor));
+      if (next === 1) {
+        lbZoomState.tx = 0; lbZoomState.ty = 0;
+      } else {
+        const k = next / old;
+        lbZoomState.tx = px - k * (px - lbZoomState.tx);
+        lbZoomState.ty = py - k * (py - lbZoomState.ty);
+        const maxT = Math.max(0, (next - 1) * rect.width / 2);
+        lbZoomState.tx = Math.max(-maxT, Math.min(maxT, lbZoomState.tx));
+        lbZoomState.ty = Math.max(-maxT, Math.min(maxT, lbZoomState.ty));
+      }
+      lbZoomState.scale = next;
+      lbApplyTransform();
+    }
+    function lbZoomReset() {
+      lbZoomState.scale = 1; lbZoomState.tx = 0; lbZoomState.ty = 0;
+      lbApplyTransform();
+    }
+    function initLightboxZoom() {
+      const stage = document.getElementById('lbStage');
+      const img = document.getElementById('lbImage');
+      if (!stage || stage._lbZoomBound) return;
+      stage._lbZoomBound = true;
+      let touchStart = null, pinchStart = null, lastTap = 0;
+      stage.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+          touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx: lbZoomState.tx, ty: lbZoomState.ty };
+        } else if (e.touches.length === 2) {
+          pinchStart = { d: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY), scale: lbZoomState.scale };
+        }
+      }, { passive: true });
+      stage.addEventListener('touchmove', function (e) {
+        if (e.touches.length === 2 && pinchStart && pinchStart.d > 0) {
+          const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          lbZoomBy(Math.max(0.01, d / pinchStart.d) * (pinchStart.scale / lbZoomState.scale));
+          if (e.cancelable) e.preventDefault();
+          return;
+        }
+        if (e.touches.length === 1 && touchStart && lbZoomState.scale > 1.01) {
+          const dx = e.touches[0].clientX - touchStart.x;
+          const dy = e.touches[0].clientY - touchStart.y;
+          lbZoomState.tx = touchStart.tx + dx;
+          lbZoomState.ty = touchStart.ty + dy;
+          const r = stage.getBoundingClientRect();
+          const maxT = Math.max(0, (lbZoomState.scale - 1) * r.width / 2);
+          lbZoomState.tx = Math.max(-maxT, Math.min(maxT, lbZoomState.tx));
+          lbZoomState.ty = Math.max(-maxT, Math.min(maxT, lbZoomState.ty));
+          lbApplyTransform();
+          if (e.cancelable) e.preventDefault();
+        }
+      }, { passive: false });
+      stage.addEventListener('touchend', function () { touchStart = null; pinchStart = null; });
+      // دابل‌تپ / دابل‌کلیک: زوم ۲.۲ برابر حول نقطه لمس (یا بازگشت)
+      stage.addEventListener('click', function (e) {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+          lastTap = 0;
+          if (lbZoomState.scale > 1.01) lbZoomReset();
+          else lbZoomBy(2.2, e.clientX, e.clientY);
+          return;
+        }
+        lastTap = now;
+      });
+      // اسکرول ماوس (پیش‌نمایش دسکتاپ)
+      stage.addEventListener('wheel', function (e) {
+        if (e.target !== img) return;
+        e.preventDefault();
+        lbZoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY);
+      }, { passive: false });
+    }
+
     function openLightbox(index) {
       lightboxIndex = index;
       const item = currentMediaItems[index];
       if (!item) return;
+      lbZoomReset();
       const lb = document.getElementById('imageLightbox');
       const title = document.getElementById('lbTitle');
       const sub = document.getElementById('lbSub');
@@ -2889,6 +3427,7 @@
       const lb = document.getElementById('imageLightbox');
       if (lb) lb.classList.remove('open');
       document.body.style.overflow = '';
+      lbZoomReset();
     }
     function lightboxNav(delta){
       let images = [];
@@ -2917,7 +3456,10 @@
         (item.resolution ? '<span class="lightbox-chip">' + escapeHtml(item.resolution) + '</span>' : '') +
         (item.mime ? '<span class="lightbox-chip">' + escapeHtml(item.mime) + '</span>' : '') +
         '<button class="btn-delete-copy" style="margin-top:8px; width:100%; background:rgba(56,189,248,0.1); color:#38bdf8; border-color:rgba(56,189,248,0.3);" onclick="openInFilesApp(\'' + (item.contentUri||item.path||'').replace(/'/g,"\\'") + '\')"><span>📂</span><span>نمایش در فایل‌ها</span></button>';
-      const src = item.contentUri || item.path || '';
+      // 1.0.3: content:// از طریق پراکسی نیتیو سرویس می‌شود (Range/seek واقعی)
+      const src = videoSrcFor(item);
+      vpClearError();
+      video.onerror = function () { try { vpShowPlaybackError(item); } catch (e) {} };
       video.pause();
       video.removeAttribute('src');
       video.load();
@@ -2925,6 +3467,8 @@
         video.src = src;
         video.load();
       }
+      setVpPlayIcon(false);
+      setVpMuteIcon(!!video.muted);
       ov.classList.add('open');
       document.body.style.overflow = 'hidden';
       const ctrls = document.getElementById('vpControls');
@@ -2933,6 +3477,33 @@
       updateVPTime();
       video.onloadedmetadata = updateVPTime;
       setTimeout(function(){ video.play().catch(function(){}); }, 150);
+    }
+    function vpClearError() {
+      const ov = document.getElementById('videoOverlay');
+      if (ov) { const err = ov.querySelector('.vp-error'); if (err) err.remove(); }
+    }
+    function vpShowPlaybackError(item) {
+      const ov = document.getElementById('videoOverlay');
+      if (!ov) return;
+      if (ov.querySelector('.vp-error')) return;
+      const err = document.createElement('div');
+      err.className = 'vp-error';
+      err.style.cssText = 'position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:rgba(2,6,17,0.88); z-index:5; text-align:center; padding:24px;';
+      const icWrap = document.createElement('div');
+      icWrap.style.cssText = 'width:52px;height:52px;border-radius:50%;background:rgba(239,68,68,0.15);color:#fca5a5;display:flex;align-items:center;justify-content:center;';
+      icWrap.innerHTML = '<svg viewBox="0 0 24 24" style="width:26px;height:26px;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>';
+      const msg = document.createElement('div');
+      msg.style.cssText = 'font-size:0.78rem; font-weight:700; color:#fecaca; line-height:1.9;';
+      msg.textContent = 'پخش درون‌برنامه‌ای این ویدیو ممکن نشد (کدک پشتیبانی نمی‌شود یا دسترسی رسانه‌ای لازم است). می‌توانید آن را در برنامه فایل‌ها پخش کنید.';
+      const btn = document.createElement('button');
+      btn.className = 'btn-delete-copy';
+      btn.style.cssText = 'color:#38bdf8; border-color:rgba(56,189,248,0.3);';
+      btn.innerHTML = '<span>📂</span><span>باز کردن در برنامه فایل‌ها</span>';
+      const target = (item && (item.contentUri || item.path)) || '';
+      btn.onclick = function () { try { openInFilesApp(target); } catch (e) {} };
+      err.appendChild(icWrap); err.appendChild(msg); err.appendChild(btn);
+      const stage = ov.querySelector('.video-stage');
+      if (stage) stage.appendChild(err);
     }
     function closeVideoPlayer(){
       const ov = document.getElementById('videoOverlay');
@@ -2947,9 +3518,10 @@
       if (!video || video._vpBound) return;
       video._vpBound = true;
       video.addEventListener('timeupdate', updateVPProgress);
-      video.addEventListener('play', function(){ const b=document.getElementById('vpPlayBtn'); if(b) b.textContent='⏸'; showVPControls(); });
-      video.addEventListener('pause', function(){ const b=document.getElementById('vpPlayBtn'); if(b) b.textContent='▶'; showVPControls(); });
-      video.addEventListener('ended', function(){ const b=document.getElementById('vpPlayBtn'); if(b) b.textContent='▶'; });
+      video.addEventListener('play', function(){ setVpPlayIcon(true); showVPControls(); });
+      video.addEventListener('pause', function(){ setVpPlayIcon(false); showVPControls(); });
+      video.addEventListener('ended', function(){ setVpPlayIcon(false); });
+      video.addEventListener('playing', function(){ vpClearError(); });
       video.addEventListener('click', toggleVPControls);
     }
     function updateVPProgress(){
@@ -2981,10 +3553,9 @@
     }
     function toggleVideoMute(){
       const v = document.getElementById('vpVideo');
-      const b = document.getElementById('vpMuteBtn');
       if (!v) return;
       v.muted = !v.muted;
-      if (b) b.textContent = v.muted ? '🔇' : '🔊';
+      setVpMuteIcon(v.muted);
     }
     function toggleVideoFullscreen(){
       const v = document.getElementById('vpVideo');
@@ -3072,9 +3643,11 @@
       if (res && res.ok) {
         const freedMb = res.freedMb || 0;
         const cacheMb = res.cacheClearedMb || 0;
-        if (note) note.textContent = 'کش پاک‌شده: ' + cacheMb + ' MB — تغییر واقعی رم آزاد: ' + freedMb + ' MB';
-        if (lastFree) lastFree.textContent = cacheMb + ' MB کش';
-        showToast('کش برنامه پاک شد: ' + cacheMb + ' مگابایت | تغییر واقعی رم آزاد: ' + freedMb + ' مگابایت');
+        // 1.0.3: freedMb اکنون اندازه‌ی واقعی فایل‌های کش پاک‌شده است (نه نوسان availMem)
+        const afterKb = (res.cacheAfterKb !== undefined) ? ' (کش باقی‌مانده: ' + toFaDigits(res.cacheAfterKb) + ' KB)' : '';
+        if (note) note.textContent = 'کش پاک‌شده: ' + toFaDigits(cacheMb) + ' MB — اندازه‌ی واقعی آزادسازی‌شده: ' + toFaDigits(freedMb) + ' MB' + afterKb;
+        if (lastFree) lastFree.textContent = toFaDigits(cacheMb) + ' MB کش';
+        showToast('کش برنامه پاک شد: ' + toFaDigits(cacheMb) + ' مگابایت' + (res.note ? ' • ' + res.note : ''));
       } else {
         if (note) note.textContent = 'عملیات انجام نشد';
         showToast('عملیات آزادسازی انجام نشد ⚠️');
@@ -3097,6 +3670,11 @@
       try { items = JSON.parse(window.Android.getRunningProcesses() || '[]'); } catch(e){ items = []; }
       if (!Array.isArray(items) || !items.length) {
         container.innerHTML = '<div style="text-align:center; padding:18px;"><div style="font-size:1.4rem;">✨</div><div style="font-size:0.78rem; font-weight:700; margin-top:4px;">هیچ پردازش سنگینی یافت نشد</div><p style="font-size:0.68rem;color:var(--text-muted);margin-top:4px;">رم در وضعیت مطلوب است.</p></div>';
+        return;
+      }
+      // 1.0.3: بدون دسترسی «آمار مصرف»، لیست کامل نمایش داده نمی‌شود ⇒ کارت راهنما
+      if (items.length === 1 && items[0].action === 'grant') {
+        renderRamProcsGrant(container, items[0]);
         return;
       }
       // رندر کارت‌های پردازش با آیکون
@@ -3130,6 +3708,13 @@
           }, 80);
         })(it.pkg);
       });
+    }
+    function renderRamProcsGrant(container, g) {
+      container.innerHTML = '<div class="app-card" style="text-align:center; padding:18px;">' +
+        '<div style="font-size:1.5rem;">🔓</div>' +
+        '<div style="font-size:0.8rem; font-weight:700; margin-top:6px;">' + escapeHtml(g.name || 'دسترسی لازم است') + '</div>' +
+        '<p style="font-size:0.66rem; color:var(--text-muted); margin-top:4px; line-height:1.7;">' + escapeHtml(g.note || '') + '</p>' +
+        '<button class="btn-action-secondary" style="margin-top:10px; padding:8px 14px;" onclick="grantUsageAccess()">🔓 اعطای دسترسی آمار مصرف</button></div>';
     }
     function toggleRamProc(pkg, checked) {
       if (checked) ramSelectedPkgs.add(pkg); else ramSelectedPkgs.delete(pkg);
@@ -3354,15 +3939,15 @@
           return suiteAssert(typeof st.mode === 'string' && st.mode.length > 0, st.mode);
         });
       });
-      add('POWER', 'نام نسخه روی 1.0.2 است', function () {
+      add('POWER', 'نام نسخه روی 1.0.3 است', function () {
         const st = nativeMonitorState();
         if (!st || !st.versionName) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionName === '1.0.2', st.versionName);
+        return suiteAssert(st.versionName === '1.0.3', st.versionName);
       });
-      add('POWER', 'کد نسخه روی ۳ است', function () {
+      add('POWER', 'کد نسخه روی ۴ است', function () {
         const st = nativeMonitorState();
         if (!st || st.versionCode === undefined) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionCode === 3, String(st.versionCode));
+        return suiteAssert(st.versionCode === 4, String(st.versionCode));
       });
       add('POWER', 'شمارنده هشدارها عددی و غیرمنفی است', function () {
         const st = nativeMonitorState();
@@ -3376,7 +3961,7 @@
       });
 
       // ---------- ۷. یکپارچگی رابط کاربری ----------
-      const domIds = ['alarmVolumeRange', 'alarmVolumeText', 'autoStopSelect', 'forceSystemVolumeToggle', 'sirenLoopToggle', 'monitoringToggle', 'lowPowerToggle', 'psMode', 'psService', 'psWakeLocks', 'psPolls', 'psAlarmCount', 'psLastAlarm', 'targetPctSelect', 'lowPctSelect', 'overheatSelect', 'cooldownSelect', 'voiceToggle', 'tempAlertToggle', 'lowAlertToggle', 'unplugAlarmToggle', 'vibrateToggle', 'thresholdsCard', 'alertTogglesCard', 'fileItemsContainer', 'coresGridContainer', 'batteryGaugeCircle', 'batteryPercentText', 'headerPctBadge', 'toastMsg', 'liveBatteryStamp', 'alarmVolumeChips', 'ramTotalVal', 'ramAvailVal', 'ownCacheVal', 'lastFreeVal', 'lastFreeNote', 'btnRunTests', 'suiteLogBox', 'suiteProgressBar', 'suiteProgressText', 'suiteTitle', 'cpuCoresText', 'cpuArchText', 'targetAlarmPill', 'overheatAlarmPill', 'lowAlarmPill', 'overheatLabelText', 'lowLabelText'];
+      const domIds = ['alarmVolumeRange', 'alarmVolumeText', 'autoStopSelect', 'forceSystemVolumeToggle', 'sirenLoopToggle', 'monitoringToggle', 'lowPowerToggle', 'psMode', 'psService', 'psWakeLocks', 'psPolls', 'psAlarmCount', 'psLastAlarm', 'targetPctSelect', 'lowPctSelect', 'overheatSelect', 'cooldownSelect', 'voiceToggle', 'tempAlertToggle', 'lowAlertToggle', 'unplugAlarmToggle', 'vibrateToggle', 'thresholdsCard', 'alertTogglesCard', 'fileItemsContainer', 'coresGridContainer', 'batteryGaugeCircle', 'batteryPercentText', 'headerPctBadge', 'toastMsg', 'liveBatteryStamp', 'alarmVolumeChips', 'ramTotalVal', 'ramAvailVal', 'ownCacheVal', 'lastFreeVal', 'lastFreeNote', 'btnRunTests', 'suiteLogBox', 'suiteProgressBar', 'suiteProgressText', 'suiteTitle', 'cpuCoresText', 'cpuArchText', 'targetAlarmPill', 'overheatAlarmPill', 'lowAlarmPill', 'overheatLabelText', 'lowLabelText', 'cpuTempText', 'cpuAvgUsageText', 'cpuFreqText', 'ramDetailText', 'romSourceText', 'fileIntelTip', 'fileIntelStats', 'fileIntelRules', 'lbZoomChip', 'lbZoomBar', 'aiBotTipText', 'aiBannerRules'];
       domIds.forEach(function (id) {
         add('UI', 'عنصر ' + id + ' در رابط کاربری وجود دارد', function () {
           return suiteAssert(!!document.getElementById(id), '#' + id);
@@ -3810,13 +4395,22 @@
         });
         return suiteAssert(ok, 'grantedCount ok for ' + apps.length + ' apps');
       });
-      add('PERMISSION', 'برنامه با 1 مجوز متوسط پرخطر تلقی نمی‌شود', function(){
+      add('PERMISSION', 'برنامه با 1 مجوز فعال حداکثر سطح «پایین» دارد (1.0.3)', function(){
         if (!native) return { skip: true, reason: 'بدون نیتیو' };
         const apps = JSON.parse(window.Android.getRiskyApps()||'[]');
-        // نباید اپی با 1 مجوز غیر critical وجود داشته باشد
-        let bad = apps.filter(function(a){ return !a.dangerLevel || (a.grantedCount===1 && a.dangerLevel==='متوسط'); });
-        // واقعاً نباید اپ تک‌مجوزه flag شود (اصلاح 1.0.2)
-        return suiteAssert(bad.length===0, 'single-perm apps=' + bad.length);
+        // از 1.0.3: اپ تک‌مجوزه نمایش داده می‌شود ولی سطحش باید «پایین» باشد (نه بالاتر)
+        const bad = apps.filter(function(a){ return a.action!=='grant' && a.grantedCount===1 && a.dangerLevel!=='پایین'; });
+        return suiteAssert(bad.length===0, 'bad single-perm=' + bad.length);
+      });
+      add('PERMISSION', 'مجوزهای حافظه/رسانه (STORAGE) در تحلیل حساسیت محاسبه می‌شوند (1.0.3)', function(){
+        if (!native) return { skip: true, reason: 'بدون نیتیو' };
+        const apps = JSON.parse(window.Android.getRiskyApps()||'[]');
+        // هر اپ با STORAGE در grantedPerms باید grantedCount >= 1 و دلیل فارسی داشته باشد
+        const bad = apps.filter(function(a){
+          if (!a.grantedPerms || a.grantedPerms.indexOf('STORAGE')===-1) return false;
+          return !(a.grantedCount>=1 && a.riskReason && a.riskReason.indexOf('حافظه')!==-1);
+        });
+        return suiteAssert(bad.length===0, 'storage-perm consistency ok');
       });
       add('MEDIA', 'گالری رسانه: برچسب فارسی تصویر/ویدیو بدون نام انگلیسی', function(){
         const container = document.getElementById('fileItemsContainer');
@@ -3854,8 +4448,10 @@
       });
       add('RAM', 'هیچ بهینه‌سازی خودکار سنگینی در پس‌زمینه نیست', function(){
         const src = document.documentElement.innerHTML;
+        // 1.0.3: ۳ تایمر واقعی (battery 4s + hardware 4s + tips 30s) + ۲ مورد
+        // رفرنس متنی داخل regexهای همین مجموعه تست که خودشان شمرده می‌شوند
         const heavy = (src.match(/setInterval/g)||[]).length;
-        return suiteAssert(heavy <= 3, 'intervals=' + heavy);
+        return suiteAssert(heavy <= 5, 'intervals=' + heavy);
       });
       add('RAM', 'سبکی اپ: حجم index.html زیر 250KB است', function(){
         const len = document.documentElement.innerHTML.length;
@@ -3880,6 +4476,148 @@
       add('UI', 'دانلود لینک همچنان مخفی است (UI تمیز)', function(){
         const links = Array.prototype.slice.call(document.querySelectorAll('a[href*="releases"], a[href*=".apk"]'));
         return suiteAssert(links.length===0, links.length+' links');
+      });
+
+      // ========== 1.0.3 - تست‌های جامع بخش‌های سخت‌افزار/رسانه/هوش فایل ==========
+      add('HARDWARE', 'getCpuInfo همه کلیدهای موردنیاز را دارد (دما/لود/فرکانس)', function(){
+        const c = sysJson('getCpuInfo');
+        if (!c) return { skip: true, reason: 'بدون SysInfo (پیش‌نمایش وب)' };
+        const ok = (typeof c.avgUsage === 'number') && ('temperature' in c)
+          && (typeof c.maxFreqMHz === 'number') && Array.isArray(c.perCore);
+        return suiteAssert(ok, 'avg=' + c.avgUsage + ' t=' + c.temperature + ' f=' + c.maxFreqMHz);
+      });
+      add('HARDWARE', 'فرکانس maxFreqMHz در بازه فیزیکی معتبر است', function(){
+        const c = sysJson('getCpuInfo');
+        if (!c) return { skip: true, reason: 'بدون SysInfo' };
+        // برخی دستگاه‌ها فرکانس گزارش نمی‌کنند (-1) => SKIP
+        if (c.maxFreqMHz <= 0) return { skip: true, reason: 'این دستگاه فرکانس گزارش نمی‌کند' };
+        return suiteAssert(c.maxFreqMHz >= 200 && c.maxFreqMHz <= 5000, c.maxFreqMHz + ' MHz');
+      });
+      add('HARDWARE', 'دما در بازه فیزیکی معتبر است', function(){
+        const c = sysJson('getCpuInfo');
+        if (!c) return { skip: true, reason: 'بدون SysInfo' };
+        if (c.temperature <= 0) return { skip: true, reason: 'سنسور CPU در دسترس نیست' };
+        return suiteAssert(c.temperature >= 0 && c.temperature <= 100, c.temperature + 'C');
+      });
+      add('HARDWARE', 'applyCpuInfoToDom دما/لود/فرکانس را روی DOM اعمال می‌کند (تست mock)', function(){
+        applyCpuInfoToDom({ model: 'TEST-CPU', cores: 8, abi: 'arm64-v8a', avgUsage: 42,
+          temperature: 41.5, maxFreqMHz: 2400,
+          perCore: [ {core:0, usage:42, curFreq:1800, maxFreq:2400}, {core:1, usage:10, curFreq:1200, maxFreq:1800} ] });
+        const t = (id) => { const el = document.getElementById(id); return el ? el.textContent : ''; };
+        const ok = t('cpuModelText').indexOf('TEST-CPU') !== -1
+          && t('cpuAvgUsageText').indexOf('۴۲') !== -1
+          && t('cpuTempText').indexOf('۴۱') !== -1
+          && t('cpuFreqText').indexOf('۲') !== -1;
+        return suiteAssert(ok, 'model=' + t('cpuModelText') + ' avg=' + t('cpuAvgUsageText') + ' t=' + t('cpuTempText') + ' f=' + t('cpuFreqText'));
+      });
+      add('HARDWARE', 'applyMemInfoToDom و applyStorageInfoToDom بدون خطا (mock)', function(){
+        let ok = true;
+        try {
+          applyMemInfoToDom({ total: 8*1073741824, avail: 4*1073741824, used: 4*1073741824, usedReal: 2*1073741824, usedPct: 50, cached: 2*1073741824, memFree: 1073741824, memAvailable: 4*1073741824, source: 'test' });
+          applyStorageInfoToDom({ total: 128*1073741824, avail: 64*1073741824, used: 64*1073741824, usedPct: 50, source: 'emulated', volumes: [] });
+        } catch (e) { ok = false; }
+        const d = document.getElementById('ramDetailText');
+        return suiteAssert(ok && !!d && d.textContent.indexOf('MemFree') !== -1, 'mock ok');
+      });
+      add('STORAGE', 'getStorageInfo منبع (source) و حجم‌های ثانویه دارد', function(){
+        const st = sysJson('getStorageInfo');
+        if (!st) return { skip: true, reason: 'بدون SysInfo' };
+        const ok = (st.total > 0) && (typeof st.source === 'string' && st.source.length > 0) && Array.isArray(st.volumes);
+        return suiteAssert(ok, 'total=' + st.total + ' source=' + st.source);
+      });
+      add('STORAGE', 'مقدار حافظه با تنظیمات اندروید هم‌مرتب است (بزرگ‌تر از ۱ گیگ)', function(){
+        const st = sysJson('getStorageInfo');
+        if (!st) return { skip: true, reason: 'بدون SysInfo' };
+        if (st.total <= 0) return { skip: true, reason: 'داده در دسترس نیست' };
+        return suiteAssert(st.total > 1073741824, (st.total / 1073741824).toFixed(1) + ' GB');
+      });
+      add('MEDIA', 'mediaProxyUrl آدرس پراکسی معتبر می‌سازد', function(){
+        const u = mediaProxyUrl('content://media/external/video/media/42');
+        const ok = u.indexOf('https://appmedia.local/m?u=') === 0 && u.indexOf(encodeURIComponent('content://media/external/video/media/42')) !== -1;
+        return suiteAssert(ok, u.slice(0, 60));
+      });
+      add('MEDIA', 'videoSrcFor فقط content:// را به پراکسی تبدیل می‌کند', function(){
+        const a = videoSrcFor({ contentUri: 'content://media/external/video/media/1' });
+        const b = videoSrcFor({ path: 'https://example.com/v.mp4' });
+        const ok = a.indexOf('appmedia.local') === 8 && b === 'https://example.com/v.mp4';
+        return suiteAssert(ok, a.slice(0, 40) + ' | ' + b);
+      });
+      add('MEDIA', 'آیکون‌های SVG حرفه‌ای در مجموعه موجودند', function(){
+        const ok = ['play','pause','volume','mute','expand','rewind','forward','film','photo','bulb','shield','scan','layers','broom','cpu','ram','storage'].every(function(n){ return !!(SVG_ICONS && SVG_ICONS[n]); });
+        return suiteAssert(ok, 'icons defined');
+      });
+      add('MEDIA', 'لایت‌باکس زوم: دکمه‌ها/تابع‌ها موجودند و بدون خطا اجرا می‌شوند', function(){
+        let ok = true;
+        try {
+          if (!document.getElementById('lbZoomChip') || !document.getElementById('lbZoomInBtn') || !document.getElementById('lbZoomOutBtn') || !document.getElementById('lbZoomResetBtn')) ok = false;
+          if (typeof lbZoomBy !== 'function' || typeof lbZoomReset !== 'function') ok = false;
+          lbZoomBy(1.4); lbZoomBy(1.4);
+          const chip = document.getElementById('lbZoomChip');
+          const zoomed = chip && chip.textContent.indexOf('۱') === 0 && chip.textContent.indexOf('٪') !== -1 && chip.textContent !== '۱۰۰٪';
+          lbZoomReset();
+          const reset = chip && chip.textContent === '۱۰۰٪';
+          ok = ok && !!zoomed && !!reset;
+        } catch (e) { ok = false; }
+        return suiteAssert(ok, 'zoom works');
+      });
+      add('MEDIA', 'ویدیو پلیر از پراکسی نیتیو استفاده می‌کند (نه content:// مستقیم)', function(){
+        const src = videoSrcFor({ contentUri: 'content://media/external/video/media/7', path: 'content://media/external/video/media/7' });
+        return suiteAssert(src.indexOf('content://') === -1 && src.indexOf('appmedia.local') !== -1, src.slice(0, 50));
+      });
+      add('FILEINTEL', 'پایگاه دانش هوش فایل حداقل ۱۵ قانون واقعی دارد', function(){
+        const rules = fileIntelAllRules();
+        return suiteAssert(rules.length >= 15, rules.length + ' rules');
+      });
+      add('FILEINTEL', 'همه قوانین هوش فایل متن فارسی غیرخالی و بدون نام فایل الکی انگلیسی هستند', function(){
+        let ok = true; let bad = '';
+        fileIntelAllRules().forEach(function(r){
+          if (!r.text || r.text.trim().length < 10) { ok = false; bad = r.rule; }
+          if (/[A-Za-z_]{4,}/.test(r.text.replace(/li-ion|thermal|task|Task|Keylogger|keylogger|Play|Protect|Chrome|GPS|5G|4G|Sync|OLED|LCD|APK|Dark|Theme|Refresh|Widget|Media|Android|Data|Cache|Cache|Location|History|Fast|Charge|trickle|keylogger|GPU|CPU|APK/i, ''))) {
+            // اجازه‌ی کلمات فنی کوتاه داده می‌شود؛ نام فایل الکی مثل IMG_2024 نباید بیاید
+            if (/IMG_|Telegram_|Video_cache|Financial/.test(r.text)) { ok = false; bad = r.rule; }
+          }
+        });
+        return suiteAssert(ok, bad || 'all clean');
+      });
+      add('FILEINTEL', 'نکته‌ی زمینه‌ای هوش فایل با داده‌ی اسکن mock تغییر می‌کند', function(){
+        const saved = JSON.parse(JSON.stringify(fileIntelScan));
+        fileIntelScan.storagePct = 95;
+        const tipHot = fileIntelContextTip();
+        fileIntelScan.storagePct = -1;
+        fileIntelScan.cacheTopName = 'TEST-APP'; fileIntelScan.cacheTotalMb = 2048;
+        const tipCache = fileIntelContextTip();
+        fileIntelScan = saved;
+        const ok = tipHot.indexOf('۹۰') !== -1 && tipCache.indexOf('TEST-APP') !== -1;
+        return suiteAssert(ok, 'context tips reactive');
+      });
+      add('FILEINTEL', 'بنر هوش بات: تعداد قوانین واقعی محاسبه و نمایش داده می‌شود', function(){
+        const n = batteryBotRulesCount();
+        const el = document.getElementById('aiBannerRules');
+        const ok = n >= 40 && !!el && el.textContent.indexOf(toFaDigits(n)) !== -1;
+        return suiteAssert(ok, n + ' rules shown');
+      });
+      add('FILEINTEL', 'buildBatteryAdvice چندسطحی با ورودی‌های مرزی بدون خطا', function(){
+        let ok = true;
+        const cases = [[-1,false,25,85],[0,false,30,85],[5,false,45,85],[20,false,35,85],[50,false,25,85],[85,true,30,85],[99,true,43,85],[100,true,46,85]];
+        cases.forEach(function(c){ try { const r = buildBatteryAdvice(c[0], c[1], c[2], c[3]); if (typeof r !== 'string' || r.length < 5) ok = false; } catch(e){ ok = false; } });
+        return suiteAssert(ok, 'edge cases ok');
+      });
+      add('RAM', 'کارت اعطای دسترسی پردازش‌ها صحیح رندر می‌شود (mock)', function(){
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        let ok = true;
+        try {
+          renderRamProcsGrant(div, { name: 'دسترسی لازم است', note: 'توضیح تست', action: 'grant' });
+          ok = div.innerHTML.indexOf('اعطای دسترسی آمار مصرف') !== -1 && div.innerHTML.indexOf('توضیح تست') !== -1;
+        } catch (e) { ok = false; }
+        div.remove();
+        return suiteAssert(ok, 'grant card ok');
+      });
+      add('RAM', 'freeOwnMemory گزارش واقعی (cacheBefore/AfterKb) برمی‌گرداند', function(){
+        if (!native) return { skip: true, reason: 'بدون نیتیو' };
+        const r = JSON.parse(window.Android.freeOwnMemory());
+        const ok = r && r.ok === true && typeof r.cacheBeforeKb === 'number' && typeof r.cacheAfterKb === 'number' && typeof r.freedKb === 'number';
+        return suiteAssert(!!ok, JSON.stringify(r));
       });
       return tests;
     }
@@ -3978,6 +4716,15 @@
 
       safeInit('volume', initVolumeControl);
       safeInit('polling', startBatteryPolling);
+      safeInit('file-intel', function () { updateFileIntelPanel(); });
+      safeInit('bot-count', function () {
+        const el = document.getElementById('aiBannerRules');
+        if (el) el.textContent = '(' + toFaDigits(batteryBotRulesCount()) + ' قانون دانشی)';
+        const tipEl = document.getElementById('aiBotTipText');
+        if (tipEl) tipEl.textContent = '💡 ' + getBatteryBotTip();
+      });
+      safeInit('lightbox-zoom', initLightboxZoom);
+      safeInit('tips', startTipsTimer);
 
       const hw = document.getElementById('tab-hardware');
       if (hw && hw.style.display !== 'none') safeInit('hw-polling', startHardwarePolling);
