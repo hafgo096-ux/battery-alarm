@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build:
@@ -27,7 +28,26 @@ jobs:
           gradle-version: '8.9'
 
       - name: Build release APK
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          if gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/build.log; then
+            echo "BUILD OK"
+          else
+            {
+              echo "## 🔥 CI build failure (run ${{ github.run_id }})"
+              echo '```'
+              grep -nE "error:|error |FAILURE|Exception|\.java:[0-9]+|What went wrong" -A 3 -B 1 /tmp/build.log | tail -80 || true
+              echo '```'
+              echo "### آخر لاگ"
+              echo '```'
+              tail -50 /tmp/build.log
+              echo '```'
+            } > /tmp/body.md
+            gh issue create --title "CI build log (run ${{ github.run_id }})" --body-file /tmp/body.md || true
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
