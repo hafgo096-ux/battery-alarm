@@ -200,6 +200,8 @@ public class SysInfoBridge {
     }
 
     // ================= RAM =================
+    // باگ‌فیکس ۱.۰.۱ → ۱: availMem شامل reclaimable cache هم هست.
+    // برای نمایش دقیق‌تر، از /proc/meminfo هم مقادیر MemFree و MemAvailable رو می‌خونیم.
     @JavascriptInterface
     public String getMemoryInfo() {
         long now = SystemClock.elapsedRealtime();
@@ -211,9 +213,15 @@ public class SysInfoBridge {
             if (am != null) am.getMemoryInfo(mi);
 
             long total = mi.totalMem;
-            long avail = mi.availMem;
+            long avail = mi.availMem; // شامل reclaimable cache
             long used = Math.max(0, total - avail);
             int usedPct = total > 0 ? (int) Math.round((double) used / total * 100) : -1;
+
+            // خواندن مقادیر دقیق‌تر از /proc/meminfo
+            long memFree = readMeminfoValue("MemFree");
+            long memAvailable = readMeminfoValue("MemAvailable");
+            long cached = readMeminfoValue("Cached");
+            long buffers = readMeminfoValue("Buffers");
 
             o.put("total", total);
             o.put("avail", avail);
@@ -221,8 +229,10 @@ public class SysInfoBridge {
             o.put("usedPct", usedPct);
             o.put("lowMemory", mi.lowMemory);
             o.put("threshold", mi.threshold);
-            o.put("cached", readMeminfoValue("Cached") + readMeminfoValue("Buffers"));
-            o.put("source", "ActivityManager.MemoryInfo");
+            o.put("cached", cached + buffers);
+            o.put("memFree", memFree);
+            o.put("memAvailable", memAvailable > 0 ? memAvailable : avail);
+            o.put("source", "ActivityManager.MemoryInfo + /proc/meminfo");
 
             memCache = o.toString();
             memCacheAt = now;
@@ -246,20 +256,49 @@ public class SysInfoBridge {
     }
 
     // ================= Storage =================
+    // باگ‌فیکس ۱.۰.۱ → ۱: قبلاً فقط Environment.getDataDirectory() استفاده می‌شد
+    // که فقط پارتیشن /data رو نشون می‌داد. الان هم حافظه داخلی و هم فضای خارجی (در صورت وجود)
+    // با استفاده از getExternalFilesDir گزارش داده می‌شود تا آمار دقیق‌تر باشد.
     @JavascriptInterface
     public String getStorageInfo() {
         long now = SystemClock.elapsedRealtime();
         if (storageCache != null && (now - storageCacheAt) < STORAGE_TTL) return storageCache;
         JSONObject o = new JSONObject();
         try {
-            StatFs sf = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-            long total = sf.getTotalBytes();
-            long avail = sf.getAvailableBytes();
+            // فضای اصلی حافظه داخلی (data partition)
+            StatFs sfData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+            long dataTotal = sfData.getTotalBytes();
+            long dataAvail = sfData.getAvailableBytes();
+
+            // فضای حافظه خارجی (اگر وجود دارد و internal emulated است)
+            // در اکثر دستگاه‌ها /sdcard یک symlink به /data/media است
+            // پس معمولاً همان پارتیشن را نشان می‌دهد
+            long total = dataTotal;
+            long avail = dataAvail;
+
+            // بررسی فضای storage خارجی (اگر internal emulated نباشد)
+            try {
+                File extFiles = ctx.getExternalFilesDir(null);
+                if (extFiles != null) {
+                    StatFs sfExt = new StatFs(extFiles.getAbsolutePath());
+                    long extTotal = sfExt.getTotalBytes();
+                    long extAvail = sfExt.getAvailableBytes();
+                    // فقط اگر پارتیشن متفاوتی است (نه emulated internal)
+                    if (extTotal > 0 && Math.abs(extTotal - dataTotal) > 1073741824L) {
+                        // پارتیشن خارجی متفاوت - جمع کن
+                        total = dataTotal + extTotal;
+                        avail = dataAvail + extAvail;
+                    }
+                    // اگر همون پارتیشن است، همان مقادیر dataTotal/dataAvail را استفاده کن
+                }
+            } catch (Exception ignored) {}
+
             long used = Math.max(0, total - avail);
             o.put("total", total);
             o.put("avail", avail);
             o.put("used", used);
             o.put("usedPct", total > 0 ? (int) Math.round((double) used / total * 100) : -1);
+            o.put("source", "StatFs");
             storageCache = o.toString();
             storageCacheAt = now;
         } catch (Exception e) {

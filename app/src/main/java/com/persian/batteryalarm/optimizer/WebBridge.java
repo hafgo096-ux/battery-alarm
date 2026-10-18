@@ -403,6 +403,33 @@ public class WebBridge {
     }
 
     // ================== شناسایی برنامه‌های پرخطر (با کش ۵ دقیقه‌ای) ==================
+    // رفع باگ نسخه ۱.۰.۱: قبلاً فقط requestedPermissions (درخواست manifest) بررسی می‌شد.
+    // در اندروید ۶+ (API 23+) دسترسی‌های خطرناک نیاز به runtime permission دارند.
+    // الان با checkPermission بررسی می‌کنیم که آیا کاربر واقعاً دسترسی داده یا نه.
+
+    private boolean hasGrantedPermission(PackageManager pm, String pkg, String perm) {
+        try {
+            return pm.checkPermission(perm, pkg) == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isRuntimePermission(String perm) {
+        // دسترسی‌هایی که نیاز به تایید صریح کاربر دارند (dangerous permissions)
+        if (perm == null) return false;
+        return perm.contains("SEND_SMS") || perm.contains("READ_SMS") || perm.contains("RECEIVE_SMS")
+                || perm.contains("ACCESS_FINE_LOCATION") || perm.contains("ACCESS_COARSE_LOCATION")
+                || perm.contains("ACCESS_BACKGROUND_LOCATION")
+                || perm.contains("CAMERA")
+                || perm.contains("RECORD_AUDIO")
+                || perm.contains("READ_CONTACTS") || perm.contains("WRITE_CONTACTS")
+                || perm.contains("READ_CALL_LOG") || perm.contains("WRITE_CALL_LOG")
+                || perm.contains("READ_PHONE_STATE") || perm.contains("READ_PHONE_NUMBERS")
+                || perm.contains("READ_EXTERNAL_STORAGE") || perm.contains("WRITE_EXTERNAL_STORAGE")
+                || perm.contains("READ_MEDIA_IMAGES") || perm.contains("READ_MEDIA_VIDEO")
+                || perm.contains("BODY_SENSORS") || perm.contains("ACTIVITY_RECOGNITION");
+    }
 
     @JavascriptInterface
     public String getRiskyApps() {
@@ -421,18 +448,37 @@ public class WebBridge {
                 if (pi.packageName.equals(ctx.getPackageName())) continue;
                 String[] reqPerms = pi.requestedPermissions;
                 if (reqPerms == null) continue;
+
+                // بررسی دسترسی‌هایی که کاربر واقعاً تایید کرده (runtime permission granted)
                 boolean hasSms = false, hasLoc = false, hasCam = false, hasOverlay = false,
                         hasMic = false, hasContacts = false, hasCallLog = false;
+                int grantedCount = 0;
+
                 for (String p : reqPerms) {
                     if (p == null) continue;
+                    boolean granted = false;
+                    // برای دسترسی‌های runtime (dangerous)، بررسی grant واقعی
+                    if (isRuntimePermission(p)) {
+                        granted = hasGrantedPermission(pm, pi.packageName, p);
+                    } else {
+                        // دسترسی‌های normal/dangerous غیر-runtime (مثل SYSTEM_ALERT_WINDOW)
+                        // این‌ها با checkPermission قابل بررسی‌اند
+                        granted = hasGrantedPermission(pm, pi.packageName, p);
+                    }
+
+                    if (!granted) continue; // دسترسی تایید نشده ← نادیده بگیر
+
+                    grantedCount++;
                     if (p.contains("SEND_SMS") || p.contains("READ_SMS") || p.contains("RECEIVE_SMS")) hasSms = true;
-                    if (p.contains("ACCESS_FINE_LOCATION") || p.contains("ACCESS_BACKGROUND_LOCATION")) hasLoc = true;
+                    if (p.contains("ACCESS_FINE_LOCATION") || p.contains("ACCESS_COARSE_LOCATION")
+                            || p.contains("ACCESS_BACKGROUND_LOCATION")) hasLoc = true;
                     if (p.contains("CAMERA")) hasCam = true;
                     if (p.contains("SYSTEM_ALERT_WINDOW")) hasOverlay = true;
                     if (p.contains("RECORD_AUDIO")) hasMic = true;
-                    if (p.contains("READ_CONTACTS")) hasContacts = true;
-                    if (p.contains("READ_CALL_LOG")) hasCallLog = true;
+                    if (p.contains("READ_CONTACTS") || p.contains("WRITE_CONTACTS")) hasContacts = true;
+                    if (p.contains("READ_CALL_LOG") || p.contains("WRITE_CALL_LOG")) hasCallLog = true;
                 }
+
                 int sensitive = 0;
                 if (hasSms) sensitive++;
                 if (hasLoc) sensitive++;
@@ -441,21 +487,25 @@ public class WebBridge {
                 if (hasMic) sensitive++;
                 if (hasContacts) sensitive++;
                 if (hasCallLog) sensitive++;
+
+                // اگر هیچ دسترسی حساسی واقعاً تایید نشده، از لیست حذف کن
+                if (sensitive == 0) continue;
+
                 boolean critical = (hasSms && hasLoc) || (hasOverlay && hasSms)
                         || (hasCam && hasLoc && hasSms);
                 if (!critical && sensitive < 2) continue;
 
                 List<String> parts = new ArrayList<>();
-                if (hasSms) parts.add("پیامک‌ها");
-                if (hasLoc) parts.add("موقعیت مکانی");
-                if (hasCam) parts.add("دوربین");
-                if (hasMic) parts.add("میکروفون");
-                if (hasContacts) parts.add("مخاطبان");
-                if (hasCallLog) parts.add("سوابق تماس");
-                if (hasOverlay) parts.add("پنجره شناور");
-                StringBuilder sb = new StringBuilder("دسترسی همزمان به ");
+                if (hasSms) parts.add("پیامک‌ها ✅تاییدشده");
+                if (hasLoc) parts.add("موقعیت مکانی ✅تاییدشده");
+                if (hasCam) parts.add("دوربین ✅تاییدشده");
+                if (hasMic) parts.add("میکروفون ✅تاییدشده");
+                if (hasContacts) parts.add("مخاطبان ✅تاییدشده");
+                if (hasCallLog) parts.add("سوابق تماس ✅تاییدشده");
+                if (hasOverlay) parts.add("پنجره شناور ✅تاییدشده");
+                StringBuilder sb = new StringBuilder("دسترسی فعال و تاییدشده: ");
                 for (int i = 0; i < parts.size(); i++) {
-                    if (i > 0) sb.append(" و ");
+                    if (i > 0) sb.append("، ");
                     sb.append(parts.get(i));
                 }
                 String reason = sb.toString();
@@ -515,20 +565,50 @@ public class WebBridge {
                 res.put(info);
                 return res.toString();
             }
+
+            // باگ‌فیکس: بررسی دسترسی USAGE_ACCESS قبل از استفاده از StorageStatsManager
+            // اگر کاربر این دسترسی را نداده، پیام راهنما نشان داده می‌شود
+            android.app.AppOpsManager appOps = (android.app.AppOpsManager) ctx.getSystemService(Context.APP_OPS_SERVICE);
+            int mode = android.app.AppOpsManager.MODE_DEFAULT;
+            try {
+                mode = appOps.checkOpNoThrow(
+                        android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        android.os.Process.myUid(), ctx.getPackageName());
+            } catch (Exception e) {
+                Log.w(TAG, "appOps check failed", e);
+            }
+
+            if (mode != android.app.AppOpsManager.MODE_ALLOWED) {
+                JSONObject grant = new JSONObject();
+                grant.put("name", "برای مشاهده کش برنامه‌ها، دسترسی «آمار مصرف» لازم است");
+                grant.put("note", "روی دکمه زیر بزنید، این برنامه را در لیست روشن کنید و برگردید");
+                grant.put("action", "grant");
+                res.put(grant);
+                return res.toString();
+            }
+
             android.app.usage.StorageStatsManager ssm =
                     (android.app.usage.StorageStatsManager) ctx.getSystemService(Context.STORAGE_STATS_SERVICE);
-            if (ssm == null) return res.toString();
+            if (ssm == null) {
+                JSONObject info = new JSONObject();
+                info.put("name", "سرویس آمار حافظه در دسترس نیست");
+                info.put("note", "StorageStatsManager روی این دستگاه پشتیبانی نمی‌شود");
+                info.put("action", "none");
+                res.put(info);
+                return res.toString();
+            }
+
             java.util.UUID uuid = android.os.storage.StorageManager.UUID_DEFAULT;
             PackageManager pm = ctx.getPackageManager();
             List<PackageInfo> pkgs = pm.getInstalledPackages(0);
 
             List<JSONObject> found = new ArrayList<>();
-            boolean blocked = false;
             for (PackageInfo pi : pkgs) {
                 if (pi.packageName.equals(ctx.getPackageName())) continue;
                 try {
                     android.app.usage.StorageStats stats = ssm.queryStatsForPackage(
                             uuid, pi.packageName, android.os.Process.myUserHandle());
+                    if (stats == null) continue;
                     long cache = stats.getCacheBytes();
                     if (cache >= 512L * 1024L) {
                         String label = pi.packageName;
@@ -547,17 +627,15 @@ public class WebBridge {
                         found.add(o);
                     }
                 } catch (SecurityException se) {
-                    blocked = true;
-                    break;
+                    // باگ‌فیکس: SecurityException یعنی دسترسی نداریم → پیام راهنما
+                    Log.w(TAG, "StorageStats SecurityException for " + pi.packageName, se);
+                    JSONObject grant = new JSONObject();
+                    grant.put("name", "دسترسی آمار مصرف لازم است");
+                    grant.put("note", "برای مشاهده کش واقعی برنامه‌ها، دسترسی «آمار مصرف» را فعال کنید");
+                    grant.put("action", "grant");
+                    res.put(grant);
+                    return res.toString();
                 } catch (Exception ignored) {}
-            }
-            if (blocked && found.isEmpty()) {
-                JSONObject grant = new JSONObject();
-                grant.put("name", "برای مشاهده کش برنامه‌ها دسترسی لازم است");
-                grant.put("note", "روی دکمه زیر بزنید، این برنامه را در لیست روشن کنید و برگردید");
-                grant.put("action", "grant");
-                res.put(grant);
-                return res.toString();
             }
             java.util.Collections.sort(found, new java.util.Comparator<JSONObject>() {
                 @Override
@@ -734,25 +812,47 @@ public class WebBridge {
     public String freeOwnMemory() {
         JSONObject res = new JSONObject();
         try {
-            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
-            ActivityManager.MemoryInfo before = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(before);
+            // باگ‌فیکس ۱.۰.۱ → ۱: قبلاً freedBytes از availMem محاسبه می‌شد
+            // که شامل reclaimable cache سیستم بود و عدد نادرست می‌داد.
+            // الان فقط اندازه واقعی فایل‌های کش پاک‌شده گزارش می‌شود.
 
-            long cleared = deleteChildren(ctx.getCacheDir());
+            // اندازه واقعی کش قبل از پاکسازی
+            long cacheBytesBefore = dirSize(ctx.getCacheDir());
             File extCache = ctx.getExternalCacheDir();
-            if (extCache != null) cleared += deleteChildren(extCache);
-            try { Runtime.getRuntime().gc(); } catch (Exception ignored) {}
-            SystemClock.sleep(300);
+            if (extCache != null) cacheBytesBefore += dirSize(extCache);
 
-            ActivityManager.MemoryInfo after = new ActivityManager.MemoryInfo();
-            if (am != null) am.getMemoryInfo(after);
-            long freedBytes = after.availMem - before.availMem;
+            // پاکسازی واقعی فایل‌های کش
+            long cleared = deleteChildren(ctx.getCacheDir());
+            if (extCache != null) cleared += deleteChildren(extCache);
+
+            // gc برای آزادسازی حافظه JVM
+            try { Runtime.getRuntime().gc(); } catch (Exception ignored) {}
+            SystemClock.sleep(200);
+
+            // اندازه واقعی کش بعد از پاکسازی (باید صفر یا نزدیک صفر باشد)
+            long cacheBytesAfter = dirSize(ctx.getCacheDir());
+            if (extCache != null) cacheBytesAfter += dirSize(extCache);
+
+            // محاسبه رم آزاد واقعی سیستم (فقط جهت اطلاعات)
+            ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+            if (am != null) am.getMemoryInfo(memInfo);
+
+            // freedBytes = تفاوت واقعی فایل‌های پاک‌شده (نه availMem)
+            long actualFreed = cacheBytesBefore - cacheBytesAfter;
+            if (actualFreed < 0) actualFreed = 0;
 
             res.put("ok", true);
-            res.put("freedMb", Math.round(freedBytes / 1048576.0));
+            res.put("freedMb", Math.round(actualFreed / 1048576.0));
+            res.put("freedKb", Math.round(actualFreed / 1024.0));
             res.put("cacheClearedMb", Math.round(cleared / 1048576.0));
             res.put("cacheClearedKb", Math.round(cleared / 1024.0));
-            res.put("availAfterMb", Math.round(after.availMem / 1048576.0));
+            res.put("cacheBeforeKb", Math.round(cacheBytesBefore / 1024.0));
+            res.put("cacheAfterKb", Math.round(cacheBytesAfter / 1024.0));
+            res.put("availAfterMb", Math.round(memInfo.availMem / 1048576.0));
+            res.put("note", cleared > 0
+                    ? "کش با موفقیت پاک شد"
+                    : "کش قبلاً خالی بوده یا قابل پاکسازی نبود");
         } catch (Exception e) {
             Log.w(TAG, "freeOwnMemory failed", e);
             try { res.put("ok", false); } catch (Exception ignored) {}

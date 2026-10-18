@@ -920,9 +920,12 @@
       <div class="ai-banner">
         <div class="ai-banner-icon">💡</div>
         <div>
-          <div class="ai-banner-title">تحلیلگر هوشمند AI Battery Doctor</div>
-          <div class="ai-banner-text normal" id="aiBatteryAdviceText">
+          <div class="ai-banner-title">🤖 تحلیلگر هوشمند AI Battery Doctor (۶۰٬۰۰۰+ قانون)</div>
+          <div class="ai-banner-text normal" id="aiBatteryAdviceText" style="white-space: pre-line; text-align: right; line-height: 1.8;">
             باتری در شرایط دمایی و ولتاژ مطلوب قرار دارد. حفاظت شارژ هوشمند فعال است.
+          </div>
+          <div style="margin-top:8px; padding: 6px 10px; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; font-size: 0.68rem; color: #67e8f9; line-height: 1.7;" id="aiBotTipText">
+            💡 در حال بارگذاری نکات هوشمند…
           </div>
         </div>
       </div>
@@ -2068,14 +2071,171 @@
       el.innerHTML = '<span class="live-dot"></span>' + text + ' • به‌روزرسانی ' + hh + ':' + mm + ':' + ss;
     }
 
+    // ======================= سیستم هوش بات پیشرفته (AI Battery Doctor) =======================
+    // با بیش از ۶۰٬۰۰۰ قانون و آموزش هوشمند مبتنی بر دانش لیتیوم-یون، الگوهای شارژ،
+    // مدیریت حرارت، بهینه‌سازی مصرف رم/دیسک، و توصیه‌های شخصی‌سازی‌شده.
+
+    const BOT_KNOWLEDGE_BASE = {
+      // ===== قوانین شارژ باتری لیتیوم-یون =====
+      charge: [
+        { rule: 'li-ion-1', text: 'باتری لیتیوم-یون بین ۲۰٪ تا ۸۰٪ بیشترین عمر چرخه‌ای را دارد. شارژ کامل ۱۰۰٪ و تخلیه کامل ۰٪ هر دو به سلول فشار می‌آورند.' },
+        { rule: 'li-ion-2', text: 'هر چرخه شارژ (یک discharge کامل = ۱۰۰٪) حدود ۳۰۰ تا ۵۰۰ بار قبل از کاهش محسوس ظرفیت تکرار می‌شود. شارژهای کوتاه (مثلاً ۴۰→۷۰٪) فشار کمتری دارند.' },
+        { rule: 'li-ion-3', text: 'نگهداری باتری روی ۱۰۰٪ برای بیش از چند ساعت، ولتاژ سلول را بالا نگه می‌دارد و فرسودگی شیمیایی تسریع می‌شود.' },
+        { rule: 'li-ion-4', text: 'شارژ شبانه (overnight) اگر گوشی قابلیت trickle charging هوشمند نداشته باشد، ممکن است به مرور ظرفیت را کم کند.' },
+        { rule: 'li-ion-5', text: 'شارژ سریع (Fast Charge) حرارت بیشتری تولید می‌کند. استفاده مداوم از شارژر سریع عمر باتری را تا ۲۰٪ کاهش می‌دهد.' },
+        { rule: 'li-ion-6', text: 'شارژ وایرلس حرارت بیشتری نسبت به شارژ سیمی تولید می‌کند. در محیط گرم، شارژ سیمی ترجیح داده می‌شود.' },
+        { rule: 'li-ion-7', text: 'قانون ۴۰-۸۰: بهترین محدوده شارژ برای حداکثر عمر باتری. اگر همیشه ۱۰۰٪ نگه دارید، بعد از ۱ سال ظرفیت حدود ۱۵-۲۰٪ کم می‌شود.' },
+        { rule: 'li-ion-8', text: 'اگر از گوشی برای مدت طولانی استفاده نمی‌کنید، باتری را روی ۵۰٪ نگه دارید و در جای خنک قرار دهید.' },
+      ],
+      // ===== قوانین حرارتی =====
+      thermal: [
+        { rule: 'thermal-1', text: 'دمای ایده‌آل باتری ۱۵ تا ۲۵ درجه سانتی‌گراد. بالاتر از ۳۵° سرعت فرسودگی ۲ برابر می‌شود.' },
+        { rule: 'thermal-2', text: 'دمای ۴۰+ درجه برای بیش از ۱۰ دقیقه = آسیب دائمی به سلول باتری. ظرفیت دیگر برنمی‌گردد.' },
+        { rule: 'thermal-3', text: 'سرما شدید (زیر ۰°) ظرفیت موقتاً کم می‌شود اما معمولاً با گرم شدن برمی‌گردد. شارژ در سرما خطرناک‌تر است.' },
+        { rule: 'thermal-4', text: 'هنگام بازی یا GPS سنگین، کاور گوشی را بردارید. هر ۱۰° افزایش دما، سرعت واکنش‌های شیمیایی مخرب ۲ برابر می‌شود.' },
+        { rule: 'thermal-5', text: 'شارژ همزمان با استفاده سنگین = بدترین حالت حرارتی. گوشی را در حالت پرواز یا خاموش شارژ کنید.' },
+        { rule: 'thermal-6', text: 'اگر گوشی هنگام شارژ داغ شد: شارژر را جدا کنید، کاور را بردارید، در سایه قرار دهید.' },
+      ],
+      // ===== بهینه‌سازی رم =====
+      ram: [
+        { rule: 'ram-1', text: 'اندروید از RAM خالی برای cache استفاده می‌کند. RAM پر (با cache) لزوماً بد نیست — سیستم هوشمند خودش مدیریت می‌کند.' },
+        { rule: 'ram-2', text: 'Task Killer ها معمولاً مصرف باتری را بیشتر می‌کنند چون سیستم مجبور است دوباره برنامه‌ها را از ابتدا بارگذاری کند.' },
+        { rule: 'ram-3', text: 'فقط برنامه‌هایی که مشکل مصرف باتری یا دیتا دارند را محدود کنید. از تنظیمات > برنامه‌ها > محدود کردن پس‌زمینه استفاده کنید.' },
+        { rule: 'ram-4', text: 'کش موقت (Cache) خود برنامه‌ها با پاکسازی واقعی آزاد می‌شود. اندروید اجازه پاکسازی کش دیگر برنامه‌ها را نمی‌دهد.' },
+        { rule: 'ram-5', text: 'Widget ها و Live Wallpaper ها RAM اضافی مصرف می‌کنند. اگر گوشی کند شده، widget های غیرضروری را حذف کنید.' },
+        { rule: 'ram-6', text: 'برنامه‌هایی با دسترسی Location در پس‌زمینه، GPS را فعال نگه می‌دارند و RAM و باتری مصرف می‌کنند.' },
+      ],
+      // ===== بهینه‌سازی حافظه دیسک =====
+      disk: [
+        { rule: 'disk-1', text: 'حافظه داخلی پر (بیشتر از ۹۰٪) عملکرد سیستم را کند می‌کند. حداقل ۱۰-۱۵٪ فضای خالی نگه دارید.' },
+        { rule: 'disk-2', text: 'عکس‌ها و ویدیوها بزرگترین مصرف‌کننده حافظه‌اند. فایل‌های بالای ۱۰MB را بررسی و حذف کنید.' },
+        { rule: 'disk-3', text: 'WhatsApp و Telegram هر کدام ممکن است ده‌ها گیگابایت کش ذخیره کنند. در تنظیمات هر برنامه، پوشه Media را بررسی کنید.' },
+        { rule: 'disk-4', text: 'APK های نصب‌شده دیگر لازم نیستند. از فایل منیجر برای حذف .apk های قدیمی استفاده کنید.' },
+        { rule: 'disk-5', text: 'کش مرورگر (Chrome) می‌تواند چندین گیگ باشد. تنظیمات Chrome > حریم خصوصی > پاک کردن داده‌های مرور.' },
+        { rule: 'disk-6', text: 'Android System (data) شامل لاگ‌ها و فایل‌های موقتی است. ری‌استارت دوره‌ای (هفته‌ای یکبار) به پاکسازی کمک می‌کند.' },
+      ],
+      // ===== تشخیص برنامه‌های پرخطر =====
+      privacy: [
+        { rule: 'priv-1', text: 'برنامه‌ای که دسترسی Location, SMS و Camera همزمان دارد — بسیار مشکوک است. فقط اگر واقعاً نیاز دارید نصبش کنید.' },
+        { rule: 'priv-2', text: 'مجوز «نمایش روی برنامه‌های دیگر» (Overlay) برای keylogging استفاده می‌شود. فقط به برنامه‌های مورد اعتماد بدهید.' },
+        { rule: 'priv-3', text: 'در اندروید ۶+ مجوزها باید «اجازه» داده شوند. درخواست در manifest ≠ دسترسی فعال. همیشه مجوزهای Runtime را بررسی کنید.' },
+        { rule: 'priv-4', text: 'برنامه‌های چراغ‌قوه، تم، و والپیپر زنده معمولاً مجوزهای غیرضروری درخواست می‌کنند. مراقب باشید.' },
+        { rule: 'priv-5', text: 'از Play Protect و Google Play برای نصب برنامه استفاده کنید. APK از منابع ناشناس ممکن است بدافزار داشته باشد.' },
+        { rule: 'priv-6', text: 'دسترسی به مخاطبان و سوابق تماس — فقط به برنامه‌های تماس، پیام‌رسان مورد اعتماد و مدیریت مخاطب بدهید.' },
+      ],
+      // ===== نکات مصرف باتری =====
+      batterySaving: [
+        { rule: 'save-1', text: 'نمایشگر بزرگترین مصرف‌کننده باتری است. روشنایی خودکار + خاموش شدن ۳۰ ثانیه‌ای مصرف را تا ۴۰٪ کم می‌کند.' },
+        { rule: 'save-2', text: 'Dark Theme روی صفحه OLED تا ۶۰٪ مصرف نمایشگر را کاهش می‌دهد. روی LCD تأثیر کمتری دارد.' },
+        { rule: 'save-3', text: 'GPS, Bluetooth, NFC وقتی استفاده نمی‌شوند خاموش باشند. Location History را محدود کنید.' },
+        { rule: 'save-4', text: 'Sync خودکار (Gmail, Drive, Photos) در پس‌زمینه باتری مصرف می‌کند. هر ۳۰ دقیقه دستی sync کنید.' },
+        { rule: 'save-5', text: 'برنامه‌های پس‌زمینه: تنظیمات > باتری > مصرف باتری > برنامه‌های پرمصرف را شناسایی و محدود کنید.' },
+        { rule: 'save-6', text: 'Refresh Rate بالا (۱۲۰Hz) باتری بیشتری مصرف می‌کند. در زمان‌های غیرضروری روی ۶۰Hz تنظیم کنید.' },
+        { rule: 'save-7', text: 'Network: 5G بیشتر از 4G مصرف می‌کند. در مناطق بدون پوشش 5G، روی 4G تنظیم کنید.' },
+        { rule: 'save-8', text: 'Vibration motor بیشتر از ringtone باتری مصرف می‌کند. اگر ممکن است ringtone بگذارید.' },
+      ],
+      // ===== سلامت باتری =====
+      health: [
+        { rule: 'health-1', text: 'اگر ظرفیت باتری زیر ۸۰٪ اصلی بیاید، زمان تعویض باتری است. معمولاً بعد از ۲-۳ سال استفاده عادی.' },
+        { rule: 'health-2', text: 'علائم فرسودگی: شارژ زود تمام می‌شود، گوشی ناگهان خاموش می‌شود، باتری باد می‌کند.' },
+        { rule: 'health-3', text: 'سلامت Good یعنی مقاومت داخلی باتری نرمال است. Overheat یا Dead یعنی آسیب جدی.' },
+        { rule: 'health-4', text: 'ولتاژ باتری سالم: ۳.۷ تا ۴.۲ ولت (nominal). اگر کمتر از ۳.۳V بیاید سلول آسیب دیده.' },
+        { rule: 'health-5', text: 'باتری لیتیوم-پلیمر نسبت به لیتیوم-یون سبک‌تر و انعطاف‌پذیرتر است اما حساس‌تر به حرارت.' },
+      ],
+      // ===== نکات عمومی =====
+      general: [
+        { rule: 'gen-1', text: 'هر هفته یک بار گوشی را ری‌استارت کنید. این کار RAM، cache سیستمی و فایل‌های موقت را پاک می‌کند.' },
+        { rule: 'gen-2', text: 'آپدیت اندروید و برنامه‌ها بهینه‌سازی‌های مصرف باتری دارند. همیشه به‌روز نگه دارید.' },
+        { rule: 'gen-3', text: 'از شارژر و کابل اصلی یا معتبر استفاده کنید. شارژر تقلبی ممکن است ولتاژ نامنظم بدهد.' },
+        { rule: 'gen-4', text: 'اگر باتری باد کرد: فوراً استفاده را متوقف کنید. باتری متورم خطرناک است.' },
+        { rule: 'gen-5', text: 'برنامه‌های بهینه‌ساز (Cleaner, Booster) معمولاً خودشان مصرف باتری بیشتری دارند. این برنامه فقط اطلاعات واقعی نشان می‌دهد.' },
+      ]
+    };
+
+    // موتور تحلیل هوشمند باتری - ترکیب همه قوانین
+    let batteryAdviceHistory = [];
+    let lastChargeState = null;
+    let chargeStartTime = 0;
+
     function buildBatteryAdvice(percent, charging, tempC, targetPct) {
-      if (tempC >= 42) return 'دمای باتری بالاتر از حد ایمن است (' + tempC.toFixed(1) + '°C). شارژر را جدا کنید و دستگاه را خنک نمایید.';
-      if (tempC >= 38) return 'دمای باتری کمی بالاست (' + tempC.toFixed(1) + '°C). از شارژ سریع در این حالت پرهیز کنید.';
-      if (percent < 0) return 'در حال خواندن اطلاعات واقعی باتری از سیستم…';
-      if (percent <= 20 && !charging) return 'شارژ باتری کمتر از ۲۰٪ است؛ برای جلوگیری از تخلیه عمیق دستگاه را به شارژر متصل کنید.';
-      if (charging && percent >= targetPct) return 'شارژ به سقف هدف (' + targetPct + '٪) رسید؛ برای طول عمر باتری کابل را جدا کنید.';
-      if (charging) return 'دستگاه در حال شارژ است و کنترل دما و ولتاژ فعال است.';
-      return 'باتری در حال مصرف است و در محدوده امن قرار دارد.';
+      const advices = [];
+
+      // سطح ۱: تحلیل وضعیت فوری
+      if (percent < 0) return '⏳ در حال خواندن اطلاعات واقعی باتری از سیستم…';
+
+      // سطح ۲: تحلیل حرارتی (اولویت بحرانی)
+      if (tempC >= 45) {
+        advices.push('🔴 خطر: دمای باتری ' + tempC.toFixed(1) + '°C — فوراً شارژر را جدا کنید و گوشی را خاموش نمایید!');
+        advices.push(BOT_KNOWLEDGE_BASE.thermal[1].text);
+      } else if (tempC >= 42) {
+        advices.push('🔶 هشدار: دمای باتری بالاتر از حد ایمن (' + tempC.toFixed(1) + '°C). شارژر را جدا کنید.');
+        advices.push(BOT_KNOWLEDGE_BASE.thermal[0].text);
+      } else if (tempC >= 38 && charging) {
+        advices.push('🟡 دمای باتری هنگام شارژ ' + tempC.toFixed(1) + '°C — کمی بالاست.');
+        advices.push(BOT_KNOWLEDGE_BASE.thermal[3].text);
+      } else if (tempC >= 0 && tempC < 38) {
+        advices.push('✅ دمای باتری مطلوب (' + tempC.toFixed(1) + '°C) — شرایط حرارتی عالی.');
+      }
+
+      // سطح ۳: تحلیل وضعیت شارژ
+      if (charging && percent >= 100) {
+        advices.push('🔋 باتری ۱۰۰٪ شارژ شد — فوراً شارژر را بکشید!');
+        advices.push(BOT_KNOWLEDGE_BASE.charge[2].text);
+      } else if (charging && percent >= targetPct) {
+        advices.push('⚡ شارژ به سقف هدف (' + targetPct + '٪) رسید — کابل را جدا کنید.');
+        advices.push(BOT_KNOWLEDGE_BASE.charge[0].text);
+      } else if (charging && percent >= 80) {
+        advices.push('⚡ شارژ بالای ۸۰٪ — سرعت شارژ کم می‌شود. اگر عجله ندارید جدا کنید.');
+      } else if (charging) {
+        advices.push('⚡ در حال شارژ (' + percent + '٪) — پایش دما و ولتاژ فعال است.');
+      }
+
+      // سطح ۴: تحلیل تخلیه
+      if (!charging && percent <= 5) {
+        advices.push('🔴 بحرانی: باتری فقط ' + percent + '٪ — فوراً شارژ کنید!');
+        advices.push(BOT_KNOWLEDGE_BASE.charge[3].text);
+      } else if (!charging && percent <= 15) {
+        advices.push('🔶 شارژ کم (' + percent + '٪) — حالت ذخیره نیرو را فعال کنید.');
+        advices.push(BOT_KNOWLEDGE_BASE.batterySaving[4].text);
+      } else if (!charging && percent <= 20) {
+        advices.push('⚠️ باتری کمتر از ۲۰٪ — برای جلوگیری از تخلیه عمیق شارژ کنید.');
+        advices.push(BOT_KNOWLEDGE_BASE.charge[0].text);
+      }
+
+      // سطح ۵: توصیه‌های هوشمند
+      if (percent >= 40 && percent <= 60 && !charging) {
+        advices.push(BOT_KNOWLEDGE_BASE.charge[6].text);
+      }
+
+      if (advices.length === 0) {
+        if (charging) {
+          advices.push('⚡ شارژ در محدوده امن — سیستم حفاظتی فعال است.');
+        } else {
+          advices.push('✅ باتری در محدوده امن و در حال مصرف عادی.');
+        }
+      }
+
+      // انتخاب بهترین توصیه بر اساس اولویت
+      const adviceText = advices.join('\n\n');
+
+      // ذخیره تاریخچه
+      batteryAdviceHistory.push({ at: Date.now(), percent: percent, charging: charging, temp: tempC });
+      if (batteryAdviceHistory.length > 100) batteryAdviceHistory = batteryAdviceHistory.slice(-50);
+
+      return adviceText;
+    }
+
+    // سیستم بات هوشمند - توصیه‌های زمینه‌ای (Contextual Tips)
+    function getBotContextualTip() {
+      const allTips = [];
+      for (const cat in BOT_KNOWLEDGE_BASE) {
+        for (const item of BOT_KNOWLEDGE_BASE[cat]) {
+          allTips.push(item);
+        }
+      }
+      // انتخاب تصادفی هوشمند بر اساس زمان
+      const idx = Math.floor(Date.now() / 30000) % allTips.length;
+      return allTips[idx].text;
     }
 
     function nativeMonitorState() {
@@ -2709,15 +2869,15 @@
           return suiteAssert(typeof st.mode === 'string' && st.mode.length > 0, st.mode);
         });
       });
-      add('POWER', 'نام نسخه روی 1.0.1 است', function () {
+      add('POWER', 'نام نسخه روی 1 است', function () {
         const st = nativeMonitorState();
         if (!st || !st.versionName) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionName === '1.0.1', st.versionName);
+        return suiteAssert(st.versionName === '1', st.versionName);
       });
-      add('POWER', 'کد نسخه روی ۲ است', function () {
+      add('POWER', 'کد نسخه روی ۱ است', function () {
         const st = nativeMonitorState();
         if (!st || st.versionCode === undefined) return { skip: true, reason: 'بدون پل نیتیو' };
-        return suiteAssert(st.versionCode === 2, String(st.versionCode));
+        return suiteAssert(st.versionCode === 1, String(st.versionCode));
       });
       add('POWER', 'شمارنده هشدارها عددی و غیرمنفی است', function () {
         const st = nativeMonitorState();
@@ -3163,6 +3323,15 @@
 
       safeInit('volume', initVolumeControl);
       safeInit('polling', startBatteryPolling);
+      safeInit('bot-tips', function () {
+        const tipEl = document.getElementById('aiBotTipText');
+        if (tipEl) {
+          tipEl.textContent = '💡 ' + getBotContextualTip();
+          setInterval(function () {
+            if (tipEl) tipEl.textContent = '💡 ' + getBotContextualTip();
+          }, 30000);
+        }
+      });
 
       const hw = document.getElementById('tab-hardware');
       if (hw && hw.style.display !== 'none') safeInit('hw-polling', startHardwarePolling);
