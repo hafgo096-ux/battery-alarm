@@ -121,16 +121,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
-          NUMS=$(gh issue list --state open --json number,title -q '.[] | select(.title | startswith("CI build log")) | .number')
+          NUMS=$(gh issue list --state open --json number,title -q '.[] | select((.title | startswith("CI build log")) or (.title | startswith("cleanup-failed"))) | .number')
           echo "found: [$NUMS]"
-          ERRLOG=/tmp/close_err.log
-          : > "$ERRLOG"
           for n in $NUMS; do
-            gh issue close "$n" --reason completed > "$ERRLOG" 2>&1
-            echo "close $n exit=$?"
-            if [ -s "$ERRLOG" ]; then
-              { echo "close issue $n failed:"; echo '```'; cat "$ERRLOG"; echo '```'; } > /tmp/body.md
+            if gh issue close "$n" --reason completed > /tmp/close_out.log 2>&1; then
+              echo "closed $n ✓"
+            else
+              { echo "close issue $n failed:"; echo '```'; cat /tmp/close_out.log; echo '```'; } > /tmp/body.md
               gh issue create --title "cleanup-failed (run ${{ github.run_id }})" --body-file /tmp/body.md || true
-              : > "$ERRLOG"
             fi
           done
