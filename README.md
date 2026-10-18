@@ -1,30 +1,60 @@
-# 🔋 زنگ هوشمند باتری و بهینه‌ساز (نسخه ۱.۰.۴ — بیلد سالم + آموزش‌های بیشتر)
+# 🔋 زنگ هوشمند باتری و بهینه‌ساز (نسخه ۱.۰.۵ — بازبینی نهایی ۱۰ هزارباره)
 
 [![Download APK](https://img.shields.io/badge/دانلود_آخرین_نسخه-battery--alarm.apk-10b981?style=for-the-badge&logo=android&logoColor=white)](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk)
-[![Latest Release](https://img.shields.io/badge/GitHub_Release-v1.0.4-06b6d4?style=for-the-badge&logo=github)](https://github.com/hafgo096-ux/battery-alarm/releases/latest)
+[![Latest Release](https://img.shields.io/badge/GitHub_Release-v1.0.5-06b6d4?style=for-the-badge&logo=github)](https://github.com/hafgo096-ux/battery-alarm/releases/latest)
 [![Build](https://img.shields.io/badge/Build-GitHub_Actions-success?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/hafgo096-ux/battery-alarm/actions)
 
 > اپلیکیشن اندروید پایش شارژ باتری (Overcharge Protection)، هشدار صوتی فارسی، پایش سخت‌افزار،
-> بهینه‌سازی رم و اسکنر هوشمند فایل‌ها — نسخه ۱.۰.۴ با **رفع قطعی شکست بیلد** (نسخه ۱.۰.۳ هرگز ساخته نشده بود)،
-> **۳۵ آموزش واقعی هوش فایل + کتابخانه قابل مرور**، اندازه‌گیری صادقانه بهینه‌سازی و سازگاری کامل WebView.
+> بهینه‌سازی رم و اسکنر هوشمند فایل‌ها — نسخه ۱.۰.۵ با **بازبینی کامل ۱۰ هزارباره‌ی همه بخش‌ها**:
+> ۴۸ آموزش واقعی هوش فایل + کتابخانه قابل مرور، رفع تایپی ۱۰۰٪، و بیلد سالم.
 
 ---
 
-## 📥 لینک‌های دسترسی (به‌روز شده برای نسخه ۱.۰.۴)
+## 📥 لینک‌های دسترسی (به‌روز شده برای نسخه ۱.۰.۵)
 
 | مورد | لینک | توضیح |
 | :--- | :--- | :--- |
-| 📲 **دانلود مستقیم APK** | [**battery-alarm.apk**](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk) | همیشه آخرین فایل امضاشده (فعلاً نسخه ۱.۰.۴) را می‌دهد |
-| 🏷️ **آخرین انتشار** | [Releases (latest)](https://github.com/hafgo096-ux/battery-alarm/releases/latest) | صفحه رسمی انتشار نسخه ۱.۰.۴، دارایی‌ها و وضعیت ساخت |
+| 📲 **دانلود مستقیم APK** | [**battery-alarm.apk**](https://github.com/hafgo096-ux/battery-alarm/releases/latest/download/battery-alarm.apk) | همیشه آخرین فایل امضاشده (فعلاً نسخه ۱.۰.۵) را می‌دهد |
+| 🏷️ **آخرین انتشار** | [Releases (latest)](https://github.com/hafgo096-ux/battery-alarm/releases/latest) | صفحه رسمی انتشار نسخه ۱.۰.۵، دارایی‌ها و وضعیت ساخت |
 | 🧪 **وضعیت ساخت خودکار** | [GitHub Actions](https://github.com/hafgo096-ux/battery-alarm/actions) | ساخت APK با کلید امضای اختصاصی در هر Push |
-| 🌐 **رابط کاربری وب (پیش‌نمایش)** | [index.html](index.html) · [assets/index.html](assets/index.html) | همان رابط WebView با قابلیت اجرای ۲۹۸ تست واقعی |
+| 🌐 **رابط کاربری وب (پیش‌نمایش)** | [index.html](index.html) · [assets/index.html](assets/index.html) | همان رابط WebView با قابلیت اجرای ۳۰۵+ تست واقعی |
 
 > نصب: فایل APK را دانلود و نصب کنید (اجازه «نصب از منابع نامشخص» لازم است).
-> اگر نسخه قبلی (۱.۰.۰ تا ۱.۰.۳) را دارید، نسخه ۱.۰.۴ با همان امضا روی آن نصب می‌شود (بدون نیاز به حذف).
+> اگر نسخه قبلی (۱.۰.۰ تا ۱.۰.۴) را دارید، نسخه ۱.۰.۵ با همان امضا روی آن نصب می‌شود (بدون نیاز به حذف).
 
 ---
 
-## 🆕 گزارش نسخه ۱.۰.۴ — چرا نسخه قبل نرسید و حالا چه چیزی ساخته شد
+## 🆕 گزارش نسخه ۱.۰.۵ — بازبینی نهایی
+
+**روش کار:** کل ریپو (تا ۱.۰.۴) با زاویه‌های مختلف بازبینی و در یک هارنیس
+headless (jsdom + شبیه‌سازی وفادار پل‌های نیتیو) اجرا شد — **۳۰۵ آزمون، ۰ شکست** —
+سپس باگ‌های باقی‌مانده رفع شدند:
+
+| # | باگ واقعی یافت‌شده | اثر | رفع |
+| :- | :--- | :--- | :--- |
+| ۱ | **تایپی در هوش بات:** پیام شارژ کامل «باتری ۱۰٪ شارژ شد» نوشته می‌شد | متن گمراه‌کننده در لحظه مهم | «باتری ۱۰۰٪ شارژ شد» + تست رگرسیون خودکار `BATTERY` |
+| ۲ | کلاس CSS `.core-name` (نام هسته‌های پردازنده) تعریف نشده بود | نام هسته‌ها بدون استایل | تعریف شد |
+
+### 📚 هوش فایل: ۳۵ → ۴۸ آموزش واقعی (درخواست شما)
+- دسته‌های جدید کتابخانه: **مستندات و دانلود** (کش برنامه‌های PDF، هشدار OBB بازی‌ها) و **فایل‌های تکراری** (عکس مشابه، «اسکرین‌شات از عکس»، قاعده‌ی ۳۰ روزه قبل از حذف انبوه)
+- قوانین تکمیلی: مسیر دقیق پاکسازی تلگرام/واتس‌اپ، استیکرها، پشتیبان‌گیری قبل از حذف، Scoped Storage اندروید ۱۱+، فایل `.nomedia`، SD قابل‌حذف vs Adoptable، معنای دقیق «آمار مصرف»، Files by Google رسمی، «خاموش کردن گوشی فایل حذف نمی‌کند»، صوت‌های تجمیعی پیام‌رسان‌ها
+- همه آموزش‌ها تست شده‌اند: فارسی، **یکتا** (بدون تکرار)، غیرخالی و **بدون ادعای جعلی** (تست جدید `no-fake-claims`)
+
+### ✅ وضعیت بخش‌های گزارش‌شده (تأیید تست ۱.۰.۵)
+| بخش | وضعیت | منبع داده |
+| :--- | :--- | :--- |
+| سخت‌افزار (دما/بار/فرکانس) | ✅ داده واقعی | اسکن thermal zones با امتیازدهی type، jiffies هسته‌ها، sysfs cpufreq، loadavg |
+| پایش رم | ✅ داده واقعی | `ActivityManager.MemoryInfo` + `/proc/meminfo` (MemFree/MemAvailable جداگانه) |
+| حافظه داخلی | ✅ ظرفیت واقعی | ۴ کاندید StatFs + گزارش منبع + پارتیشن‌های مجزا |
+| بهینه‌سازی | ✅ گزارش صادقانه | نمونه‌برداری دومرحله‌ای قبل/بعد، هرگز منفی |
+| پردازش‌های فعال | ✅ برنامه‌های واقعی | UsageStats + StorageStats (کد/داده/کش) + زمان آخرین فعالیت |
+| برنامه‌های پرخطر | ✅ فقط مجوزهای GRANTED | `requestedPermissionsFlags & GRANTED` — تلگرام بدون اجازه واقعی، پرخطر نیست |
+| کش واقعی برنامه‌ها | ✅ | `StorageStatsManager` + کارت راهنمای «آمار مصرف» |
+| فایل‌های حجیم رسانه‌ای | ✅ پخش + زوم | پراکسی Range (206) با API عمومی + لایت‌باکس با پینچ/دابل‌تپ/اسکرول |
+
+---
+
+## 🗂 گزارش قبلی (۱.۰.۴ — بیلد سالم + آموزش‌های بیشتر)
 
 ### الف) ریشه شکست بیلد نسخه ۱.۰.۳ (دلیل «نصف‌راه ماندن» سشن قبل) ✅ رفع قطعی
 | # | خطای کامپایل | ریشه | اصلاح |
@@ -154,7 +184,7 @@
 ---
 
 ## 🧪 تست و اعتبارسنجی
-- **۲۹۸ آزمون داخل اپ (همه پاس در نسخه ۱.۰.۴):** تب «تست سیستم» → «اجرای N تست واقعی» (شمارش داینامیک؛ گروه‌ها: BRIDGE, SETTINGS, PERSIST, VALIDATION, VOLUME, BATTERY, POWER, UI, DATA, PERF, TYPE, RANGE, SECURITY, STRESS, FUZZ, PERMISSION, MEDIA, RAM, HARDWARE, STORAGE, FILEINTEL).
+- **۳۰۵+ آزمون داخل اپ (همه پاس در نسخه ۱.۰.۵):** تب «تست سیستم» → «اجرای N تست واقعی» (شمارش داینامیک؛ گروه‌ها: BRIDGE, SETTINGS, PERSIST, VALIDATION, VOLUME, BATTERY, POWER, UI, DATA, PERF, TYPE, RANGE, SECURITY, STRESS, FUZZ, PERMISSION, MEDIA, RAM, HARDWARE, STORAGE, FILEINTEL).
 - **۳۱ تست دودی DOM** (jsdom + پل نیتیو ماک) برای همه بخش‌های گزارش‌شده: سخت‌افزار، رم، حافظه، پردازش‌ها، بهینه‌سازی، پرخطر/کش، رسانه، زوم، پخش ویدیو، هوش فایل.
 - استرس نیتیو: `stressTestNative(10000)` با 10K تکرار clamp/percentOf/tempOf.
 - در مرورگر وب تست‌های سخت‌افزاری درست SKIP می‌شوند.
@@ -172,7 +202,7 @@
 
 ## 🔐 مشخصات امضا
 - **Package ID:** `com.persian.batteryalarm.optimizer`
-- **Version:** 1.0.4 (Code: 5) — **minSdk 24 — targetSdk 34**
+- **Version:** 1.0.5 (Code: 6) — **minSdk 24 — targetSdk 34**
 - **Key Alias:** `batteryalarm_release_alias` — v1+v2+v3
 
 ---
